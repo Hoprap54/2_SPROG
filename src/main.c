@@ -20,7 +20,7 @@ int main(void) {
 		
 		_delay_ms(1000)	;
 		
-        printf("Hello World!!! \n");
+        printf("Hello !!! \n");
        
     }
         
