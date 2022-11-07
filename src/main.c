@@ -24,7 +24,7 @@ int main(void) {
 		
 		_delay_ms(1000)	;
 		
-        printf("Hello world !!! \n");
+        printf("Hello world and Beni!!! \n");
        
     }
         
