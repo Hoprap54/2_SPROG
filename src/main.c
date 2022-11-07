@@ -24,11 +24,7 @@ int main(void) {
 		
 		_delay_ms(1000)	;
 		
-<<<<<<< HEAD
-        printf("Hello !!! \n");//comment
-=======
         printf("Hello world !!! \n");
->>>>>>> 596572f71cd1a3f6596e7fc8e30f6af95ab63dcc
        
     }
         
