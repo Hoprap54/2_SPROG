@@ -24,7 +24,7 @@ int main(void) {
 		
 		_delay_ms(1000)	;
 		
-        printf("Hello \n");
+        printf("Hello world and Beni!!efefeffdfcsfefwefdcdsfewfdcdfrgvfefddsd \n");
        
     }
         
@@ -32,20 +32,3 @@ int main(void) {
 }
 
 /* Function description */
-
-void run_Motor(){
-    int count;
-    DDRD = 0x60;       // Set Port D as output for the LEDs 0b0010 0000
-    TCCR0A |= 0xA2;    // Fast PWM //mode with clear OC0A on compare match, set at bottom. Output B similar. //Page 84 and 86​
-    TCCR0B |= 0x05;    // 1024 frequency scaling​
-    TCNT0 = 0x0000;
-    count += 1;
-    if (count > OCR0A){
-        PORTD = 0x60;
-        OCR0A = 1;  // PWM TO 5v 
-        count = 0;
-    }else{
-        PORTD = 0x00;
-        OCR0A = 0;  // PWM TO 0v 
-    }
-}
