@@ -9,7 +9,6 @@
 #include <util/delay.h> //here the delay functions are found
 #include "usart.h"
 
-/* Declare global variable */
 
 /* Declare function */
 
@@ -17,6 +16,8 @@ int main(void) {
 
     uart_init();   // open the communication to the microcontroller
 	io_redirect(); // redirect input and output to the communication
+
+/* Declare global variable */
 
     
     while(1) {
