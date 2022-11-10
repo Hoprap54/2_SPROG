@@ -49,3 +49,57 @@ void run_Motor(){
         OCR0A = 0;  // PWM TO 0v 
     }
 }
+
+void optocoupler(void){
+unsigned int optotime;
+float milisec;
+int main(void) {    
+
+    uart_init(); // open the communication to the microcontroller
+	io_redirect(); // redirect input and output to the communication
+
+//initializing the timers
+    TCCR1A = 0x00;
+    //TIMSK1|=(1<<5);
+    // ICIE1=enable;
+    TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-raising edge, 1024 prescaling
+    // TCCR1B = 0xC5;
+    DDRB &= ~0x01;
+    PORTB |= 0x01;
+    TCNT1=0;
+    printf("SPROG Get the time program\n");
+    printf("Input Caputure Flag:%d\n",TIFR1>>5);
+   TCNT1=0;
+    while(1) {
+		TCNT1=0;
+        TIFR1|=1;
+        ICR1=0;
+        while((TIFR1|(1<<0))!=TIFR1){
+        if((TIFR1|(1<<5))==TIFR1){
+        //TCNT1;
+		//printf("Timer: %u\n",TCNT1);
+        TCNT1=0;
+        TIFR1|=(1<<5);
+        
+        }
+
+        printf("%d",TIFR1>>5);
+        
+        optotime=ICR1;
+		milisec= ICR1*(10.24/160000);//conversion wrong
+        
+        printf("Optotime: %u/%flSeconds\n",optotime,milisec/1000);
+        
+        
+        printf("%d",TIFR1>>5);
+
+        printf("Debug");
+        //printf("Reset input capture flag: %d",TIFR1>>5);
+        _delay_ms(2000);
+        
+        }
+    }
+        
+    return 0;
+}
+}
