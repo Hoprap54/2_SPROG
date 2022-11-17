@@ -3,20 +3,37 @@
 #define NUMBER_STRING 1001
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <util/delay.h> //here the delay functions are found
 #include "usart.h"
 
+volatile unsigned long int timer=0, counter; 
+unsigned long int microseconds;
+float seconds;
+void initialize(void);
 
+ISR(TIMER1_CAPT_vect){
+    timer=ICR1+65535*counter;
+    //printf("Input Capture EVENT!!!");
+    TCNT1=0;
+    TIFR1|=1<<ICF1;//reseting the input capture flag
+    counter=0;
+    
+}
+ISR(TIMER1_OVF_vect){
+    counter++;
+    TCNT1=0;
+}
 /* Declare function */
 
 int main(void) {    
 
     uart_init();   // open the communication to the microcontroller
 	io_redirect(); // redirect input and output to the communication
-
+    initialize();
 /* Declare global variable */
 
     
@@ -25,6 +42,10 @@ int main(void) {
 		_delay_ms(1000)	;
 		
         printf("Hello \n");
+        seconds=(timer*1000)/15625000;
+            printf("\n This is the current state of the the timer:%lu and seconds:%f",timer,seconds);
+            _delay_ms(2000);
+            
        
     }
         
@@ -50,56 +71,18 @@ void run_Motor(){
     }
 }
 
-void optocoupler(void){
-unsigned int optotime;
-float milisec;
-int main(void) {    
 
-    uart_init(); // open the communication to the microcontroller
-	io_redirect(); // redirect input and output to the communication
 
-//initializing the timers
+void initialize(void){
+    sei();//enable global interrupts
+    
+    TIMSK1|=(1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
     TCCR1A = 0x00;
-    //TIMSK1|=(1<<5);
-    // ICIE1=enable;
-    TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-raising edge, 1024 prescaling
-    // TCCR1B = 0xC5;
+    TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;
     PORTB |= 0x01;
-    TCNT1=0;
-    printf("SPROG Get the time program\n");
-    printf("Input Caputure Flag:%d\n",TIFR1>>5);
-   TCNT1=0;
-    while(1) {
-		TCNT1=0;
-        TIFR1|=1;
-        ICR1=0;
-        while((TIFR1|(1<<0))!=TIFR1){
-        if((TIFR1|(1<<5))==TIFR1){
-        //TCNT1;
-		//printf("Timer: %u\n",TCNT1);
-        TCNT1=0;
-        TIFR1|=(1<<5);
-        
-        }
+    TIFR1|=1<<ICF1;//reseting input capture flag
 
-        printf("%d",TIFR1>>5);
-        
-        optotime=ICR1;
-		milisec= ICR1*(10.24/160000);//conversion wrong
-        
-        printf("Optotime: %u/%flSeconds\n",optotime,milisec/1000);
-        
-        
-        printf("%d",TIFR1>>5);
+}
 
-        printf("Debug");
-        //printf("Reset input capture flag: %d",TIFR1>>5);
-        _delay_ms(2000);
-        
-        }
-    }
-        
-    return 0;
-}
-}
+
