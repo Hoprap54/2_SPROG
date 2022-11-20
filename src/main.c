@@ -76,8 +76,8 @@ void run_Motor(){
 void initialize(void){
     sei();//enable global interrupts
     
-    TIMSK1|=(1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
-    TCCR1A = 0x00;
+    TIMSK1|=(1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled - interrupt for input capture flag and overflow
+    TCCR1A = 0x00; 
     TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;
     PORTB |= 0x01;
