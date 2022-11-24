@@ -73,8 +73,8 @@ int main(void) {
             _delay_ms(1000);
            
 
-            printf("\n prev-speed:%f",prev_speed);
-            prev_speed=speed;
+            //printf("\n prev-speed:%f",prev_speed); debugging
+            prev_speed=speed;//setting a new value for previous speed
                                            
         }
             
