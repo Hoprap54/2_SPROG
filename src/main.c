@@ -20,18 +20,18 @@ void initialize(void);//function for initializing the timer and interrupts
 
 ISR(TIMER1_CAPT_vect){
     timer=ICR1+65535*counter;
-    //printf("Input Capture EVENT!!!");
-    TCNT1=0;
+    //printf("Input Capture EVENT!!!"); line used for debugging
+    TCNT1=0; //reseting the timer to zero
     TIFR1|=1<<ICF1;//reseting the input capture flag
-    counter=0;
-    car_move_flag=1;
+    counter=0;//reseting overflow counter
+    car_move_flag=1;//car is being moved
     
 }
 ISR(TIMER1_OVF_vect){
-    counter++;
+    counter++;//adding one to the overflow counter
     TCNT1=0;
-    if(counter>2)
-    car_move_flag=0;
+    if(counter>2)//the car has not really moved for a long time
+    car_move_flag=0;//so the move-flag is reset
 }
 /* Declare function */
 int main(void) {    
@@ -46,15 +46,18 @@ int main(void) {
     car_move_flag=0;
     printf("%lf", speed);
         while(1){
-            
+            //seconds calculation
             seconds=((double)timer*1000)/15625000;
             //speed calculation
-            if (seconds)
-            speed = eigthcircumference/seconds;
             
+            if (seconds)//speed is only recalculated when there is actually a timer-value (that is not zero)
+            speed = eigthcircumference/seconds;//distance divided by time
+            
+            //check whether car is moving
             if (car_move_flag==1){
                 printf("\nCar is moving");
             }
+            //if it is not moving - set speed etc. to zero
             if (car_move_flag==0){
                 printf("\nCar is not moving.");
                 speed=0;
@@ -63,6 +66,8 @@ int main(void) {
                 prev_speed=0;
             }
 
+
+            //checking for a
             acceleration_flag= acceleration_index(speed, prev_speed);
             printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d",timer,seconds, speed, acceleration_flag);
             _delay_ms(1000);
