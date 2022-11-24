@@ -67,7 +67,7 @@ int main(void) {
             }
 
 
-            //checking for a
+            //checking for acceleration
             acceleration_flag= acceleration_index(speed, prev_speed);
             printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d",timer,seconds, speed, acceleration_flag);
             _delay_ms(1000);
