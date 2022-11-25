@@ -25,14 +25,14 @@ ISR(TIMER1_CAPT_vect){
     TCNT1=0; //reseting the timer to zero
     TIFR1|=1<<ICF1;//reseting the input capture flag
     counter=0;//reseting overflow counter
-    car_move_flag=true;//car is being moved
+    car_move_flag = true;//car is being moved
     
 }
 ISR(TIMER1_OVF_vect){
     counter++;//adding one to the overflow counter
     TCNT1=0;
     if(counter>2)//the car has not really moved for a long time
-    car_move_flag=false;//so the move-flag is reset
+    car_move_flag = false;//so the move-flag is reset
 }
 /* Declare function */
 int main(void) {    
@@ -44,11 +44,11 @@ int main(void) {
     speed=0;
     prev_speed=0;
     acceleration_flag=0;
-    car_move_flag=false;
+    car_move_flag = false;
     printf("%lf", speed);
         while(1){
             //seconds calculation
-            seconds=((double)timer*1000)/15625000;
+            seconds = ((double)timer*1000)/15625000;
             //speed calculation
             
             if (seconds)//speed is only recalculated when there is actually a timer-value (that is not zero)
