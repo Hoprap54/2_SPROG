@@ -9,9 +9,10 @@
 #include <stdio.h>
 #include <util/delay.h> //here the delay functions are found
 #include "usart.h"
+#include<stdbool.h>
 
 volatile unsigned long int timer = 0, counter = 0; //timer: variable for the time; counter: counter to count timeroverflows
-volatile char car_move_flag = 0; //variable to indicate whether the car is moving
+volatile bool car_move_flag = false; //variable to indicate whether the car is moving
 char acceleration_index(double, double); //function for checking the state of acceleration
 char acceleration_flag = 0; //variable for indicating the state of aceleration
 double seconds, speed = 0, prev_speed = 0, eigthcircumference = 0.02589182;
@@ -24,14 +25,14 @@ ISR(TIMER1_CAPT_vect){
     TCNT1=0; //reseting the timer to zero
     TIFR1|=1<<ICF1;//reseting the input capture flag
     counter=0;//reseting overflow counter
-    car_move_flag=1;//car is being moved
+    car_move_flag=true;//car is being moved
     
 }
 ISR(TIMER1_OVF_vect){
     counter++;//adding one to the overflow counter
     TCNT1=0;
     if(counter>2)//the car has not really moved for a long time
-    car_move_flag=0;//so the move-flag is reset
+    car_move_flag=false;//so the move-flag is reset
 }
 /* Declare function */
 int main(void) {    
@@ -43,7 +44,7 @@ int main(void) {
     speed=0;
     prev_speed=0;
     acceleration_flag=0;
-    car_move_flag=0;
+    car_move_flag=false;
     printf("%lf", speed);
         while(1){
             //seconds calculation
@@ -54,11 +55,11 @@ int main(void) {
             speed = eigthcircumference/seconds;//distance divided by time
             
             //check whether car is moving
-            if (car_move_flag==1){
+            if (car_move_flag){
                 printf("\nCar is moving");
             }
             //if it is not moving - set speed etc. to zero
-            if (car_move_flag==0){
+            else if (car_move_flag==false){
                 printf("\nCar is not moving.");
                 speed=0;
                 timer=0;
