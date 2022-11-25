@@ -103,7 +103,7 @@ void run_Motor(){
 
 
 
-void initialize(void){
+inline void initialize(void){
     sei();//enable global interrupts
     
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
