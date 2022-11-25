@@ -106,12 +106,12 @@ void run_Motor(){
 void initialize(void){
     sei();//enable global interrupts
     
-    TIMSK1|=(1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
+    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
     TCCR1A = 0x00;
     TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;
     PORTB |= 0x01;
-    TIFR1|=1<<ICF1;//reseting input capture flag
+    TIFR1 |= 1<<ICF1;//reseting input capture flag
     
     
 }
@@ -120,15 +120,15 @@ void initialize(void){
 char acceleration_index(double current_speed, double previous_speed){
 
     char acceleration_flag;
-    if(current_speed==0&&previous_speed==0)
+    if(current_speed == 0 && previous_speed == 0)
     acceleration_flag=0;
     else
-    if(current_speed<prev_speed)
+    if(current_speed < prev_speed)
     acceleration_flag=1;
-    if(current_speed>prev_speed)
-    acceleration_flag=2;
+    if(current_speed > prev_speed)
+    acceleration_flag = 2;
     if(speed==0)
-    acceleration_flag=0;
+    acceleration_flag = 0;
     printf("debug");
     
 
