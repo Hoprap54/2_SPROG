@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <util/delay.h> //here the delay functions are found
 #include "usart.h"
-#include<stdbool.h>
+#include <stdbool.h>
 
 volatile unsigned long int timer = 0, counter = 0; //timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false; //variable to indicate whether the car is moving
