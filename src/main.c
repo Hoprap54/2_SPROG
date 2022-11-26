@@ -67,6 +67,8 @@ int main(void) {
     acceleration_flag=0;
     car_move_flag = false;
 
+    //goto test; code test: maybe something useful - code will jump to mark test
+
     //printf("%lf", speed); line used for debugging
         while(1){
             
@@ -91,7 +93,7 @@ int main(void) {
                 prev_speed=0;
             }
 
-
+        
             //checking for acceleration
             acceleration_flag= acceleration_index(speed, prev_speed);
 
