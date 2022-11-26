@@ -21,9 +21,11 @@ volatile char readBuffer[100];
 //variables for the functions
 char acceleration_index(double, double); //function for checking the state of acceleration
 char acceleration_flag = 0; //variable for indicating the state of aceleration
+char savereadBuffer[100];
 double seconds, speed = 0, prev_speed = 0, eigthcircumference = 0.02589182;
 
 void initialize(void);//function for initializing the timer and interrupts
+char displayreader(void);
 
 ISR(USART_RX_vect){
     
@@ -138,6 +140,18 @@ inline void initialize(void){
     TIFR1 |= 1<<ICF1;//reseting input capture flag
     
     
+}
+
+
+inline char displayreader(void){
+
+for(i=0;i<100;i++){
+
+    savereadBuffer[i] = readBuffer[i];
+    
+}
+
+
 }
 
 
