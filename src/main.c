@@ -12,24 +12,32 @@
 #include "usart.h"
 #include <stdbool.h>
 
+//variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0; //timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false; //variable to indicate whether the car is moving
+volatile int i; //for for loop in interrupt
+volatile char readBuffer[100];
 
+//variables for the functions
 char acceleration_index(double, double); //function for checking the state of acceleration
 char acceleration_flag = 0; //variable for indicating the state of aceleration
-
 double seconds, speed = 0, prev_speed = 0, eigthcircumference = 0.02589182;
 
 void initialize(void);//function for initializing the timer and interrupts
 
 ISR(USART_RX_vect){
+    
+    for(i=0;i<8;i++){
 
+        scanf("%c",&readBuffer[i]);
 
+    }
 
 }
 
 ISR(TIMER1_CAPT_vect){
-    timer=ICR1+65535*counter;
+    
+    timer=ICR1+65535*counter;//updating timer value
     //printf("Input Capture EVENT!!!"); line used for debugging
     TCNT1=0; //reseting the timer to zero
     TIFR1|=1<<ICF1;//reseting the input capture flag
