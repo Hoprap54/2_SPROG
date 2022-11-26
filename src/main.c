@@ -130,7 +130,13 @@ void run_Motor(){
 
 
 inline void initialize(void){
+    
     sei();//enable global interrupts
+    
+    //usart interrupts
+    SREG |= 1<<SREG_I;
+    UCSR0B |=1<<RXCIE0;//enabeling interrupt for rx complete
+    
     
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
     TCCR1A = 0x00;
@@ -148,7 +154,7 @@ inline char displayreader(void){
 for(i=0;i<100;i++){
 
     savereadBuffer[i] = readBuffer[i];
-    
+
 }
 
 
