@@ -58,16 +58,20 @@ int main(void) {
 	io_redirect(); // redirect input and output to the communication
 
     initialize();
+
+    //reseting all the values
     speed=0;
     prev_speed=0;
     acceleration_flag=0;
     car_move_flag = false;
-    printf("%lf", speed);
+
+    //printf("%lf", speed); line used for debugging
         while(1){
+            
             //seconds calculation
             seconds = ((double)timer*1000)/15625000;
-            //speed calculation
             
+            //speed calculation
             if (seconds)//speed is only recalculated when there is actually a timer-value (that is not zero)
             speed = eigthcircumference/seconds;//distance divided by time
             
@@ -75,6 +79,7 @@ int main(void) {
             if (car_move_flag){
                 printf("\nCar is moving");
             }
+
             //if it is not moving - set speed etc. to zero
             else if (car_move_flag==false){
                 printf("\nCar is not moving.");
@@ -87,6 +92,8 @@ int main(void) {
 
             //checking for acceleration
             acceleration_flag= acceleration_index(speed, prev_speed);
+
+            //output current data in console
             printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d",timer,seconds, speed, acceleration_flag);
             _delay_ms(1000);
            
