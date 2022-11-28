@@ -78,18 +78,18 @@ int main(void) {
     //printf("%lf", speed); 
         while(1){
             
-            // Reading data out of readbuffer
+            // Reading data out of readbuffer (Display)
             if(readBuffer[0]==0x65)
             printf("secpag.n0.val=%d%c%c%c",(test+223), 255,255,255);
-
-            seconds = ((double)timer*1000)/15625000;                // Time calculation (Seconds)
+            
+            // Reading data out of the optocoupler
+            seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
             // printf("\n debug: %f",seconds);
             distance = (double)distancecounter*eigthcircumference;  // Distance calculation
 
-
             // Speed calculation (optocoupler)
-            if (seconds){ //speed is only recalculated when there is actually a timer-value (that is not zero)
-                speed = eigthcircumference/seconds;//distance divided by time
+            if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
+                speed = eigthcircumference/seconds; // Distance divided by time
             }
             // Check whether car is moving
             /*if (car_move_flag){
@@ -109,12 +109,12 @@ int main(void) {
             acceleration_flag = acceleration_index(speed, prev_speed);
             acceleration_flag = acceleration_index(speed, prev_speed);
 
-            //output current data in console
+            // output current data in console
             // printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
             _delay_ms(1000);
 
             //printf("\n prev-speed:%f",prev_speed); debugging
-            prev_speed=speed;//setting a new value for previous speed                               
+            prev_speed=speed; // Setting a new value for previous speed                               
         }
     return 0;
 }
