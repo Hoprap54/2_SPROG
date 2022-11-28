@@ -16,12 +16,12 @@
 volatile unsigned long int timer = 0, counter = 0; //timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false; //variable to indicate whether the car is moving
 volatile int i, distancecounter = 0, test = 3; //for for loop in interrupt
-volatile char readBuffer[100];
+volatile char readBuffer[100]= {0};
 
 //variables for the functions
 char acceleration_index(double, double); //function for checking the state of acceleration
 char acceleration_flag = 0; //variable for indicating the state of aceleration
-char savereadBuffer[100];
+char savereadBuffer[100]= {0};
 double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, distance;
 
 void initialize(void);//function for initializing the timer and interrupts
@@ -78,15 +78,16 @@ int main(void) {
     //printf("%lf", speed); 
         while(1){
             
+            //reading data out of readbuffer
+
+            if(readBuffer[0]==0x65)
+            printf("secpag.n0.val=%d%c%c%c",(test+223), 255,255,255);
 
 
 
 
 
 
-
-
-            
             //seconds calculation
             seconds = ((double)timer*1000)/15625000;
            // printf("\n debug: %f",seconds);
@@ -98,7 +99,7 @@ int main(void) {
             //speed calculation
             if (seconds)//speed is only recalculated when there is actually a timer-value (that is not zero)
             speed = eigthcircumference/seconds;//distance divided by time
-            printf("secpag.n0.val=%d%c%c%c",(test+203), 255,255,255);
+            
             //check whether car is moving
             if (car_move_flag){
                // printf("\nCar is moving");
