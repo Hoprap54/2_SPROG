@@ -15,7 +15,7 @@
 //variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0; //timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false; //variable to indicate whether the car is moving
-volatile int i, distancecounter = 0; //for for loop in interrupt
+volatile int i, distancecounter = 0, test = 3; //for for loop in interrupt
 volatile char readBuffer[100];
 
 //variables for the functions
@@ -29,12 +29,18 @@ char displayreader(void);
 
 ISR(USART_RX_vect){
     //printf("page page0%c%c%c",255,255,255);
+    
     for(i=0;i<8;i++){
 
         scanf("%c",&readBuffer[i]);
-
+        printf("secpag.n0.val=%d%c%c%c",(test+i), 255,255,255);
     }
-
+    //UCSR0A &= ~(1<<RXC0);//reseting receive complete flag
+    //UDR0=0;
+    //flushing the receiver and thus deleting any data within
+    UCSR0B &= ~(1<<RXEN0);
+    UCSR0B |= 1<<RXEN0;
+    //UCSR0A |= 1 << RXC0;
 }
 
 ISR(TIMER1_CAPT_vect){
@@ -69,12 +75,21 @@ int main(void) {
     car_move_flag = false;
 
 
-    printf("%lf", speed); 
+    //printf("%lf", speed); 
         while(1){
+            
+
+
+
+
+
+
+
+
             
             //seconds calculation
             seconds = ((double)timer*1000)/15625000;
-            printf("\n debug: %f",seconds);
+           // printf("\n debug: %f",seconds);
 
             //distance calculation
             distance = (double)distancecounter*eigthcircumference;
@@ -83,16 +98,16 @@ int main(void) {
             //speed calculation
             if (seconds)//speed is only recalculated when there is actually a timer-value (that is not zero)
             speed = eigthcircumference/seconds;//distance divided by time
-            
+            printf("secpag.n0.val=%d%c%c%c",(test+203), 255,255,255);
             //check whether car is moving
             if (car_move_flag){
-                printf("\nCar is moving");
+               // printf("\nCar is moving");
             }
 
 
             //if it is not moving - set speed etc. to zero
             else if (car_move_flag==false){
-                printf("\nCar is not moving.");
+               // printf("\nCar is not moving.");
                 speed=0;
                 timer=0;
                 seconds=0;
@@ -104,7 +119,7 @@ int main(void) {
             acceleration_flag= acceleration_index(speed, prev_speed);
 
             //output current data in console
-            printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
+           // printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
             _delay_ms(1000);
            
 
@@ -181,7 +196,7 @@ char acceleration_index(double current_speed, double previous_speed){
     acceleration_flag = 2;
     if(speed==0)
     acceleration_flag = 0;
-    printf("debug");
+    //printf("debug");
     
 
     return acceleration_flag;
