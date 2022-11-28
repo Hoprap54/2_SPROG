@@ -47,7 +47,6 @@ ISR(USART_RX_vect){
 }
 
 ISR(TIMER1_CAPT_vect){
-    
     timer=ICR1+65535*counter;// Updating timer value
     //printf("Input Capture EVENT!!!"); line used for debugging
     TCNT1=0;                // Reseting the timer to zero
@@ -66,10 +65,8 @@ ISR(TIMER1_OVF_vect){
 }
 
 int main(void) {    
-
     uart_init();   // Open the communication to the microcontroller
 	io_redirect(); // Redirect input and output to the communication
-
     initialize();
 
     // Reseting all the values
@@ -82,28 +79,25 @@ int main(void) {
         while(1){
             
             // Reading data out of readbuffer
-
             if(readBuffer[0]==0x65)
             printf("secpag.n0.val=%d%c%c%c",(test+223), 255,255,255);
 
-            // Seconds calculation
-            seconds = ((double)timer*1000)/15625000;
+            seconds = ((double)timer*1000)/15625000;                // Time calculation (Seconds)
             // printf("\n debug: %f",seconds);
+            distance = (double)distancecounter*eigthcircumference;  // Distance calculation
 
-            // Distance calculation
-            distance = (double)distancecounter*eigthcircumference;
 
-            // Speed calculation
+            // Speed calculation (optocoupler)
             if (seconds){ //speed is only recalculated when there is actually a timer-value (that is not zero)
                 speed = eigthcircumference/seconds;//distance divided by time
             }
-            //check whether car is moving
-            if (car_move_flag){
-               // printf("\nCar is moving");
-            }
+            // Check whether car is moving
+            /*if (car_move_flag){
+                printf("\nCar is moving");
+            }*/
 
-            //if it is not moving - set speed etc. to zero
-            else if (car_move_flag==false){
+            // If it is not moving - set speed etc. to zero
+            else if (car_move_flag == false){
                // printf("\nCar is not moving.");
                 speed=0;
                 timer=0;
@@ -111,7 +105,7 @@ int main(void) {
                 prev_speed=0;
             }
 
-            //checking for acceleration
+            // Checking for acceleration
             acceleration_flag = acceleration_index(speed, prev_speed);
             acceleration_flag = acceleration_index(speed, prev_speed);
 
@@ -122,20 +116,18 @@ int main(void) {
             //printf("\n prev-speed:%f",prev_speed); debugging
             prev_speed=speed;//setting a new value for previous speed                               
         }
-            
     return 0;
 }
 
 /* Function description */
 inline void initialize(void){
-    
     sei();  // Enable global interrupts
     
     // Usart interrupts
     SREG |= 1<<SREG_I;
     UCSR0B |=1<<RXCIE0; // Enabeling interrupt for rx complete
     
-    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    //Timer interrupts must be enabled
+    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     TCCR1A = 0x00;
     TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;
@@ -146,28 +138,28 @@ inline void initialize(void){
 inline char displayreader(void){
     for(i=0;i<100;i++){
         savereadBuffer[i] = readBuffer[i];
-        }
+    }
 }
 
 char acceleration_index(double current_speed, double previous_speed){
     char acceleration_flag;
-    if(current_speed == 0 && previous_speed == 0)
-    acceleration_flag=0;
-    else
-    if(current_speed < prev_speed)
-    acceleration_flag=1;
-    if(current_speed > prev_speed)
-    acceleration_flag = 2;
-    if(speed==0)
-    acceleration_flag = 0;
-    printf("debug");
-
+    if(current_speed == 0 && previous_speed == 0){
+        acceleration_flag=0;
+    }else if(current_speed < prev_speed){
+        acceleration_flag=1;
+    }
+    if(current_speed > prev_speed){
+        acceleration_flag = 2;
+    }
+    if(speed==0){
+        acceleration_flag = 0;
+        printf("debug");
+    }
     return acceleration_flag;
 }
 
-void PWM_Motor(int freq, int duty){  
+inline void PWM_Motor(int freq, int duty){  
     DDRD = 0x40;    // Set Port D as output for the ENA (Motor) 0b0010 0000
-
     TCCR0A |= (1<<COM0A1) | (1<<COM0B1) | (1<<WGM01) | (1<<WGM00);  // Fast PWM
 
     // Compare value
