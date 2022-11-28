@@ -34,7 +34,6 @@ ISR(USART_RX_vect){
     //printf("page page0%c%c%c",255,255,255);
     
     for(i=0;i<8;i++){
-
         scanf("%c",&readBuffer[i]);
         printf("secpag.n0.val=%d%c%c%c",(test+i), 255,255,255);
     }
@@ -47,32 +46,33 @@ ISR(USART_RX_vect){
 }
 
 ISR(TIMER1_CAPT_vect){
-    timer = ICR1 + 65535*counter;//updating timer value
+    
+    timer=ICR1+65535*counter;// Updating timer value
     //printf("Input Capture EVENT!!!"); line used for debugging
-    TCNT1=0; //reseting the timer to zero
-    TIFR1|=1<<ICF1;//reseting the input capture flag
-    counter=0;//reseting overflow counter
-    car_move_flag = true;//car is being moved
+    TCNT1=0;                // Reseting the timer to zero
+    TIFR1|=1<<ICF1;         // Reseting the input capture flag
+    counter=0;              // Reseting overflow counter
+    car_move_flag = true;   // Car is being moved
     distancecounter++;
     
 }
 ISR(TIMER1_OVF_vect){
-    counter++;//adding one to the overflow counter
+    counter++;            // Adding one to the overflow counter
     TCNT1=0;
-    if(counter>2){//the car has not really moved for a long time
-        car_move_flag = 0;//so the move-flag is reset
+    if(counter>2){        // The car has not really moved for a long time
+        car_move_flag = 0;// So the move-flag is reset
     }
 }
 
 /* Declare function */
 int main(void) {    
 
-    uart_init(); // open the communication to the microcontroller
-	io_redirect(); // redirect input and output to the communication
+    uart_init();   // Open the communication to the microcontroller
+	io_redirect(); // Redirect input and output to the communication
 
     initialize();
 
-    //reseting all the values
+    // Reseting all the values
     speed=0;
     prev_speed=0;
     acceleration_flag=0;
@@ -81,22 +81,22 @@ int main(void) {
     //printf("%lf", speed); 
         while(1){
             
-            //reading data out of readbuffer
+            // Reading data out of readbuffer
 
             if(readBuffer[0]==0x65)
             printf("secpag.n0.val=%d%c%c%c",(test+223), 255,255,255);
 
-            //seconds calculation
+            // Seconds calculation
             seconds = ((double)timer*1000)/15625000;
             // printf("\n debug: %f",seconds);
 
-            //distance calculation
+            // Distance calculation
             distance = (double)distancecounter*eigthcircumference;
 
-            //speed calculation
-            if (seconds)//speed is only recalculated when there is actually a timer-value (that is not zero)
-            speed = eigthcircumference/seconds;//distance divided by time
-            
+            // Speed calculation
+            if (seconds){ //speed is only recalculated when there is actually a timer-value (that is not zero)
+                speed = eigthcircumference/seconds;//distance divided by time
+            }
             //check whether car is moving
             if (car_move_flag){
                // printf("\nCar is moving");
@@ -127,30 +127,47 @@ int main(void) {
 }
 
 /* Function description */
+void run_Motor(){
+    int count;
+    DDRD = 0x60;       // Set Port D as output for the LEDs 0b0010 0000
+    TCCR0A |= 0xA2;    // Fast PWM //mode with clear OC0A on compare match, set at bottom. Output B similar. //Page 84 and 86​
+    TCCR0B |= 0x05;    // 1024 frequency scaling​
+    TCNT0 = 0x0000;
+    count += 1;
+    if (count > OCR0A){
+        PORTD = 0x60;
+        OCR0A = 1;  // PWM TO 5v 
+        count = 0;
+    }else{
+        PORTD = 0x00;
+        OCR0A = 0;  // PWM TO 0v 
+    }
+}
+
 inline void initialize(void){
-    sei();//enable global interrupts
     
-    //usart interrupts
+    sei();  // Enable global interrupts
+    
+    // Usart interrupts
     SREG |= 1<<SREG_I;
-    UCSR0B |=1<<RXCIE0;//enabeling interrupt for rx complete
+    UCSR0B |=1<<RXCIE0; // Enabeling interrupt for rx complete
     
-    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);//timer interrupts must be enabled
+    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    //Timer interrupts must be enabled
     TCCR1A = 0x00;
     TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;
     PORTB |= 0x01;
-    TIFR1 |= 1<<ICF1;//reseting input capture flag
+    TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 }
 
 inline char displayreader(void){
     for(i=0;i<100;i++){
         savereadBuffer[i] = readBuffer[i];
-    }
+        }
 }
 
 char acceleration_index(double current_speed, double previous_speed){
-
-    char acceleration_flag; 
+    char acceleration_flag;
     if(current_speed == 0 && previous_speed == 0)
     acceleration_flag=0;
     else
@@ -160,28 +177,7 @@ char acceleration_index(double current_speed, double previous_speed){
     acceleration_flag = 2;
     if(speed==0)
     acceleration_flag = 0;
-    //printf("debug");s
+    printf("debug");
 
     return acceleration_flag;
-}
-
-inline void PWM_Motor(int freq, int duty){  
-    DDRD = 0x40;    // Set Port D as output for the ENA (Motor) 0b0010 0000
-
-    TCCR0A |= (1<<COM0A1) | (1<<COM0B1) | (1<<WGM01) | (1<<WGM00);  // Fast PWM
-
-    // Compare value
-    ICR1 = (F_CPU/1024) - 1;
-    OCR0A = (((F_CPU/freq/1024) - 1 )*duty)/100;
-    OCR0B = (((F_CPU/freq/1024) - 1 )*duty)/100;
-}
-
-inline void PWM_on(){
-    TCNT0 = 0X00;
-    TCCR0B |= (1<<CS00) | (1<<WGM02);   // 1024 Prescaler
-}
-
-inline void PWM_off(){
-    OCR0A = 0;
-    OCR0B = 0;    
 }
