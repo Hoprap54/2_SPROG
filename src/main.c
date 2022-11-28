@@ -24,6 +24,7 @@ char acceleration_flag = 0;                 // Variable for indicating the state
 char savereadBuffer[100]= {0};
 double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, distance;
 
+/* Declare function */
 void initialize(void);      //Function for initializing the timer and interrupts
 char displayreader(void);
 void PWM_Motor(int freq, int duty);
@@ -64,7 +65,6 @@ ISR(TIMER1_OVF_vect){
     }
 }
 
-/* Declare function */
 int main(void) {    
 
     uart_init();   // Open the communication to the microcontroller
@@ -116,7 +116,7 @@ int main(void) {
             acceleration_flag = acceleration_index(speed, prev_speed);
 
             //output current data in console
-           // printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
+            // printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
             _delay_ms(1000);
 
             //printf("\n prev-speed:%f",prev_speed); debugging
@@ -127,23 +127,6 @@ int main(void) {
 }
 
 /* Function description */
-void run_Motor(){
-    int count;
-    DDRD = 0x60;       // Set Port D as output for the LEDs 0b0010 0000
-    TCCR0A |= 0xA2;    // Fast PWM //mode with clear OC0A on compare match, set at bottom. Output B similar. //Page 84 and 86​
-    TCCR0B |= 0x05;    // 1024 frequency scaling​
-    TCNT0 = 0x0000;
-    count += 1;
-    if (count > OCR0A){
-        PORTD = 0x60;
-        OCR0A = 1;  // PWM TO 5v 
-        count = 0;
-    }else{
-        PORTD = 0x00;
-        OCR0A = 0;  // PWM TO 0v 
-    }
-}
-
 inline void initialize(void){
     
     sei();  // Enable global interrupts
@@ -180,4 +163,25 @@ char acceleration_index(double current_speed, double previous_speed){
     printf("debug");
 
     return acceleration_flag;
+}
+
+void PWM_Motor(int freq, int duty){  
+    DDRD = 0x40;    // Set Port D as output for the ENA (Motor) 0b0010 0000
+
+    TCCR0A |= (1<<COM0A1) | (1<<COM0B1) | (1<<WGM01) | (1<<WGM00);  // Fast PWM
+
+    // Compare value
+    ICR1 = (F_CPU/1024) - 1;
+    OCR0A = (((F_CPU/freq/1024) - 1 )*duty)/100;
+    OCR0B = (((F_CPU/freq/1024) - 1 )*duty)/100;
+}
+
+void PWM_on(){
+    TCNT0 = 0X00;
+    TCCR0B |= (1<<CS00) | (1<<WGM02);    // 1024 Prescaler
+}
+
+void PWM_off(){
+    OCR0A = 0;
+    OCR0B = 0;    
 }
