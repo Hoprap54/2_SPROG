@@ -69,6 +69,8 @@ int main(void) {
 	io_redirect(); // Redirect input and output to the communication
     initialize();
 
+    int test;
+
     // Reseting all the values
     speed=0;
     prev_speed=0;
@@ -122,7 +124,7 @@ int main(void) {
 /* Function description */
 inline void initialize(void){
     sei();  // Enable global interrupts
-    
+    test = 12;
     // Usart interrupts
     SREG |= 1<<SREG_I;
     UCSR0B |=1<<RXCIE0; // Enabeling interrupt for rx complete
@@ -148,6 +150,7 @@ char acceleration_index(double current_speed, double previous_speed){
     }else if(current_speed < prev_speed){
         acceleration_flag=1;
     }
+        
     if(current_speed > prev_speed){
         acceleration_flag = 2;
     }
