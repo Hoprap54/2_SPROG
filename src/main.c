@@ -34,9 +34,9 @@ void PWM_off();
 ISR(USART_RX_vect){
     //printf("page page0%c%c%c",255,255,255);
     
-    for(i=0;i<8;i++){
-        scanf("%c",&readBuffer[i]);
-        printf("secpag.n0.val=%d%c%c%c",(test+i), 255,255,255);
+    for(i=0;i<8;i++){//for one each
+        //scanf("%c",&readBuffer[i]);
+        //printf("secpag.n0.val=%d%c%c%c",(test+i), 255,255,255);
     }
     //UCSR0A &= ~(1<<RXC0);//reseting receive complete flag
     //UDR0=0;
@@ -68,8 +68,6 @@ int main(void) {
     uart_init();   // Open the communication to the microcontroller
 	io_redirect(); // Redirect input and output to the communication
     initialize();
-
-    int test;
 
     // Reseting all the values
     speed=0;
