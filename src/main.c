@@ -25,7 +25,7 @@ char acceleration_flag = 0;                 // Variable for indicating the state
 char savereadBuffer[100]= {0};
 double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, distance;
 
-/* Declare function */
+/* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
 char displayreader(void);
 void PWM_Motor(int freq, int duty);
@@ -39,19 +39,6 @@ ISR(USART_RX_vect){
     if(readBufferindex==7)
     readBufferindex = 0;
 
-/*
- //printf("page page0%c%c%c",255,255,255);
-        for(i=0;i<8;i++){//for one each
-        //scanf("%c",&readBuffer[i]);
-        //printf("secpag.n0.val=%d%c%c%c",(test+i), 255,255,255);
-    }
-    //UCSR0A &= ~(1<<RXC0);//reseting receive complete flag
-    //UDR0=0;
-    //flushing the receiver and thus deleting any data within
-    UCSR0B &= ~(1<<RXEN0);
-    UCSR0B |= 1<<RXEN0;
-    //UCSR0A |= 1 << RXC0;
-    */
 }
 
 ISR(TIMER1_CAPT_vect){
@@ -86,12 +73,13 @@ int main(void) {
 
     //printf("%lf", speed); 
         
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));
         
         while(1){
             displayreader(); //saving the readbuffer from being changed
             // Reading data out of readbuffer (Display)
             if(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00)
-            printf("secpag.n0.val=%d%c%c%c",(test+223), 255,255,255);
+            printf("secpag.n0.val=%d%c%c%c ",(test+223), 255,255,255);
             
             // Reading data out of the optocoupler
             seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
@@ -101,16 +89,21 @@ int main(void) {
             // Speed calculation (optocoupler)
             if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
                 speed = eigthcircumference/seconds; // Distance divided by time
+                printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+                printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
             }
+            
+            
             // Check whether car is moving
-            /*if (car_move_flag){
-                printf("\nCar is moving");
-            }*/
+            if (car_move_flag){
+                //printf("\nCar is moving");
+            }
 
             // If it is not moving - set speed etc. to zero
             else if (car_move_flag == false){
                // printf("\nCar is not moving.");
                 speed=0;
+                printf("page2.speed.val=%d%c%c%c", 0, 255,255,255);
                 timer=0;
                 seconds=0;
                 prev_speed=0;
