@@ -10,12 +10,13 @@
 #include <stdio.h>
 #include <util/delay.h> //here the delay functions are found
 #include "usart.h"
+#include "subfunctions.h"
 #include <stdbool.h>
 
 // Variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0; // Timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false;               // Variable to indicate whether the car is moving
-volatile int i, distancecounter = 0, test = 3;     // For for loop in interrupt
+volatile int i, distancecounter = 0, test = 3, readBufferindex = 0;     // For for loop in interrupt
 volatile char readBuffer[100]= {0};
 
 // Variables for the functions
@@ -32,9 +33,15 @@ void PWM_on();
 void PWM_off();
 
 ISR(USART_RX_vect){
-    //printf("page page0%c%c%c",255,255,255);
-    
-    for(i=0;i<8;i++){//for one each
+
+    scanf("%c", &readBuffer[readBufferindex]);
+    readBufferindex++;
+    if(readBufferindex==7)
+    readBufferindex = 0;
+
+/*
+ //printf("page page0%c%c%c",255,255,255);
+        for(i=0;i<8;i++){//for one each
         //scanf("%c",&readBuffer[i]);
         //printf("secpag.n0.val=%d%c%c%c",(test+i), 255,255,255);
     }
@@ -44,6 +51,7 @@ ISR(USART_RX_vect){
     UCSR0B &= ~(1<<RXEN0);
     UCSR0B |= 1<<RXEN0;
     //UCSR0A |= 1 << RXC0;
+    */
 }
 
 ISR(TIMER1_CAPT_vect){
@@ -65,6 +73,7 @@ ISR(TIMER1_OVF_vect){
 }
 
 int main(void) {    
+    
     uart_init();   // Open the communication to the microcontroller
 	io_redirect(); // Redirect input and output to the communication
     initialize();
@@ -76,10 +85,12 @@ int main(void) {
     car_move_flag = false;
 
     //printf("%lf", speed); 
+        
+        
         while(1){
-            
+            displayreader(); //saving the readbuffer from being changed
             // Reading data out of readbuffer (Display)
-            if(readBuffer[0]==0x65)
+            if(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00)
             printf("secpag.n0.val=%d%c%c%c",(test+223), 255,255,255);
             
             // Reading data out of the optocoupler
@@ -154,7 +165,7 @@ char acceleration_index(double current_speed, double previous_speed){
     }
     if(speed==0){
         acceleration_flag = 0;
-        printf("debug");
+        //printf("debug");
     }
     return acceleration_flag;
 }
