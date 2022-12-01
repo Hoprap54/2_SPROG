@@ -24,6 +24,10 @@ char acceleration_index(double, double);    // Function for checking the state o
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
 double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, distance;
+long int setspeed=0;
+bool displayreadsuccess = false;
+
+
 
 /* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
@@ -36,7 +40,7 @@ ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
     readBufferindex++;
-    if(readBufferindex==7)
+    if(readBufferindex==8)
     readBufferindex = 0;
 
 }
@@ -79,8 +83,10 @@ int main(void) {
             displayreader(); //saving the readbuffer from being changed
             // Reading data out of readbuffer (Display)
             if(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00)
-            printf("secpag.n0.val=%d%c%c%c ",(test+223), 255,255,255);
+            //printf("secpag.n0.val=%d%c%c%c ",(test+223), 255,255,255);
             
+
+
             // Reading data out of the optocoupler
             seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
             // printf("\n debug: %f",seconds);
@@ -90,9 +96,23 @@ int main(void) {
             if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
                 speed = eigthcircumference/seconds; // Distance divided by time
                 printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
-                printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+                //printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
             }
-            
+            printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
+            _delay_ms(1000);
+           // do{
+           // if(readBuffer[0] == 0x71 /*&& readBuffer[5] == 0xFF && readBuffer[6] == 0xFF*/)//This is a complete number return
+		    //{
+					setspeed = (unsigned long)readBuffer[1] | ((unsigned long)(readBuffer[2]) << 8) | ((unsigned long)(readBuffer[3]) << 16)| ((unsigned long)(readBuffer[4]) << 24);
+                    printf("secpag.x1.val=%ld%c%c%c", (unsigned long)setspeed, 255,255,255);
+                    displayreadsuccess=true;
+			//	}
+           // }while(displayreadsuccess == false);
+            /*
+            for(i=0;i<8;i++){
+                printf("%c",readBuffer[i]);
+                }
+               */ 
             
             // Check whether car is moving
             if (car_move_flag){
@@ -103,7 +123,7 @@ int main(void) {
             else if (car_move_flag == false){
                // printf("\nCar is not moving.");
                 speed=0;
-                printf("page2.speed.val=%d%c%c%c", 0, 255,255,255);
+                //printf("page2.speed.val=%d%c%c%c", 0, 255,255,255);
                 timer=0;
                 seconds=0;
                 prev_speed=0;
@@ -134,7 +154,7 @@ inline void initialize(void){
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     TCCR1A = 0x00;
     TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
-    DDRB &= ~0x01;
+    DDRB &= ~0x01;//opto
     PORTB |= 0x01;
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 }
