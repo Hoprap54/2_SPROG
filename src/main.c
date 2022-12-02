@@ -17,12 +17,13 @@
 volatile unsigned long int timer = 0, counter = 0; // Timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false;               // Variable to indicate whether the car is moving
 volatile int i, distancecounter = 0, test = 3, readBufferindex = 0;     // For for loop in interrupt
-volatile char readBuffer[100]= {0};
+volatile char readBuffer[100]= {0}, rxexpect=0x71;
 
 // Variables for the functions
 char acceleration_index(double, double);    // Function for checking the state of acceleration
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
+int currentpagenumber = 0;
 double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, distance;
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
@@ -32,6 +33,7 @@ bool displayreadsuccess = false;
 /* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
 char displayreader(void);
+void updatedata(void);
 void PWM_Motor(int freq, int duty);
 void PWM_on();
 void PWM_off();
@@ -39,12 +41,16 @@ void PWM_off();
 ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
+
+    if(readBuffer[readBufferindex]==rxexpect)
+    readBufferindex=0;
+
     readBufferindex++;
-    if(readBufferindex==8){
-    readBufferindex = 0;
+    /*if(readBufferindex==8){
+    readBufferindex = 0;*/
     /*UCSR0B &= ~(1<<RXEN0);
     UCSR0B |= 1<<RXEN0;*/
-    }
+    //}
 }
 
 ISR(TIMER1_CAPT_vect){
@@ -79,9 +85,15 @@ int main(void) {
 
     //printf("%lf", speed); 
         
+       
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));
         
-        //display
+        /*printf("sendme");
+        _delay_ms(500);
+        currentpagenumber=readBuffer[1];
+        printf("secpag.x1.val=%d %c%c%c", currentpagenumber, 255,255,255);
+        */
+        //setting the speed
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(750);
             displayreader(); //saving the readbuffer from being changed
@@ -93,20 +105,27 @@ int main(void) {
                 printf("Elements %d",i);
             }*/
             
-            if(readBuffer[7] == 0x71 && readBuffer[4] == 0xFF && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF){
+            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
-                setspeed = savereadBuffer[0] | (savereadBuffer[1] << 8) | (savereadBuffer[2] << 16)| (savereadBuffer[3] << 24);
+                setspeed = savereadBuffer[1] | (savereadBuffer[2] << 8) | (savereadBuffer[3] << 16)| (savereadBuffer[4] << 24);
                 printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
-
+                
             }
-
-
+            printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
+            _delay_ms(750);
+            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
+                
+                setspeed = savereadBuffer[1] | (savereadBuffer[2] << 8) | (savereadBuffer[3] << 16)| (savereadBuffer[4] << 24);
+                printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
+                
+            }
+                
 
                 while(1){
-                    
-                    
+                    //printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
+                    _delay_ms(750);
                     displayreader(); //saving the readbuffer from being changed
-                    
+                    updatedata();
                     // Reading data out of readbuffer (Display)
                     if(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00)
                     //printf("secpag.n0.val=%d%c%c%c ",(test+223), 255,255,255);
@@ -215,4 +234,11 @@ void PWM_on(){
 void PWM_off(){
     OCR0A = 0;
     OCR0B = 0;    
+}
+
+inline void updatedata(void){
+
+   // printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
+  //  printf("speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+
 }
