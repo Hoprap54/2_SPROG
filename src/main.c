@@ -129,6 +129,7 @@ int main(void) {
            
             rxexpect=0x66;
             printf("sendme%c%c%c",255,255,255);
+            currentpagenumber=readBuffer[1];
                 
 
                 while(1){
