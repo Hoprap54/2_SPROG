@@ -132,21 +132,7 @@ int main(void) {
                 
 
                 while(1){
-                   // printf("page1.n0.val=%d%c%c%c", 7, 255,255,255);
-                    _delay_ms(500);
-                    rxexpect=0x66;
-                  //  printf("sendme");
-                    _delay_ms(750);
-                    currentpagenumber=readBuffer[1];
-                  //  printf("page1.n0.val=%d%c%c%c", currentpagenumber, 255,255,255);
-                    displayreader(); //saving the readbuffer from being changed
-                    updatedata();
-                    // Reading data out of readbuffer (Display)
-                    if(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00)
-                    //printf("secpag.n0.val=%d%c%c%c ",(test+223), 255,255,255);
-                    
-
-
+                                 
                     // Reading data out of the optocoupler
                     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
                     // printf("\n debug: %f",seconds);
@@ -175,7 +161,6 @@ int main(void) {
                         prev_speed=0;
                     }
 
-                    
                     
                     // Checking for acceleration
                     acceleration_flag = acceleration_index(speed, prev_speed);
