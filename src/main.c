@@ -124,6 +124,11 @@ int main(void) {
                 printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
                 
             }
+
+            //reading the pageid
+           
+            rxexpect=0x66;
+            printf("sendme%c%c%c",255,255,255);
                 
 
                 while(1){
