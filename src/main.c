@@ -42,13 +42,14 @@ ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
 
-    if(stringbeginflag==false){
-    if(readBuffer[readBufferindex]==0x71){
-    readBufferindex=0;
-    readBuffer[0]=0x71;
-    stringbeginflag=true;
+    if(stringbeginflag==false){//making sure that only first indicator gets detected
+        if(readBuffer[readBufferindex]==0x71){
+        
+        readBufferindex=0;
+        readBuffer[0]=0x71;
+        stringbeginflag=true;
 
-    }
+        }
     }
 
     readBufferindex++;
@@ -94,11 +95,9 @@ int main(void) {
         
        
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));
-        rxexpect=0x66;
-        //printf("sendme");
-        _delay_ms(500);
-        currentpagenumber=readBuffer[1];
-       // printf("secpag.x1.val=%d %c%c%c", currentpagenumber, 255,255,255);
+        
+        
+      
         
         //setting the speed
             rxexpect=0x71;
@@ -107,12 +106,12 @@ int main(void) {
             printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
             displayreader(); //saving the readbuffer from being changed
             
-           for(i=0;i<8;i++){
+           /*for(i=0;i<8;i++){//stringreader
                 //printf("%c",savereadBuffer[0]);
                 printf("%c",savereadBuffer[i]);
                 if(savereadBuffer[i]==0x71)
                 printf("Elements %d",i);
-            }
+            }*/
             
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
