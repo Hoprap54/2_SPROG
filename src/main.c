@@ -100,40 +100,27 @@ int main(void) {
       
         
         //setting the speed
-            rxexpect=0x71;
-            printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
-            _delay_ms(750);
-
-
-            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
-                
-                setspeed = savereadBuffer[1] | (savereadBuffer[2] << 8) | (savereadBuffer[3] << 16)| (savereadBuffer[4] << 24);
-                printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
-                
-            }
-
-
-            printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
-            displayreader(); //saving the readbuffer from being changed
             
-           for(i=0;i<8;i++){//stringreader
+            //ask for data of secpag.x0
+            rxexpect=0x71;//setting what string to expect
+
+            
+            
+            
+           /*for(i=0;i<8;i++){//stringreader for debugging purpose
                 //printf("%c",savereadBuffer[0]);
                 printf("%c",savereadBuffer[i]);
                 if(savereadBuffer[i]==0x71)
                 printf("Elements %d",i);
-            }
+            }*/
             
-            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
-                
-                setspeed = savereadBuffer[1] | (savereadBuffer[2] << 8) | (savereadBuffer[3] << 16)| (savereadBuffer[4] << 24);
-                printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
-                
-            }
+            rxexpect=0x71;
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(750);
+            displayreader(); //saving the readbuffer from being changed
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
-                setspeed = savereadBuffer[1] | (savereadBuffer[2] << 8) | (savereadBuffer[3] << 16)| (savereadBuffer[4] << 24);
+                setspeed = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
                 printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
                 
             }
