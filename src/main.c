@@ -15,7 +15,7 @@
 
 // Variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0; // Timer: variable for the time; counter: counter to count timeroverflows
-volatile bool car_move_flag = false;               // Variable to indicate whether the car is moving
+volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
 volatile int i, distancecounter = 0, test = 3, readBufferindex = 0;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
 
@@ -42,15 +42,22 @@ ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
 
-    if(readBuffer[readBufferindex]==rxexpect)
+    if(stringbeginflag==false){
+    if(readBuffer[readBufferindex]==0x71){
     readBufferindex=0;
+    readBuffer[0]=0x71;
+    stringbeginflag=true;
+
+    }
+    }
 
     readBufferindex++;
-    /*if(readBufferindex==8){
-    readBufferindex = 0;*/
+    if(readBufferindex==8){
+    readBufferindex = 0;
+    stringbeginflag = false;
     /*UCSR0B &= ~(1<<RXEN0);
     UCSR0B |= 1<<RXEN0;*/
-    //}
+    }
 }
 
 ISR(TIMER1_CAPT_vect){
@@ -87,23 +94,25 @@ int main(void) {
         
        
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));
-        
-        /*printf("sendme");
+        rxexpect=0x66;
+        //printf("sendme");
         _delay_ms(500);
         currentpagenumber=readBuffer[1];
-        printf("secpag.x1.val=%d %c%c%c", currentpagenumber, 255,255,255);
-        */
+       // printf("secpag.x1.val=%d %c%c%c", currentpagenumber, 255,255,255);
+        
         //setting the speed
+            rxexpect=0x71;
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(750);
+            printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
             displayreader(); //saving the readbuffer from being changed
             
-            /*for(i=0;i<8;i++){
+           for(i=0;i<8;i++){
                 //printf("%c",savereadBuffer[0]);
                 printf("%c",savereadBuffer[i]);
                 if(savereadBuffer[i]==0x71)
                 printf("Elements %d",i);
-            }*/
+            }
             
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
