@@ -43,10 +43,10 @@ ISR(USART_RX_vect){
     scanf("%c", &readBuffer[readBufferindex]);
 
     if(stringbeginflag==false){//making sure that only first indicator gets detected
-        if(readBuffer[readBufferindex]==0x71){
+        if(readBuffer[readBufferindex]==rxexpect){
         
         readBufferindex=0;
-        readBuffer[0]=0x71;
+        readBuffer[0]=rxexpect;
         stringbeginflag=true;
 
         }
@@ -103,15 +103,25 @@ int main(void) {
             rxexpect=0x71;
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(750);
+
+
+            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
+                
+                setspeed = savereadBuffer[1] | (savereadBuffer[2] << 8) | (savereadBuffer[3] << 16)| (savereadBuffer[4] << 24);
+                printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
+                
+            }
+
+
             printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
             displayreader(); //saving the readbuffer from being changed
             
-           /*for(i=0;i<8;i++){//stringreader
+           for(i=0;i<8;i++){//stringreader
                 //printf("%c",savereadBuffer[0]);
                 printf("%c",savereadBuffer[i]);
                 if(savereadBuffer[i]==0x71)
                 printf("Elements %d",i);
-            }*/
+            }
             
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
@@ -130,8 +140,13 @@ int main(void) {
                 
 
                 while(1){
-                    //printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
+                   // printf("page1.n0.val=%d%c%c%c", 7, 255,255,255);
+                    _delay_ms(500);
+                    rxexpect=0x66;
+                  //  printf("sendme");
                     _delay_ms(750);
+                    currentpagenumber=readBuffer[1];
+                  //  printf("page1.n0.val=%d%c%c%c", currentpagenumber, 255,255,255);
                     displayreader(); //saving the readbuffer from being changed
                     updatedata();
                     // Reading data out of readbuffer (Display)
