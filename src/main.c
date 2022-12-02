@@ -116,7 +116,7 @@ int main(void) {
             
             rxexpect=0x71;
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
-            _delay_ms(750);
+            _delay_ms(51);
             displayreader(); //saving the readbuffer from being changed
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
