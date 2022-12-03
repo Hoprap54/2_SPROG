@@ -222,7 +222,7 @@ inline void PWM_Motor(int freq, int duty){
     TCCR0A |= (1<<COM0A1) | (1<<COM0B1) | (1<<WGM01) | (1<<WGM00);  // Fast PWM
 
     // Compare value
-    ICR1 = (F_CPU/1024) - 1;
+    //ICR1 = (F_CPU/1024) - 1;
     OCR0A = (((F_CPU/freq/1024) - 1 )*duty)/100;
     OCR0B = (((F_CPU/freq/1024) - 1 )*duty)/100;
 }
