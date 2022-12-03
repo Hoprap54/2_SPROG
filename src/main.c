@@ -94,7 +94,7 @@ int main(void) {
     //printf("%lf", speed); 
         
        
-        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));//stops the car form doing anything until start button is pressed
         
         
       
