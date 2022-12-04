@@ -33,6 +33,7 @@ bool displayreadsuccess = false;
 /* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
 char displayreader(void);
+void getpage(void);
 void updatedata(void);
 void PWM_Motor(int freq, int duty);
 void PWM_on();
@@ -93,7 +94,7 @@ int main(void) {
 
     //printf("%lf", speed); 
         
-       
+        rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));//stops the car form doing anything until start button is pressed
         
         
@@ -129,10 +130,17 @@ int main(void) {
            
             rxexpect=0x66;
             printf("sendme%c%c%c",255,255,255);
+            _delay_ms(51);
             currentpagenumber=readBuffer[1];
                 
 
                 while(1){
+
+                    getpage();
+
+                    if(currentpagenumber==1);//etc.
+
+                    
                                  
                     // Reading data out of the optocoupler
                     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
@@ -242,4 +250,13 @@ inline void updatedata(void){
    // printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
   //  printf("speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
 
+}
+
+inline getpage(void){
+
+    rxexpect=0x66;
+    printf("sendme%c%c%c",255,255,255);
+    _delay_ms(51);
+    currentpagenumber=readBuffer[1];
+            
 }
