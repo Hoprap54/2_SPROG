@@ -143,7 +143,7 @@ int main(void) {
 
                     getpage();
 
-                    if(currentpagenumber==1);//etc.
+                    if(currentpagenumber==1);//etc. maybe with switch statement
 
                     
                                  
