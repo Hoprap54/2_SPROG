@@ -39,6 +39,8 @@ void PWM_Motor(int freq, int duty);
 void PWM_on();
 void PWM_off();
 
+
+//interrupts
 ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
@@ -54,7 +56,7 @@ ISR(USART_RX_vect){
     }
 
     readBufferindex++;
-    if(readBufferindex==8){
+    if(readBufferindex==8){//maybe adding expected_byte_count
     readBufferindex = 0;
     stringbeginflag = false;
     /*UCSR0B &= ~(1<<RXEN0);
@@ -80,6 +82,8 @@ ISR(TIMER1_OVF_vect){
     }
 }
 
+
+//main function
 int main(void) {    
     
     uart_init();   // Open the communication to the microcontroller
@@ -186,7 +190,17 @@ int main(void) {
             return 0;
         }
 
-/* Function description */
+
+
+
+
+
+
+
+
+/* Function descriptions */
+
+//function for initializing interrups and the timer for the optocoupler
 inline void initialize(void){
     sei();  // Enable global interrupts
     test = 12;
@@ -202,12 +216,14 @@ inline void initialize(void){
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 }
 
+//potential function to save input
 inline char displaysave(void){
     for(i=0;i<100;i++){
         savereadBuffer[i] = readBuffer[i];
     }
 }
 
+//checking acceleration with optocoupler data
 char acceleration_index(double current_speed, double previous_speed){
     char acceleration_flag;
     if(current_speed == 0 && previous_speed == 0){
@@ -225,6 +241,7 @@ char acceleration_index(double current_speed, double previous_speed){
     }
     return acceleration_flag;
 }
+
 
 inline void PWM_Motor(int freq, int duty){  
     DDRD = 0x40;    // Set Port D as output for the ENA (Motor) 0b0010 0000
