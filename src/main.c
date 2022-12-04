@@ -32,7 +32,7 @@ bool displayreadsuccess = false;
 
 /* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
-char displayreader(void);
+char displaysave(void);
 void getpage(void);
 void updatedata(void);
 void PWM_Motor(int freq, int duty);
@@ -118,7 +118,7 @@ int main(void) {
             rxexpect=0x71;
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(51);
-            displayreader(); //saving the readbuffer from being changed
+            displaysave(); //saving the readbuffer from being changed
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
                 setspeed = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
@@ -201,7 +201,7 @@ inline void initialize(void){
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 }
 
-inline char displayreader(void){
+inline char displaysave(void){
     for(i=0;i<100;i++){
         savereadBuffer[i] = readBuffer[i];
     }
