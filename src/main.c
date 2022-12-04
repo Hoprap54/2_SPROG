@@ -44,7 +44,7 @@ ISR(USART_RX_vect){
     scanf("%c", &readBuffer[readBufferindex]);
 
     if(stringbeginflag==false){//making sure that only first indicator gets detected
-        if(readBuffer[readBufferindex]==rxexpect){
+        if(readBuffer[readBufferindex]==rxexpect){//saving first element of string at index 0
         
         readBufferindex=0;
         readBuffer[0]=rxexpect;
@@ -101,6 +101,7 @@ int main(void) {
       
         
         //setting the speed
+        //WARNING data can only be requested when the corresponding page is loaded on the display
             
             //ask for data of secpag.x0
             rxexpect=0x71;//setting what string to expect
