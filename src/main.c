@@ -28,6 +28,13 @@ double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, di
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
 
+typedef struct{
+
+    float speed;
+    float distance;
+
+}rallystage_t;
+
 
 
 /* Declare functions */
