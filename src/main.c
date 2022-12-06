@@ -203,7 +203,7 @@ int main(void) {
 
         //starting the car
 
-        cardriver(stagesexpexted);
+        
 
         //go to next page
         printf("page 5%c%c%c",255,255,255);
@@ -214,6 +214,7 @@ int main(void) {
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x05 && readBuffer[2]==0x01 && readBuffer[3]==0x01));//stops the car form doing anything until start button is pressed
         _delay_ms(51);
+        cardriver(stagesexpexted);
                     
         //setting the speed
         //WARNING data can only be requested when the corresponding page is loaded on the display
@@ -391,7 +392,7 @@ void cardriver(int stagecount){
 
     bool stagecompleteflag = false;
     PWM_on();
-
+    PWM_Motor(30000,15);
     while(!stagecompleteflag){
     
     // Reading data out of the optocoupler
