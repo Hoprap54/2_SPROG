@@ -16,24 +16,27 @@
 // Variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0; // Timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
-volatile int i, distancecounter = 0, test = 3, readBufferindex = 0;     // For for loop in interrupt
+volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
 
 // Variables for the functions
 char acceleration_index(double, double);    // Function for checking the state of acceleration
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
-int currentpagenumber = 0;
-double seconds, speed = 100, prev_speed = 0, eigthcircumference = 0.02589182, distance;
+int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven;
+double seconds, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance;
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
 
 typedef struct{
 
-    float speed;
+    float stagetime;
     float distance;
+    float stagespeed;
 
 }rallystage_t;
+
+rallystage_t rallystages[10];
 
 
 
@@ -45,6 +48,7 @@ void updatedata(void);
 void PWM_Motor(int freq, int duty);
 void PWM_on();
 void PWM_off();
+void cardriver(int);
 
 
 //interrupts
@@ -63,7 +67,19 @@ ISR(USART_RX_vect){
     }
 
     readBufferindex++;
-    if(readBufferindex==8){//maybe adding expected_byte_count
+    switch(rxexpect){
+
+        case 0x71:
+        buffersize=8;
+        break;
+        case 0x65:
+        buffersize=7;
+        break;
+        case 0x66:
+        buffersize=5;
+
+    }
+    if(readBufferindex==buffersize){//maybe adding expected_byte_count - buffersize
     readBufferindex = 0;
     stringbeginflag = false;
     /*UCSR0B &= ~(1<<RXEN0);
@@ -102,23 +118,110 @@ int main(void) {
     prev_speed=0;
     acceleration_flag=0;
     car_move_flag = false;
+    currentpagenumber=0;
+    stages_driven = 0;
 
     //printf("%lf", speed); 
-        
         rxexpect=0x65;
-        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x01 && readBuffer[2]==0x09 && readBuffer[3]==0x00));//stops the car form doing anything until start button is pressed
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x00 && readBuffer[2]==0x01));
+        /*for(i=0;i<8;i++){//stringreader for debugging purpose
+                //printf("%c",savereadBuffer[0]);
+                printf("%c",readBuffer[i]);
+                if(readBuffer[i]==0x65)
+                printf("Elements %d",i);
+            }*/
+        /*
+        do{
+        getpage();
+        }while(currentpagenumber!=4);
+        */
+       //printf("debug");
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x04 && readBuffer[2]==0x06)){
+        _delay_ms(1000);
+        //printf("debug");
+        /*for(i=0;i<8;i++){//stringreader for debugging purpose
+                //printf("%c",readBuffer[0]);
+                printf("%c",readBuffer[i]);
+                if(readBuffer[i]==0x65)
+                printf("Elements %d",i);
+            }*/
+        }
+        _delay_ms(250);
+        rxexpect=0x71;
+        printf("get %s.val%c%c%c","etap.n0",255,255,255);	//sends "get secpag.n0.val"
+            _delay_ms(500);
+            
+            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
+                
+                stagesexpexted = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
+                                
+            }
         
+        //Page rallystages
         
-      
+        printf("page 3%c%c%c",255,255,255);
+        printf("Rallystages.n2.val=%d%c%c%c", stagesexpexted, 255, 255, 255);
+        stagenumber=0;
+        do{
+        //wait for button
+       
+       
+        printf("Rallystages.n0.val=%d%c%c%c", stagenumber+1, 255, 255, 255);
+        rxexpect=0x65;
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x03 && readBuffer[2]==0x02));
+        //reading the confirmed values
+        _delay_ms(51);
+        rxexpect=0x71;
+        printf("get %s.val%c%c%c","Rallystages.x0",255,255,255);	//sends "get secpag.n0.val"
+            _delay_ms(51);
+            
+            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
+                
+                rallystages[stagenumber].distance = (readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24));
+                rallystages[stagenumber].distance /= 10;
+                //printf("v:%f",rallystages[stagenumber].distance);
+                //printf("Rallystages.x0.val=%d%c%c%c",/*(int)rallystages[stagenumber].distance*10*/0 , 255,255,255);
+                
+            }
+        printf("get %s.val%c%c%c","Rallystages.n1",255,255,255);	//sends "get secpag.n0.val"
+            _delay_ms(51);
+
+            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
+                //printf("debug2");
+                rallystages[stagenumber].stagetime = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
+                //printf("v:%f",rallystages[stagenumber].stagetime);             
+            }
         
+        //calculating the expected average speed
+        rallystages[stagenumber].stagespeed = rallystages[stagenumber].distance/rallystages[stagenumber].stagetime;
+        
+
+        stagenumber++;
+        }while(stagesexpexted>stagenumber);//check condition
+        //printf("%f",rallystages[0].stagespeed);
+        stagenumber=0;
+
+        //starting the car
+
+        cardriver(stagesexpexted);
+
+        //go to next page
+        printf("page 5%c%c%c",255,255,255);
+
+
+        
+
+        rxexpect=0x65;
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x05 && readBuffer[2]==0x01 && readBuffer[3]==0x01));//stops the car form doing anything until start button is pressed
+        _delay_ms(51);
+                    
         //setting the speed
         //WARNING data can only be requested when the corresponding page is loaded on the display
             
             //ask for data of secpag.x0
             rxexpect=0x71;//setting what string to expect
 
-            
-            
+    
             
            /*for(i=0;i<8;i++){//stringreader for debugging purpose
                 //printf("%c",savereadBuffer[0]);
@@ -150,9 +253,7 @@ int main(void) {
 
                     getpage();
 
-                    if(currentpagenumber==1);//etc. maybe with switch statement
-
-                    
+                                      
                                  
                     // Reading data out of the optocoupler
                     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
@@ -277,11 +378,44 @@ inline void updatedata(void){
 
 }
 
-inline getpage(void){
+inline void getpage(void){
 
     rxexpect=0x66;
     printf("sendme%c%c%c",255,255,255);
     _delay_ms(51);
     currentpagenumber=readBuffer[1];
             
+}
+
+void cardriver(int stagecount){
+
+    bool stagecompleteflag = false;
+    PWM_on();
+
+    while(!stagecompleteflag){
+    
+    // Reading data out of the optocoupler
+                    seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
+                    distance = (double)distancecounter*eigthcircumference;  // Distance calculation
+    // Speed calculation (optocoupler)
+                    if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
+                        speed = eigthcircumference/seconds; // Distance divided by time
+                        //printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+                        //printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+                    }
+    if(distance>=rallystages[stages_driven].distance)
+    stagecompleteflag=true;
+    
+    //rallystages[stages_driven].stagespeed
+
+
+    }
+
+    if(stages_driven<stagecount){
+    stages_driven++;
+    cardriver(stagecount);
+    }
+    else
+    PWM_off();
+
 }
