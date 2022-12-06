@@ -38,8 +38,6 @@ typedef struct{
 
 rallystage_t rallystages[10];
 
-
-
 /* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
 char displaysave(void);
@@ -208,9 +206,6 @@ int main(void) {
         //go to next page
         printf("page 5%c%c%c",255,255,255);
 
-
-        
-
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x05 && readBuffer[2]==0x01 && readBuffer[3]==0x01));//stops the car form doing anything until start button is pressed
         _delay_ms(51);
@@ -221,7 +216,6 @@ int main(void) {
             
             //ask for data of secpag.x0
             rxexpect=0x71;//setting what string to expect
-
     
             
            /*for(i=0;i<8;i++){//stringreader for debugging purpose
@@ -249,12 +243,9 @@ int main(void) {
             _delay_ms(51);
             currentpagenumber=readBuffer[1];
                 
-
                 while(1){
 
-                    getpage();
-
-                                      
+                    getpage();              
                                  
                     // Reading data out of the optocoupler
                     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
@@ -267,7 +258,6 @@ int main(void) {
                         printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
                         //printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
                     }
-                    
                     
                     // Check whether car is moving
                     if (car_move_flag){
@@ -287,7 +277,6 @@ int main(void) {
                     
                     // Checking for acceleration
                     acceleration_flag = acceleration_index(speed, prev_speed);
-                    
 
                     // output current data in console
                     // printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
@@ -298,14 +287,6 @@ int main(void) {
                 }
             return 0;
         }
-
-
-
-
-
-
-
-
 
 /* Function descriptions */
 
@@ -404,7 +385,7 @@ void cardriver(int stagecount){
                         //printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
                         //printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
                     }
-    if(distance>=rallystages[stages_driven].distance)
+    if(distance >= rallystages[stages_driven].distance)
     stagecompleteflag=true;
     
     //rallystages[stages_driven].stagespeed
@@ -413,8 +394,8 @@ void cardriver(int stagecount){
     }
 
     if(stages_driven<stagecount){
-    stages_driven++;
-    cardriver(stagecount);
+        stages_driven++;
+        cardriver(stagecount);
     }
     else
     PWM_off();
