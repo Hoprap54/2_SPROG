@@ -331,7 +331,7 @@ char acceleration_index(double current_speed, double previous_speed){
     return acceleration_flag;
 }
 
-
+ 
 inline void PWM_Motor(int duty){  
     DDRD = 0x60;    // Set Port D as output for the ENA (Motor) 0b0010 0000
 
