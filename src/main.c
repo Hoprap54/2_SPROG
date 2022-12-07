@@ -373,14 +373,13 @@ void cardriver(int stagecount){
                         printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
                     }
     if(distance >= rallystages[stages_driven].distance)
-    stagecompleteflag=true;
+    stagecompleteflag = true;
     
     //rallystages[stages_driven].stagespeed
 
-
     }
 
-    if(stages_driven<stagecount){
+    if(stages_driven < stagecount){
         stages_driven++;
         cardriver(stagecount);
     }
