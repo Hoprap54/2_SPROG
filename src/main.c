@@ -14,7 +14,7 @@
 #include <stdbool.h>
 
 // Variables for the interrupts
-volatile unsigned long int timer = 0, counter = 0; // Timer: variable for the time; counter: counter to count timeroverflows
+volatile unsigned long int timer = 0, counter = 0;                        // Timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
 volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
@@ -54,7 +54,7 @@ ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
 
-    if(stringbeginflag==false){//making sure that only first indicator gets detected
+    if(stringbeginflag==false){                    //making sure that only first indicator gets detected
         if(readBuffer[readBufferindex]==rxexpect){//saving first element of string at index 0
         
         readBufferindex=0;
@@ -77,7 +77,7 @@ ISR(USART_RX_vect){
         buffersize=5;
 
     }
-    if(readBufferindex==buffersize){//maybe adding expected_byte_count - buffersize
+    if(readBufferindex == buffersize){//maybe adding expected_byte_count - buffersize
     readBufferindex = 0;
     stringbeginflag = false;
     /*UCSR0B &= ~(1<<RXEN0);
@@ -95,6 +95,7 @@ ISR(TIMER1_CAPT_vect){
     distancecounter++;
     
 }
+
 ISR(TIMER1_OVF_vect){
     counter++;            // Adding one to the overflow counter
     TCNT1=0;
@@ -102,7 +103,6 @@ ISR(TIMER1_OVF_vect){
         car_move_flag = 0;// So the move-flag is reset
     }
 }
-
 
 //main function
 int main(void) {    
