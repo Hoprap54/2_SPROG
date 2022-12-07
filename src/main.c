@@ -23,15 +23,16 @@ volatile char readBuffer[100]= {0}, rxexpect=0x71;
 char acceleration_index(double, double);    // Function for checking the state of acceleration
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
-int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven;
-double seconds, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance;
+int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven, ocr0asetter=150;
+double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
+
 
 typedef struct{
 
     float stagetime;
-    float distance;
+    float stagedistance;
     float stagespeed;
 
 }rallystage_t;
@@ -44,6 +45,7 @@ char displaysave(void);
 void getpage(void);
 void updatedata(void);
 void PWM_Motor(unsigned char);
+unsigned int read_adc(void);
 void cardriver(int);
 
 
@@ -174,8 +176,8 @@ int main(void) {
             
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
-                rallystages[stagenumber].distance = (readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24));
-                rallystages[stagenumber].distance /= 10;
+                rallystages[stagenumber].stagedistance = (readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24));
+                rallystages[stagenumber].stagedistance /= 10;
                 //printf("v:%f",rallystages[stagenumber].distance);
                 //printf("Rallystages.x0.val=%d%c%c%c",/*(int)rallystages[stagenumber].distance*10*/0 , 255,255,255);
                 
@@ -190,7 +192,7 @@ int main(void) {
             }
         
         //calculating the expected average speed
-        rallystages[stagenumber].stagespeed = rallystages[stagenumber].distance/rallystages[stagenumber].stagetime;
+        //rallystages[stagenumber].stagespeed = rallystages[stagenumber].stagedistance/rallystages[stagenumber].stagetime;
         
 
         stagenumber++;
@@ -303,6 +305,12 @@ inline void initialize(void){
     DDRB &= ~0x01;//opto
     PORTB |= 0x01;
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
+
+
+    ADMUX = ADMUX | 0x40;//ADC0 single ended input on PortC0
+    ADCSRB = ADCSRB & (0xF8);//Free running mode
+    ADCSRA = ADCSRA | 0xE7; //Enable, Start conversion, slow input clock
+
 }
 
 //potential function to save input
@@ -313,7 +321,7 @@ inline char displaysave(void){
 }
 
 //checking acceleration with optocoupler data
-char acceleration_index(double current_speed, double previous_speed){
+inline char acceleration_index(double current_speed, double previous_speed){
     char acceleration_flag;
     if(current_speed == 0 && previous_speed == 0){
         acceleration_flag=0;
@@ -358,33 +366,82 @@ inline void getpage(void){
 }
 
 void cardriver(int stagecount){
-
+    distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
+    secondstogo = (double)rallystages[stages_driven].stagetime - seconds;
+    printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
     bool stagecompleteflag = false;
-    PWM_Motor(255);
+    secondstogo = (double)rallystages[stages_driven].stagetime;
+    PWM_Motor(ocr0asetter);
+    printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     while(!stagecompleteflag){
-    
+        
+        printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     // Reading data out of the optocoupler
                     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
                     distance = (double)distancecounter*eigthcircumference;  // Distance calculation
+                    
+                    distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
+                    secondstogo = secondstogo - seconds;
+                    neededspeed = distancetogo/secondstogo;
+
     // Speed calculation (optocoupler)
                     if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
+                        
                         speed = eigthcircumference/seconds; // Distance divided by time
                         printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
                         printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
+                        printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
+                        printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
+                        printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
+
                     }
-    if(distance >= rallystages[stages_driven].distance)
+    
+
+        if (speed<neededspeed){
+            ocr0asetter+=10;
+        }
+        if (speed>neededspeed){
+            ocr0asetter-=10;
+        }
+
+
+
+    
+    acceleration_flag = acceleration_index(speed, prev_speed);
+    prev_speed = speed;
+    switch(acceleration_flag){
+
+        case 1: 
+        printf("progress.t4.txt=%s%c%c%c","\"breaking\"",255,255,255);
+        break;
+        case 2:
+        printf("progress.t4.txt=%s%c%c%c","\"accelerating\"",255,255,255);
+    }
+    
+    if(distance >= rallystages[stages_driven].stagedistance){
     stagecompleteflag = true;
+    distancecounter = 0;
+    stages_driven++;
+    }
     
     //rallystages[stages_driven].stagespeed
 
     }
 
     if(stages_driven < stagecount){
-        stages_driven++;
+        
         cardriver(stagecount);
     }
-    cardriver(stagecount);
+   // cardriver(stagecount);
    // else
     //PWM_Motor(0);
 
+}
+
+inline unsigned int read_adc(void){
+
+    unsigned int adclow = ADCL;
+    
+    
+    return (adclow + ((ADCH & 0x03) << 8));//need to ensure that ADCL is //read first as it is not updated otherwise
 }
