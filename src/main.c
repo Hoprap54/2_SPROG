@@ -241,15 +241,15 @@ int main(void) {
                 printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
                 
             }
-
+            /*
             //reading the pageid
            
             rxexpect=0x66;
             printf("sendme%c%c%c",255,255,255);
             _delay_ms(51);
-            currentpagenumber=readBuffer[1];
+            currentpagenumber=readBuffer[1];*/
                 
-                while(1){
+                /*while(1){
 
                     getpage();              
                                  
@@ -290,7 +290,7 @@ int main(void) {
 
                     //printf("\n prev-speed:%f",prev_speed); debugging
                     prev_speed=speed; // Setting a new value for previous speed                               
-                }
+                }*/
             return 0;
         }
 
