@@ -206,9 +206,6 @@ int main(void) {
         stagenumber=0;
 
         //starting the car
-
-        
-
         //go to next page
         printf("page 5%c%c%c",255,255,255);
 
@@ -217,80 +214,6 @@ int main(void) {
         _delay_ms(51);
         cardriver(stagesexpexted);
                     
-        //setting the speed
-        //WARNING data can only be requested when the corresponding page is loaded on the display
-            
-            //ask for data of secpag.x0
-            rxexpect=0x71;//setting what string to expect
-    
-            
-           /*for(i=0;i<8;i++){//stringreader for debugging purpose
-                //printf("%c",savereadBuffer[0]);
-                printf("%c",savereadBuffer[i]);
-                if(savereadBuffer[i]==0x71)
-                printf("Elements %d",i);
-            }*/
-            /*
-            rxexpect=0x71;
-            printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
-            _delay_ms(51);
-            displaysave(); //saving the readbuffer from being changed
-            if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
-                
-                setspeed = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
-                printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
-                
-            }*/
-            /*
-            //reading the pageid
-           
-            rxexpect=0x66;
-            printf("sendme%c%c%c",255,255,255);
-            _delay_ms(51);
-            currentpagenumber=readBuffer[1];*/
-                
-                /*while(1){
-
-                    getpage();              
-                                 
-                    // Reading data out of the optocoupler
-                    seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
-                    // printf("\n debug: %f",seconds);
-                    distance = (double)distancecounter*eigthcircumference;  // Distance calculation
-
-                    // Speed calculation (optocoupler)
-                    if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
-                        speed = eigthcircumference/seconds; // Distance divided by time
-                        printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
-                        //printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
-                    }
-                    
-                    // Check whether car is moving
-                    if (car_move_flag){
-                        //printf("\nCar is moving");
-                    }
-
-                    // If it is not moving - set speed etc. to zero
-                    else if (car_move_flag == false){
-                    // printf("\nCar is not moving.");
-                        speed=0;
-                        //printf("page2.speed.val=%d%c%c%c", 0, 255,255,255);
-                        timer=0;
-                        seconds=0;
-                        prev_speed=0;
-                    }
-
-                    
-                    // Checking for acceleration
-                    acceleration_flag = acceleration_index(speed, prev_speed);
-
-                    // output current data in console
-                    // printf("\n This is the current state of the the timer:%lu and seconds:%lf - speed:%lf - accelerationflag:%d - distance:%lf",timer,seconds, speed, acceleration_flag, distance);
-                    //_delay_ms(1000);
-
-                    //printf("\n prev-speed:%f",prev_speed); debugging
-                    prev_speed=speed; // Setting a new value for previous speed                               
-                }*/
             return 0;
         }
 
