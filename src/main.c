@@ -356,8 +356,8 @@ inline void PWM_Motor(unsigned char duty){
 
 inline void updatedata(void){
 
-   // printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
-  //  printf("speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+    // printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
+    // printf("speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
 
 }
 
@@ -376,11 +376,12 @@ void cardriver(int stagecount){
 
     distancetogo = (double)rallystages[stages_driven].stagedistance;
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
-    
-    
+    bool stagecompleteflag = false;
     secondstogo = (double)rallystages[stages_driven].stagetime;
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     PWM_Motor(ocr0asetter);
+=======
+>>>>>>> Stashed changes
     while(!stagecompleteflag){
         
         
@@ -435,8 +436,14 @@ void cardriver(int stagecount){
     }
     
     //rallystages[stages_driven].stagespeed
+    /*
+    Get distance and time
+    Run motor (set speed using time given) 
+    Stop motor when distance has been reached*/
+    PWM_Motor();
 
     }
+
 
     if(stages_driven < stagecount){
         
