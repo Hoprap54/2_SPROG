@@ -373,7 +373,7 @@ inline void getpage(void){
 void cardriver(int stagecount){
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
-    
+
     distancetogo = (double)rallystages[stages_driven].stagedistance;
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
     
@@ -430,6 +430,7 @@ void cardriver(int stagecount){
     if(distance >= rallystages[stages_driven].stagedistance){
     stagecompleteflag = true;
     distancecounter = 0;
+    distance=0;
     stages_driven++;
     }
     
