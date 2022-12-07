@@ -43,7 +43,7 @@ void initialize(void);      //Function for initializing the timer and interrupts
 char displaysave(void);
 void getpage(void);
 void updatedata(void);
-void PWM_Motor(int duty);
+void PWM_Motor(unsigned char);
 void cardriver(int);
 
 
@@ -332,7 +332,7 @@ char acceleration_index(double current_speed, double previous_speed){
 }
 
  
-inline void PWM_Motor(int duty){  
+inline void PWM_Motor(unsigned char duty){  
     DDRD = 0x60;    // Set Port D as output for the ENA (Motor) 0b0010 0000
 
     TCCR0A |= 0XA3;  // Fast PWM
@@ -360,7 +360,7 @@ inline void getpage(void){
 void cardriver(int stagecount){
 
     bool stagecompleteflag = false;
-    PWM_Motor(15);
+    PWM_Motor(255);
     while(!stagecompleteflag){
     
     // Reading data out of the optocoupler
@@ -369,8 +369,8 @@ void cardriver(int stagecount){
     // Speed calculation (optocoupler)
                     if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
                         speed = eigthcircumference/seconds; // Distance divided by time
-                        //printf("secpag.x1.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
-                        //printf("page2.speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+                        printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+                        printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
                     }
     if(distance >= rallystages[stages_driven].distance)
     stagecompleteflag=true;
@@ -384,7 +384,8 @@ void cardriver(int stagecount){
         stages_driven++;
         cardriver(stagecount);
     }
-    else
-    PWM_Motor(0);
+    cardriver(stagecount);
+   // else
+    //PWM_Motor(0);
 
 }
