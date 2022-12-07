@@ -230,7 +230,7 @@ int main(void) {
                 if(savereadBuffer[i]==0x71)
                 printf("Elements %d",i);
             }*/
-            
+            /*
             rxexpect=0x71;
             printf("get %s.val%c%c%c","secpag.x0",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(51);
@@ -240,7 +240,7 @@ int main(void) {
                 setspeed = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
                 printf("secpag.x1.val=%ld%c%c%c", setspeed, 255,255,255);
                 
-            }
+            }*/
             /*
             //reading the pageid
            
@@ -376,12 +376,11 @@ void cardriver(int stagecount){
 
     distancetogo = (double)rallystages[stages_driven].stagedistance;
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
-    bool stagecompleteflag = false;
+    
     secondstogo = (double)rallystages[stages_driven].stagetime;
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     PWM_Motor(ocr0asetter);
-=======
->>>>>>> Stashed changes
+
     while(!stagecompleteflag){
         
         
@@ -440,7 +439,7 @@ void cardriver(int stagecount){
     Get distance and time
     Run motor (set speed using time given) 
     Stop motor when distance has been reached*/
-    PWM_Motor();
+    PWM_Motor(0);
 
     }
 
