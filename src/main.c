@@ -160,6 +160,7 @@ int main(void) {
         printf("page 3%c%c%c",255,255,255);
         printf("Rallystages.n2.val=%d%c%c%c", stagesexpexted, 255, 255, 255);
         stagenumber=0;
+        
         do{
         //wait for button
        
