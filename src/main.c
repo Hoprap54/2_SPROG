@@ -408,7 +408,7 @@ void cardriver(int stagecount){
         neededspeed = distancetogo/secondstogo;
         if (speed<neededspeed){
            
-            ocr0asetter+=1;
+            ocr0asetter+=2;
         }
         if (speed>neededspeed){
             ocr0asetter-=2;
