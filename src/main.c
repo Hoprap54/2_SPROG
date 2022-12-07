@@ -24,7 +24,7 @@ volatile double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, 
 
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
-int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven, ocr0asetter=150;
+int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven = 0, ocr0asetter=150;
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
 
@@ -330,14 +330,14 @@ void cardriver(int stagecount){
         neededspeed = distancetogo/secondstogo;
         if (speed<neededspeed){
            
-            ocr0asetter+=2;
+            ocr0asetter+=10;
         }
         if (speed>neededspeed){
-            ocr0asetter-=2;
+            ocr0asetter-=10;
         }
 
 
-
+    PWM_Motor(ocr0asetter);
     
     acceleration_flag = acceleration_index(speed, prev_speed);
     prev_speed = speed;
@@ -356,16 +356,14 @@ void cardriver(int stagecount){
     distance=0;
     stages_driven++;
     }
+    }
     
     //rallystages[stages_driven].stagespeed
     /*
     Get distance and time
     Run motor (set speed using time given) 
     Stop motor when distance has been reached*/
-    PWM_Motor(0);
-
-    }
-
+    
 
     if(stages_driven < stagecount){
         
@@ -373,8 +371,9 @@ void cardriver(int stagecount){
     }
    // cardriver(stagecount);
    // else
+    
+    
     PWM_Motor(0);
-
 }
 
 inline unsigned int read_adc(void){
