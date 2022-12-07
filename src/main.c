@@ -18,13 +18,13 @@ volatile unsigned long int timer = 0, counter = 0;                        // Tim
 volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
 volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
+volatile double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 
 // Variables for the functions
-char acceleration_index(double, double);    // Function for checking the state of acceleration
+
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
 int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven, ocr0asetter=150;
-double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
 
@@ -37,8 +37,8 @@ typedef struct{
 
 }rallystage_t;
 
-rallystage_t rallystages[10];
-
+volatile rallystage_t rallystages[10];
+char acceleration_index(double, double);    // Function for checking the state of acceleration
 /* Declare functions */
 void initialize(void);      //Function for initializing the timer and interrupts
 char displaysave(void);
@@ -93,6 +93,11 @@ ISR(TIMER1_CAPT_vect){
     counter=0;              // Reseting overflow counter
     car_move_flag = true;   // Car is being moved
     distancecounter++;
+    seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
+    speed = eigthcircumference/seconds;
+    distance = (double)distancecounter*eigthcircumference;  // Distance calculation
+    distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
+    secondstogo = secondstogo - seconds;
     
 }
 
@@ -366,42 +371,44 @@ inline void getpage(void){
 }
 
 void cardriver(int stagecount){
-    distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
-    secondstogo = (double)rallystages[stages_driven].stagetime - seconds;
+    printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
+    distancetogo = (double)rallystages[stages_driven].stagedistance;
+    secondstogo = (double)rallystages[stages_driven].stagetime;
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
     bool stagecompleteflag = false;
     secondstogo = (double)rallystages[stages_driven].stagetime;
-    PWM_Motor(ocr0asetter);
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
+    PWM_Motor(ocr0asetter);
     while(!stagecompleteflag){
         
-        printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
+        
     // Reading data out of the optocoupler
-                    seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
-                    distance = (double)distancecounter*eigthcircumference;  // Distance calculation
+                    //seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
+                    //distance = (double)distancecounter*eigthcircumference;  // Distance calculation
                     
-                    distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
-                    secondstogo = secondstogo - seconds;
-                    neededspeed = distancetogo/secondstogo;
+                    //distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
+                    //secondstogo = secondstogo - seconds;
+                    //neededspeed = distancetogo/secondstogo;
 
     // Speed calculation (optocoupler)
-                    if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
+                  //  if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
                         
-                        speed = eigthcircumference/seconds; // Distance divided by time
+                       // speed = eigthcircumference/seconds; // Distance divided by time
                         printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
                         printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
                         printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
                         printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
                         printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
 
-                    }
+              //      }
     
-
+        neededspeed = distancetogo/secondstogo;
         if (speed<neededspeed){
-            ocr0asetter+=10;
+           
+            ocr0asetter+=1;
         }
         if (speed>neededspeed){
-            ocr0asetter-=10;
+            ocr0asetter-=2;
         }
 
 
@@ -434,7 +441,7 @@ void cardriver(int stagecount){
     }
    // cardriver(stagecount);
    // else
-    //PWM_Motor(0);
+    PWM_Motor(0);
 
 }
 
