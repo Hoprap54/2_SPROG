@@ -297,15 +297,14 @@ void cardriver(int stagecount){
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
 
-    distancetogo = (double)rallystages[stages_driven].stagedistance;
+    distancetogo = (double)rallystages[stages_driven].stagedistance;    // Get distance from optocoupler
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
     
-    secondstogo = (double)rallystages[stages_driven].stagetime;
+    secondstogo = (double)rallystages[stages_driven].stagetime;         // Get time from optocoupler
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     PWM_Motor(ocr0asetter);
 
     while(!stagecompleteflag){
-        
         
     // Reading data out of the optocoupler
                     //seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
