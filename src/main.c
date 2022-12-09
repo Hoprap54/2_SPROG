@@ -24,16 +24,16 @@ volatile double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, 
 
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
-int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven = 0, ocr0asetter=150;
+int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven = 0, ocr0asetter=100;
 uint32_t setspeed=0;
 bool displayreadsuccess = false;
 
 
 typedef struct{
 
-    float stagetime;
-    float stagedistance;
-    float stagespeed;
+    double stagetime;
+    double stagedistance;
+    double stagespeed;
 
 }rallystage_t;
 
@@ -104,8 +104,9 @@ ISR(TIMER1_CAPT_vect){
 ISR(TIMER1_OVF_vect){
     counter++;            // Adding one to the overflow counter
     TCNT1=0;
-    if(counter>2){        // The car has not really moved for a long time
+    if(counter>=2){        // The car has not really moved for a long time
         car_move_flag = 0;// So the move-flag is reset
+        speed = 0;
     }
 }
 
@@ -116,6 +117,7 @@ int main(void) {
 	io_redirect(); // Redirect input and output to the communication
     initialize();
 
+    while(1){
     // Reseting all the values
     speed=0;
     prev_speed=0;
@@ -123,6 +125,7 @@ int main(void) {
     car_move_flag = false;
     currentpagenumber=0;
     stages_driven = 0;
+    ocr0asetter = 0;
 
     //printf("%lf", speed); 
         rxexpect=0x65;
@@ -172,7 +175,7 @@ int main(void) {
        
         printf("Rallystages.n0.val=%d%c%c%c", stagenumber+1, 255, 255, 255);
         rxexpect=0x65;
-        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x03 && readBuffer[2]==0x02));
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x03 && readBuffer[2]==0x04));
         //reading the confirmed values
         _delay_ms(51);
         rxexpect=0x71;
@@ -211,9 +214,23 @@ int main(void) {
 
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x05 && readBuffer[2]==0x01 && readBuffer[3]==0x01));//stops the car form doing anything until start button is pressed
-        _delay_ms(51);
+       // _delay_ms(51);
+        
+        
+        
         cardriver(stagesexpexted);
-                    
+        printf("progress.x0.val=%lu%c%c%c", (unsigned long int)(speed*1000), 255,255,255);
+        printf("progress.x1.val=%lu%c%c%c", (unsigned long int)(distance*1000), 255,255,255);
+        printf("progress.x2.val=%lu%c%c%c", (unsigned long int)(distancetogo*1000), 255,255,255);
+        printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
+        printf("progress.x3.val=%lu%c%c%c", (unsigned long int)(secondstogo*1000), 255,255,255);
+        printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((rallystages[stages_driven].stagedistance/distance)*100), 255,255,255);
+        
+        rxexpect = 0x65;
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x06 && readBuffer[2]==0x10));
+
+        printf("page 0%c%c%c",255,255,255);
+        }
             return 0;
         }
 
@@ -294,46 +311,45 @@ inline void getpage(void){
 }
 
 void cardriver(int stagecount){
+
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
 
-    distancetogo = (double)rallystages[stages_driven].stagedistance;    // Get distance from optocoupler
+    distancetogo = rallystages[stages_driven].stagedistance;    
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
     
-    secondstogo = (double)rallystages[stages_driven].stagetime;         // Get time from optocoupler
-    printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
+    secondstogo = rallystages[stages_driven].stagetime;    
+    neededspeed = distancetogo/secondstogo;     
+    printf("progress.x3.val=%ld%c%c%c", (unsigned long int)(secondstogo*1000), 255,255,255);
+    
+    speed=0;
+    distance=0;
+    if(rallystages[stages_driven].stagedistance>=2)
+    ocr0asetter = 50;
+    if(rallystages[stages_driven].stagedistance<=2)
+    ocr0asetter = 30;
     PWM_Motor(ocr0asetter);
-
+    _delay_ms(50);
     while(!stagecompleteflag){
         
-    // Reading data out of the optocoupler
-                    //seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
-                    //distance = (double)distancecounter*eigthcircumference;  // Distance calculation
-                    
-                    //distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
-                    //secondstogo = secondstogo - seconds;
-                    //neededspeed = distancetogo/secondstogo;
+        printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+        printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
+        printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
+        printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
+        printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
+        //printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((rallystages[stages_driven].stagedistance/distance)*100), 255,255,255);
 
-    // Speed calculation (optocoupler)
-                  //  if (seconds){ // Speed is only recalculated when there is actually a timer-value (that is not zero)
-                        
-                       // speed = eigthcircumference/seconds; // Distance divided by time
-                        printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
-                        printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
-                        printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
-                        printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
-                        printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
-
-              //      }
     
         neededspeed = distancetogo/secondstogo;
-        if (speed<neededspeed){
+        if (speed<neededspeed && ocr0asetter<250){
            
-            ocr0asetter+=10;
+            ocr0asetter+=1;
         }
-        if (speed>neededspeed){
-            ocr0asetter-=10;
+        if (speed>neededspeed && ocr0asetter>25){
+            ocr0asetter-=2;
         }
+        
+
 
 
     PWM_Motor(ocr0asetter);
@@ -368,9 +384,6 @@ void cardriver(int stagecount){
         
         cardriver(stagecount);
     }
-   // cardriver(stagecount);
-   // else
-    
     
     PWM_Motor(0);
 }
