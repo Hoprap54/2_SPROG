@@ -371,14 +371,11 @@ void cardriver(int stagecount){
    // cardriver(stagecount);
    // else
     
-    
     PWM_Motor(0);
 }
 
 inline unsigned int read_adc(void){
 
     unsigned int adclow = ADCL;
-    
-    
     return (adclow + ((ADCH & 0x03) << 8));//need to ensure that ADCL is //read first as it is not updated otherwise
 }
