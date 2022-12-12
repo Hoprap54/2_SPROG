@@ -94,10 +94,11 @@ ISR(TIMER1_CAPT_vect){
     car_move_flag = true;   // Car is being moved
     distancecounter++;
     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
+    secondstogo = secondstogo - seconds;
     speed = eigthcircumference/seconds;
     distance = (double)distancecounter*eigthcircumference;  // Distance calculation
     distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
-    secondstogo = secondstogo - seconds;
+    
     
 }
 
@@ -170,10 +171,10 @@ int main(void) {
         stagenumber=0;
         
         do{
-        //wait for button
-       
-       
+              
         printf("Rallystages.n0.val=%d%c%c%c", stagenumber+1, 255, 255, 255);
+
+        //wait for button
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x03 && readBuffer[2]==0x04));
         //reading the confirmed values
@@ -224,7 +225,7 @@ int main(void) {
         printf("progress.x2.val=%lu%c%c%c", (unsigned long int)(distancetogo*1000), 255,255,255);
         printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
         printf("progress.x3.val=%lu%c%c%c", (unsigned long int)(secondstogo*1000), 255,255,255);
-        printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((rallystages[stages_driven].stagedistance/distance)*100), 255,255,255);
+        printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
         
         rxexpect = 0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x06 && readBuffer[2]==0x10));
@@ -296,8 +297,12 @@ inline void PWM_Motor(unsigned char duty){
 
 inline void updatedata(void){
 
-    // printf("secpag.n0.val=%d%c%c%c", 7, 255,255,255);
-    // printf("speed.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+    printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+    printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
+    printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
+    printf("progress.n1.val=%u%c%c%c", read_adc(),255,255,255);
+    printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
+    printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
 
 }
 
@@ -333,14 +338,15 @@ void cardriver(int stagecount){
     secondstogo = rallystages[stages_driven].stagetime;
     while(!stagecompleteflag){
         
-        printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
+        /*printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
         printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
         printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
-        printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
+        printf("progress.n1.val=%u%c%c%c", read_adc(),255,255,255);
         printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
-        //printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((rallystages[stages_driven].stagedistance/distance)*100), 255,255,255);
+        printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
+        */
+        updatedata();
 
-    
         neededspeed = distancetogo/secondstogo;
         if (speed<neededspeed && ocr0asetter<250){
            
