@@ -1,8 +1,8 @@
 #define F_CPU 16000000UL //needs to be defined for the delay functions to work.
 #define BAUD 9600
 #define NUMBER_STRING 1001
-//#define CIRCUMFERENCE 0.02589182
-
+#define FIFTEENTHCIRCUMFERENCE 0.01382300768
+#define EIGTHCIRCUMFERENCE 0.02589182
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
@@ -26,8 +26,10 @@ char acceleration_flag = 0;                 // Variable for indicating the state
 char savereadBuffer[100]= {0};
 int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven = 0, ocr0asetter=100;
 uint32_t setspeed=0;
-bool displayreadsuccess = false;
-
+float r2 = 20000;  //kiloohms 
+float r1 = 15000;  //kiloohms
+float volt, temp, temp2;
+unsigned int adcval;
 
 typedef struct{
 
@@ -47,6 +49,7 @@ void updatedata(void);
 void PWM_Motor(unsigned char);
 unsigned int read_adc(void);
 void cardriver(int);
+float voltagecalc(void);
 
 
 //interrupts
@@ -95,9 +98,11 @@ ISR(TIMER1_CAPT_vect){
     distancecounter++;
     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
     secondstogo = secondstogo - seconds;
-    speed = eigthcircumference/seconds;
-    distance = (double)distancecounter*eigthcircumference;  // Distance calculation
+    speed = FIFTEENTHCIRCUMFERENCE/seconds;
+    distance = (double)distancecounter*FIFTEENTHCIRCUMFERENCE;  // Distance calculation
     distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
+    if(!distancecounter)
+    secondstogo = rallystages[stages_driven].stagetime;
     
     
 }
@@ -127,6 +132,8 @@ int main(void) {
     currentpagenumber=0;
     stages_driven = 0;
     ocr0asetter = 0;
+    secondstogo = 0;
+    seconds = 0;
 
     //printf("%lf", speed); 
         rxexpect=0x65;
@@ -296,11 +303,11 @@ inline void PWM_Motor(unsigned char duty){
 }
 
 inline void updatedata(void){
-
+    
     printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
     printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
-    printf("progress.n1.val=%u%c%c%c", read_adc(),255,255,255);
+    printf("progress.n1.val=%ld%c%c%c", (long int)(voltagecalc()*10),255,255,255);
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
 
@@ -316,7 +323,8 @@ inline void getpage(void){
 }
 
 void cardriver(int stagecount){
-
+    secondstogo = 0;
+        seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
 
@@ -330,9 +338,9 @@ void cardriver(int stagecount){
     speed=0;
     distance=0;
     if(rallystages[stages_driven].stagedistance>=2)
-    ocr0asetter = 50;
+    ocr0asetter = 105;
     if(rallystages[stages_driven].stagedistance<=2)
-    ocr0asetter = 30;
+    ocr0asetter = 63;
     PWM_Motor(ocr0asetter);
     _delay_ms(50);
     secondstogo = rallystages[stages_driven].stagetime;
@@ -348,12 +356,14 @@ void cardriver(int stagecount){
         updatedata();
 
         neededspeed = distancetogo/secondstogo;
+        if(seconds<0)
+        PWM_Motor(255);
         if (speed<neededspeed && ocr0asetter<250){
            
-            ocr0asetter+=1;
+            ocr0asetter+=5;
         }
         if (speed>neededspeed && ocr0asetter>25){
-            ocr0asetter-=2;
+            ocr0asetter-=3;
         }
         
 
@@ -391,7 +401,8 @@ void cardriver(int stagecount){
         
         cardriver(stagecount);
     }
-    
+    secondstogo = 0;
+    seconds = 0;
     PWM_Motor(0);
 }
 
@@ -399,4 +410,16 @@ inline unsigned int read_adc(void){
 
     unsigned int adclow = ADCL;
     return (adclow + ((ADCH & 0x03) << 8));//need to ensure that ADCL is //read first as it is not updated otherwise
+}
+
+inline float voltagecalc(void){
+
+    adcval = read_adc();
+    temp = (float)adcval/1024;
+    temp2 = temp * 5;
+    temp = temp2/3;
+    
+    volt = temp*7;
+
+    return volt;
 }
