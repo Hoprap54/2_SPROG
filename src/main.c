@@ -321,7 +321,7 @@ void cardriver(int stagecount){
     secondstogo = rallystages[stages_driven].stagetime;    
     neededspeed = distancetogo/secondstogo;     
     printf("progress.x3.val=%ld%c%c%c", (unsigned long int)(secondstogo*1000), 255,255,255);
-    
+    seconds=0;
     speed=0;
     distance=0;
     if(rallystages[stages_driven].stagedistance>=2)
@@ -330,6 +330,7 @@ void cardriver(int stagecount){
     ocr0asetter = 30;
     PWM_Motor(ocr0asetter);
     _delay_ms(50);
+    secondstogo = rallystages[stages_driven].stagetime;
     while(!stagecompleteflag){
         
         printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
