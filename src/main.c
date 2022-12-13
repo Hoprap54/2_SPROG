@@ -16,7 +16,7 @@
 // Variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0;                        // Timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
-volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize;     // For for loop in interrupt
+volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize, stages_driven = 0;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
 volatile double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 
@@ -24,7 +24,7 @@ volatile double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, 
 
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
 char savereadBuffer[100]= {0};
-int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, stages_driven = 0, ocr0asetter=100;
+int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, ocr0asetter=100;
 uint32_t setspeed=0;
 float r2 = 20000;  //kiloohms 
 float r1 = 15000;  //kiloohms
@@ -362,7 +362,7 @@ void cardriver(int stagecount){
             ocr0asetter+=5;
         }
         if (speed>neededspeed && ocr0asetter>25){
-            ocr0asetter-=3;
+            ocr0asetter-=4;
         }
         
 
@@ -414,16 +414,18 @@ inline unsigned int read_adc(void){
 inline float voltagecalc(void){
 
    digitalVolt = read_adc();
-   Volt = (float)digitalVolt/ 1024 *5;
+   Volt = (float)digitalVolt/1024 *5;
    totalvolt = Volt/3*7;
 
     return totalvolt;
 }
 
 void batteryalert(void){
-    PWM_Motor(0);
+    /*PWM_Motor(0);
     printf("page 7%c%c%c",255,255,255);
-    printf("battery.x0.val=%ld%c%c%c", (long int)(voltagecalc()*10),255,255,255);
-    while(1);
-        
+    while(1){
+    printf("battery.x0.val=%d%c%c%c", (int)(voltagecalc()*10),255,255,255);
+    _delay_ms(500);
+    }
+        */
 }
