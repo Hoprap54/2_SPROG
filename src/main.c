@@ -30,6 +30,8 @@ float r2 = 20000;  //kiloohms
 float r1 = 15000;  //kiloohms
 float volt, temp, temp2;
 unsigned int adcval;
+int digitalVolt = 0;
+float Volt, totalvolt;
 
 typedef struct{
 
@@ -50,6 +52,7 @@ void PWM_Motor(unsigned char);
 unsigned int read_adc(void);
 void cardriver(int);
 float voltagecalc(void);
+void batteryalert(void);
 
 
 //interrupts
@@ -123,10 +126,14 @@ int main(void) {
 	io_redirect(); // Redirect input and output to the communication
     initialize();
 
+    if(voltagecalc()<=6.6)
+    batteryalert();
+
     while(1){
     // Reseting all the values
     speed=0;
     prev_speed=0;
+    stagenumber=0;
     acceleration_flag=0;
     car_move_flag = false;
     currentpagenumber=0;
@@ -138,27 +145,13 @@ int main(void) {
     //printf("%lf", speed); 
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x00 && readBuffer[2]==0x01));
-        /*for(i=0;i<8;i++){//stringreader for debugging purpose
-                //printf("%c",savereadBuffer[0]);
-                printf("%c",readBuffer[i]);
-                if(readBuffer[i]==0x65)
-                printf("Elements %d",i);
-            }*/
-        /*
-        do{
-        getpage();
-        }while(currentpagenumber!=4);
-        */
-       //printf("debug");
+
+        if(voltagecalc()<=6.6)
+        batteryalert();
+
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x04 && readBuffer[2]==0x06)){
         _delay_ms(1000);
-        //printf("debug");
-        /*for(i=0;i<8;i++){//stringreader for debugging purpose
-                //printf("%c",readBuffer[0]);
-                printf("%c",readBuffer[i]);
-                if(readBuffer[i]==0x65)
-                printf("Elements %d",i);
-            }*/
+        
         }
         _delay_ms(250);
         rxexpect=0x71;
@@ -182,9 +175,13 @@ int main(void) {
         printf("Rallystages.n0.val=%d%c%c%c", stagenumber+1, 255, 255, 255);
 
         //wait for button
+        if(voltagecalc()<=6.6)
+        batteryalert();
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x03 && readBuffer[2]==0x04));
         //reading the confirmed values
+        if(voltagecalc()<=6.6)
+        batteryalert();
         _delay_ms(51);
         rxexpect=0x71;
         printf("get %s.val%c%c%c","Rallystages.x0",255,255,255);	//sends "get secpag.n0.val"
@@ -220,17 +217,21 @@ int main(void) {
         //go to next page
         printf("page 5%c%c%c",255,255,255);
 
+        if(voltagecalc()<=6.6)
+        batteryalert();
+
         rxexpect=0x65;
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x05 && readBuffer[2]==0x01 && readBuffer[3]==0x01));//stops the car form doing anything until start button is pressed
        // _delay_ms(51);
         
         
-        
+        if(voltagecalc()<=6.6)
+        batteryalert();
         cardriver(stagesexpexted);
         printf("progress.x0.val=%lu%c%c%c", (unsigned long int)(speed*1000), 255,255,255);
         printf("progress.x1.val=%lu%c%c%c", (unsigned long int)(distance*1000), 255,255,255);
         printf("progress.x2.val=%lu%c%c%c", (unsigned long int)(distancetogo*1000), 255,255,255);
-        printf("progress.n1.val=%u%c%c%c",read_adc(),255,255,255);
+        printf("progress.n1.val=%u%c%c%c",(unsigned int)(voltagecalc()*10),255,255,255);
         printf("progress.x3.val=%lu%c%c%c", (unsigned long int)(secondstogo*1000), 255,255,255);
         printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
         
@@ -238,6 +239,8 @@ int main(void) {
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x06 && readBuffer[2]==0x10));
 
         printf("page 0%c%c%c",255,255,255);
+
+        
         }
             return 0;
         }
@@ -346,13 +349,9 @@ void cardriver(int stagecount){
     secondstogo = rallystages[stages_driven].stagetime;
     while(!stagecompleteflag){
         
-        /*printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
-        printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
-        printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
-        printf("progress.n1.val=%u%c%c%c", read_adc(),255,255,255);
-        printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
-        printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
-        */
+        if(voltagecalc()<=6.6)
+        batteryalert();
+        
         updatedata();
 
         neededspeed = distancetogo/secondstogo;
@@ -414,12 +413,17 @@ inline unsigned int read_adc(void){
 
 inline float voltagecalc(void){
 
-    adcval = read_adc();
-    temp = (float)adcval/1024;
-    temp2 = temp * 5;
-    temp = temp2/3;
-    
-    volt = temp*7;
+   digitalVolt = read_adc();
+   Volt = (float)digitalVolt/ 1024 *5;
+   totalvolt = Volt/3*7;
 
-    return volt;
+    return totalvolt;
+}
+
+void batteryalert(void){
+    PWM_Motor(0);
+    printf("page 7%c%c%c",255,255,255);
+    printf("battery.x0.val=%ld%c%c%c", (long int)(voltagecalc()*10),255,255,255);
+    while(1);
+        
 }
