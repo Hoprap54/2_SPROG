@@ -411,11 +411,11 @@ inline unsigned int read_adc(void){
     return (adclow + ((ADCH & 0x03) << 8));//need to ensure that ADCL is //read first as it is not updated otherwise
 }
 
-inline float voltagecalc(void){
+inline float voltagecalc(void){ // 90
 
    digitalVolt = read_adc();
-   Volt = (float)digitalVolt/1024 *4.97;
-   totalvolt = Volt/15*45;
+   Volt = (float)digitalVolt/1024*4.97;
+   totalvolt = Volt*5/15*45;
 
     return totalvolt;
 }
