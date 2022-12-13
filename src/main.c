@@ -414,8 +414,8 @@ inline unsigned int read_adc(void){
 inline float voltagecalc(void){ // 90
 
    digitalVolt = read_adc();
-   Volt = (float)digitalVolt/1024 *4.97;
-   totalvolt = Volt/15*45;
+   Volt = (float)digitalVolt/1023.0f*(4.96-1.0f);
+   totalvolt = Volt/15.0f*45.0f;
 
     return totalvolt;
 }
