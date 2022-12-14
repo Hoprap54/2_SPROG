@@ -416,11 +416,10 @@ inline float voltagecalc(void){ // 90
 }
 
 void batteryalert(void){
-    /*PWM_Motor(0);
+    PWM_Motor(0);
     printf("page 7%c%c%c",255,255,255);
     while(1){
     printf("battery.x0.val=%d%c%c%c", (int)(voltagecalc()*10),255,255,255);
     _delay_ms(500);
     }
-        */
 }
