@@ -18,7 +18,7 @@ volatile unsigned long int timer = 0, counter = 0;                        // Tim
 volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
 volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize, stages_driven = 0;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
-volatile double seconds, secondstogo, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
+volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 
 // Variables for the functions
 
@@ -26,8 +26,7 @@ char acceleration_flag = 0;                 // Variable for indicating the state
 char savereadBuffer[100]= {0};
 int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, ocr0asetter=100;
 uint32_t setspeed=0;
-float r2 = 20000;  //kiloohms 
-float r1 = 15000;  //kiloohms
+
 float volt, temp, temp2;
 unsigned int adcval;
 int digitalVolt = 0;
@@ -100,7 +99,8 @@ ISR(TIMER1_CAPT_vect){
     car_move_flag = true;   // Car is being moved
     distancecounter++;
     seconds = ((double)timer*1000)/15625000;    // Time calculation (Seconds)
-    secondstogo = secondstogo - seconds;
+    secondsgone = seconds + secondsgone;
+    //secondstogo = secondstogo - seconds;
     speed = FIFTEENTHCIRCUMFERENCE/seconds;
     distance = (double)distancecounter*FIFTEENTHCIRCUMFERENCE;  // Distance calculation
     distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
@@ -141,6 +141,7 @@ int main(void) {
     ocr0asetter = 0;
     secondstogo = 0;
     seconds = 0;
+    counter = 0;
 
     //printf("%lf", speed); 
         rxexpect=0x65;
@@ -200,7 +201,7 @@ int main(void) {
 
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 //printf("debug2");
-                rallystages[stagenumber].stagetime = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
+                rallystages[stagenumber].stagetime = (long double)(readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24));
                 //printf("v:%f",rallystages[stagenumber].stagetime);             
             }
         
@@ -257,7 +258,7 @@ inline void initialize(void){
     
     //TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     TCCR1A = 0x00;
-    TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
+    TCCR1B = (1<<ICNC1)/*(1<<ICES1)|*/;//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;//opto
     PORTB |= 0x01;
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
@@ -326,7 +327,7 @@ inline void getpage(void){
 }
 
 void cardriver(int stagecount){
-    
+   
     
     secondstogo = 0;
         seconds = 0;
@@ -339,9 +340,11 @@ void cardriver(int stagecount){
     secondstogo = rallystages[stages_driven].stagetime;    
     neededspeed = distancetogo/secondstogo;     
     printf("progress.x3.val=%ld%c%c%c", (unsigned long int)(secondstogo*1000), 255,255,255);
+    counter = 0; //reseting overflow counter
     seconds=0;
     speed=0;
     distance=0;
+    secondsgone = 0;
     if(rallystages[stages_driven].stagedistance>=2)
     ocr0asetter = 105;
     if(rallystages[stages_driven].stagedistance<=2)
@@ -349,16 +352,18 @@ void cardriver(int stagecount){
     TIFR1 |= (1<<ICF1);
     TCNT1 = 0;
     ICR1 = 0;
+    //maybe move secondstogo calc into function
     PWM_Motor(ocr0asetter);
-    secondstogo = rallystages[stages_driven].stagetime;
+    TCCR1B|= (1<<CS12)|(1<<CS10);
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     while(!stagecompleteflag){
         
         if(voltagecalc()<=6.6)
         batteryalert();
         
+        
+        secondstogo = rallystages[stages_driven].stagetime - secondsgone;
         updatedata();
-
         neededspeed = distancetogo/secondstogo;
         if(seconds<0)
         PWM_Motor(255);
@@ -386,12 +391,13 @@ void cardriver(int stagecount){
         printf("progress.t4.txt=%s%c%c%c","\"accelerating\"",255,255,255);
     }
     
-    if(distance >= rallystages[stages_driven].stagedistance){
-    stagecompleteflag = true;
-    distancecounter = 0;
-    distance=0;
-    stages_driven++;
-    }
+        if(distance >= rallystages[stages_driven].stagedistance){
+        stagecompleteflag = true;
+        distancecounter = 0;
+        distance=0;
+        secondsgone = 0;
+        stages_driven++;
+        }
     }
     
     //rallystages[stages_driven].stagespeed
@@ -400,7 +406,7 @@ void cardriver(int stagecount){
     Run motor (set speed using time given) 
     Stop motor when distance has been reached*/
     
-
+    TCCR1B&= ~((1<<CS12)|(1<<CS10));
     if(stages_driven < stagecount){
         
         cardriver(stagecount);
@@ -411,6 +417,8 @@ void cardriver(int stagecount){
     
     TIMSK1 &= ~((1<<ICIE1)|(1<<TOIE1));
     TCNT1=0;
+    
+
     
 }
 
