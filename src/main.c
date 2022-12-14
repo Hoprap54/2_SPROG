@@ -35,7 +35,7 @@ float Volt, totalvolt;
 
 typedef struct{
 
-    double stagetime;
+    long double stagetime;
     double stagedistance;
     double stagespeed;
 
@@ -112,7 +112,7 @@ ISR(TIMER1_CAPT_vect){
 
 ISR(TIMER1_OVF_vect){
     counter++;            // Adding one to the overflow counter
-    TCNT1=0;
+    //TCNT1=0;
     if(counter>=2){        // The car has not really moved for a long time
         car_move_flag = 0;// So the move-flag is reset
         speed = 0;
@@ -255,7 +255,7 @@ inline void initialize(void){
     SREG |= 1<<SREG_I;
     UCSR0B |=1<<RXCIE0; // Enabeling interrupt for rx complete
     
-    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
+    //TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     TCCR1A = 0x00;
     TCCR1B = (1<<ICNC1)|/*(1<<ICES1)|*/(1<<CS12)|(1<<CS10);//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;//opto
@@ -326,6 +326,8 @@ inline void getpage(void){
 }
 
 void cardriver(int stagecount){
+    
+    
     secondstogo = 0;
         seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
@@ -345,8 +347,14 @@ void cardriver(int stagecount){
     if(rallystages[stages_driven].stagedistance<=2)
     ocr0asetter = 63;
     PWM_Motor(ocr0asetter);
-    _delay_ms(50);
+    TCNT1 = 0;
+    ICR1 = 0;
+    seconds=0;
+    speed=0;
+    distance=0;
+    //_delay_ms(50);
     secondstogo = rallystages[stages_driven].stagetime;
+    TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     while(!stagecompleteflag){
         
         if(voltagecalc()<=6.6)
@@ -403,6 +411,10 @@ void cardriver(int stagecount){
     secondstogo = 0;
     seconds = 0;
     PWM_Motor(0);
+    
+    TIMSK1 &= ~((1<<ICIE1)|(1<<TOIE1));
+    TCNT1=0;
+    
 }
 
 inline unsigned int read_adc(void){
