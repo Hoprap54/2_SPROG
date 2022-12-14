@@ -347,6 +347,8 @@ void cardriver(int stagecount){
         neededspeed = distancetogo/secondstogo;
         if(secondstogo<=0)
         PWM_Motor(255);
+        if(speed == 0)
+        PWM_Motor(150);
         if (speed<neededspeed && ocr0asetter<250){
            
             ocr0asetter+=4;
