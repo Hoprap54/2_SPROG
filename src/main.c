@@ -345,7 +345,7 @@ void cardriver(int stagecount){
         secondstogo = rallystages[stages_driven].stagetime - secondsgone;
         updatedata();
         neededspeed = distancetogo/secondstogo;
-        if(seconds<0)
+        if(secondstogo<=0)
         PWM_Motor(255);
         if (speed<neededspeed && ocr0asetter<250){
            
