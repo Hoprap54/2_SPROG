@@ -34,7 +34,6 @@ int digitalVolt = 0;
 float Volt, totalvolt;
 
 typedef struct{
-
     long double stagetime;
     double stagedistance;
     double stagespeed;
@@ -54,7 +53,6 @@ void cardriver(int);
 float voltagecalc(void);
 void batteryalert(void);
 
-
 //interrupts
 ISR(USART_RX_vect){
 
@@ -62,17 +60,14 @@ ISR(USART_RX_vect){
 
     if(stringbeginflag==false){                    //making sure that only first indicator gets detected
         if(readBuffer[readBufferindex]==rxexpect){//saving first element of string at index 0
-        
-        readBufferindex=0;
-        readBuffer[0]=rxexpect;
-        stringbeginflag=true;
-
+            readBufferindex=0;
+            readBuffer[0]=rxexpect;
+            stringbeginflag=true;
         }
     }
 
     readBufferindex++;
     switch(rxexpect){
-
         case 0x71:
         buffersize=8;
         break;
@@ -81,8 +76,8 @@ ISR(USART_RX_vect){
         break;
         case 0x66:
         buffersize=5;
-
     }
+
     if(readBufferindex == buffersize){//maybe adding expected_byte_count - buffersize
     readBufferindex = 0;
     stringbeginflag = false;
@@ -106,8 +101,6 @@ ISR(TIMER1_CAPT_vect){
     distancetogo = (double)rallystages[stages_driven].stagedistance - distance;
     if(!distancecounter)
     secondstogo = rallystages[stages_driven].stagetime;
-    
-    
 }
 
 ISR(TIMER1_OVF_vect){
@@ -160,8 +153,7 @@ int main(void) {
             
             if(readBuffer[0] == 0x71 && readBuffer[5] == 0xFF && readBuffer[6] == 0xFF && readBuffer[7] == 0xFF){
                 
-                stagesexpexted = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);
-                                
+                stagesexpexted = readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24);                 
             }
         
         //Page rallystages
@@ -171,7 +163,6 @@ int main(void) {
         stagenumber=0;
         
         do{
-              
         printf("Rallystages.n0.val=%d%c%c%c", stagenumber+1, 255, 255, 255);
 
         //wait for button
@@ -193,8 +184,8 @@ int main(void) {
                 rallystages[stagenumber].stagedistance /= 10;
                 //printf("v:%f",rallystages[stagenumber].distance);
                 //printf("Rallystages.x0.val=%d%c%c%c",/*(int)rallystages[stagenumber].distance*10*/0 , 255,255,255);
-                
             }
+
         printf("get %s.val%c%c%c","Rallystages.n1",255,255,255);	//sends "get secpag.n0.val"
             _delay_ms(51);
 
@@ -207,7 +198,6 @@ int main(void) {
         //calculating the expected average speed
         //rallystages[stagenumber].stagespeed = rallystages[stagenumber].stagedistance/rallystages[stagenumber].stagetime;
         
-
         stagenumber++;
         }while(stagesexpexted>stagenumber);//check condition
         //printf("%f",rallystages[0].stagespeed);
@@ -224,7 +214,6 @@ int main(void) {
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x05 && readBuffer[2]==0x01 && readBuffer[3]==0x01));//stops the car form doing anything until start button is pressed
        // _delay_ms(51);
         
-        
         if(voltagecalc()<=6.6)
         batteryalert();
         cardriver(stagesexpexted);
@@ -239,8 +228,6 @@ int main(void) {
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x06 && readBuffer[2]==0x10));
 
         printf("page 0%c%c%c",255,255,255);
-
-        
         }
             return 0;
         }
@@ -262,11 +249,9 @@ inline void initialize(void){
     PORTB |= 0x01;
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 
-
     ADMUX = ADMUX | 0x40;//ADC0 single ended input on PortC0
     ADCSRB = ADCSRB & (0xF8);//Free running mode
     ADCSRA = ADCSRA | 0xE7; //Enable, Start conversion, slow input clock
-
 }
 
 //potential function to save input
@@ -306,7 +291,6 @@ inline void PWM_Motor(unsigned char duty){
 }
 
 inline void updatedata(void){
-    
     printf("progress.x0.val=%ld%c%c%c", (long int)(speed*1000), 255,255,255);
     printf("progress.x1.val=%ld%c%c%c", (long int)(distance*1000), 255,255,255);
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
@@ -317,17 +301,13 @@ inline void updatedata(void){
 }
 
 inline void getpage(void){
-
     rxexpect=0x66;
     printf("sendme%c%c%c",255,255,255);
     _delay_ms(51);
     currentpagenumber=readBuffer[1];
-            
 }
 
 void cardriver(int stagecount){
-    
-    
     secondstogo = 0;
         seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
@@ -369,9 +349,6 @@ void cardriver(int stagecount){
         if (speed>neededspeed && ocr0asetter>25){
             ocr0asetter-=4;
         }
-        
-
-
 
     PWM_Motor(ocr0asetter);
     
