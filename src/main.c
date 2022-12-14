@@ -114,7 +114,6 @@ ISR(TIMER1_OVF_vect){
 
 //main function
 int main(void) {    
-    
     uart_init();   // Open the communication to the microcontroller
 	io_redirect(); // Redirect input and output to the communication
     initialize();
