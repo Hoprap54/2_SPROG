@@ -346,13 +346,10 @@ void cardriver(int stagecount){
     ocr0asetter = 105;
     if(rallystages[stages_driven].stagedistance<=2)
     ocr0asetter = 63;
-    PWM_Motor(ocr0asetter);
+    TIFR1 |= (1<<ICF1);
     TCNT1 = 0;
     ICR1 = 0;
-    seconds=0;
-    speed=0;
-    distance=0;
-    //_delay_ms(50);
+    PWM_Motor(ocr0asetter);
     secondstogo = rallystages[stages_driven].stagetime;
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     while(!stagecompleteflag){
@@ -367,7 +364,7 @@ void cardriver(int stagecount){
         PWM_Motor(255);
         if (speed<neededspeed && ocr0asetter<250){
            
-            ocr0asetter+=5;
+            ocr0asetter+=4;
         }
         if (speed>neededspeed && ocr0asetter>25){
             ocr0asetter-=4;
