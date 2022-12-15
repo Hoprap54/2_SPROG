@@ -16,7 +16,7 @@
 // Variables for the interrupts
 volatile unsigned long int timer = 0, counter = 0;                        // Timer: variable for the time; counter: counter to count timeroverflows
 volatile bool car_move_flag = false, stringbeginflag=false;               // Variable to indicate whether the car is moving
-volatile int i, distancecounter = 0, test = 3, readBufferindex = 0, buffersize, stages_driven = 0;     // For for loop in interrupt
+volatile int i, distancecounter = 0, readBufferindex = 0, buffersize, stages_driven = 0;     // For for loop in interrupt
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
 volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 
@@ -27,7 +27,7 @@ char savereadBuffer[100]= {0};
 int currentpagenumber = 0, stagesexpexted = 0, stagenumber = 0, ocr0asetter=100;
 uint32_t setspeed=0;
 
-float volt, temp, temp2;
+
 unsigned int adcval;
 int digitalVolt = 0;
 float Volt, totalvolt;
@@ -236,7 +236,7 @@ int main(void) {
 //function for initializing interrups and the timer for the optocoupler
 inline void initialize(void){
     sei();  // Enable global interrupts
-    test = 12;
+    
     // Usart interrupts
     SREG |= 1<<SREG_I;
     UCSR0B |=1<<RXCIE0; // Enabeling interrupt for rx complete
@@ -329,7 +329,7 @@ void cardriver(int stagecount){
     ocr0asetter = 105;
     if(rallystages[stages_driven].stagedistance<=2)
     ocr0asetter = 63;
-    TIFR1 |= (1<<ICF1);
+    TIFR1 |= (1<<ICF1); //reseting input capture flag
     TCNT1 = 0;
     ICR1 = 0;
     //maybe move secondstogo calc into function
