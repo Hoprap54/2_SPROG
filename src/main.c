@@ -246,6 +246,8 @@ inline void initialize(void){
     TCCR1B = (1<<ICNC1)/*(1<<ICES1)|*/;//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;//opto
     PORTB |= 0x01;
+    DDRD = (0b00001000|0x60);
+    PORTD |=0b00001100;
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 
     ADMUX = ADMUX | 0x40;//ADC0 single ended input on PortC0
@@ -281,7 +283,7 @@ inline char acceleration_index(double current_speed, double previous_speed){
 
  
 inline void PWM_Motor(unsigned char duty){  
-    DDRD = 0x60;    // Set Port D as output for the ENA (Motor) 0b0010 0000
+    DDRD |= 0x60;    // Set Port D as output for the ENA (Motor) 0b0010 0000
 
     TCCR0A |= 0XA3;  // Fast PWM
     TCCR0B |= 0X05;    // 1024 Prescaler
@@ -326,9 +328,9 @@ void cardriver(int stagecount){
     distance=0;
     secondsgone = 0;
     if(rallystages[stages_driven].stagedistance>=2)
-    ocr0asetter = 105;
+    ocr0asetter = 75;
     if(rallystages[stages_driven].stagedistance<=2)
-    ocr0asetter = 63;
+    ocr0asetter = 50;
     TIFR1 |= (1<<ICF1); //reseting input capture flag
     TCNT1 = 0;
     ICR1 = 0;
@@ -349,12 +351,12 @@ void cardriver(int stagecount){
         PWM_Motor(255);
         if(speed == 0)
         PWM_Motor(150);
-        if (speed<neededspeed && ocr0asetter<250){
+        if (speed<neededspeed && ocr0asetter<253){
            
-            ocr0asetter+=4;
+            ocr0asetter+=1;
         }
-        if (speed>neededspeed && ocr0asetter>25){
-            ocr0asetter-=4;
+        if (speed>neededspeed && ocr0asetter>30){
+            ocr0asetter-=1;
         }
 
     PWM_Motor(ocr0asetter);
