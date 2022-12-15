@@ -36,6 +36,7 @@ typedef struct{
     long double stagetime;
     double stagedistance;
     double stagespeed;
+    bool direction_flag;
 
 }rallystage_t;
 
@@ -181,6 +182,11 @@ int main(void) {
                 
                 rallystages[stagenumber].stagedistance = (readBuffer[1] | (readBuffer[2] << 8) | (readBuffer[3] << 16)| (readBuffer[4] << 24));
                 rallystages[stagenumber].stagedistance /= 10;
+                rallystages[stagenumber].direction_flag = true;
+                if((readBuffer[4]&0x01)==0x01){
+                    rallystages[stagenumber].stagedistance /= -1.0f;
+                    rallystages[stagenumber].direction_flag = false;
+                }
                 //printf("v:%f",rallystages[stagenumber].distance);
                 //printf("Rallystages.x0.val=%d%c%c%c",/*(int)rallystages[stagenumber].distance*10*/0 , 255,255,255);
             }
@@ -246,8 +252,8 @@ inline void initialize(void){
     TCCR1B = (1<<ICNC1)/*(1<<ICES1)|*/;//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;//opto
     PORTB |= 0x01;
-    DDRD = (0b00001000|0x60);
-    PORTD |=0b00001100;
+    DDRD = (0b00001100|0x60);
+    PORTD |=0b00001000;
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 
     ADMUX = ADMUX | 0x40;//ADC0 single ended input on PortC0
@@ -310,11 +316,16 @@ inline void getpage(void){
 
 void cardriver(int stagecount){
     
-    
+    PORTD |=0b00001000;
+    PORTD &= ~(0b0000100);
     secondstogo = 0;
         seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
+    if(!rallystages[stages_driven].direction_flag){
+        PORTD &= ~(0b00001000);
+        PORTD |=0b0000100;
+    }
 
     distancetogo = rallystages[stages_driven].stagedistance;    
     printf("progress.x2.val=%ld%c%c%c", (long int)(distancetogo*1000), 255,255,255);
