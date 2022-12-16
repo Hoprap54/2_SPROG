@@ -20,6 +20,10 @@ volatile int i, distancecounter = 0, readBufferindex = 0, buffersize, stages_dri
 volatile char readBuffer[100]= {0}, rxexpect=0x71;
 volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 
+//sonic distance
+volatile unsigned char sonictime = 0;
+volatile double sonicseconds = 0, sonic_distance = 0;
+volatile bool active_pulse = false;
 // Variables for the functions
 
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
@@ -52,8 +56,22 @@ unsigned int read_adc(void);
 void cardriver(int);
 float voltagecalc(void);
 void batteryalert(void);
+void sonicdistance(void);
 
 //interrupts
+
+ISR(INT1_vect){
+sonictime = TCNT2;
+TCCR2B |= ((0<<CS22)|(0<<CS21)|(0<<CS20));//switch of timer
+TCNT2 = 0;
+sonicseconds = ((double)sonictime*1000)/15625000;
+sonic_distance = ((sonictime*1000)/15625000)*1000000/58;
+active_pulse = false;
+
+
+
+}
+
 ISR(USART_RX_vect){
 
     scanf("%c", &readBuffer[readBufferindex]);
@@ -259,7 +277,11 @@ inline void initialize(void){
     ADMUX = ADMUX | 0x40;//ADC0 single ended input on PortC0
     ADCSRB = ADCSRB & (0xF8);//Free running mode
     ADCSRA = ADCSRA | 0xE7; //Enable, Start conversion, slow input clock
-}
+
+    //Distancecalc for not crashing - virtual airbag
+    EICRA |= ((1<<ISC01)|(1<<ISC00)); //rising edge on int 0 generates interrupt request
+    EIMSK |= (1<<INT0); //external interrupt 0 enable
+}   
 
 //potential function to save input
 inline char displaysave(void){
@@ -437,5 +459,14 @@ void batteryalert(void){
     printf("battery.x0.val=%d%c%c%c", (int)(voltagecalc()*10),255,255,255);
     _delay_ms(500);
     }
+    }
+}
+
+inline void sonicdistance(void){
+    //before make pulse
+    if(active_pulse == false){
+    active_pulse = true;
+    TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+    
     }
 }
