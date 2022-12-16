@@ -76,7 +76,6 @@ ISR(INT0_vect){
     TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
     //printf("debug");
     EIFR|= (1<<INTF0);
-
 }
 
 ISR(TIMER2_OVF_vect){
@@ -84,7 +83,6 @@ ISR(TIMER2_OVF_vect){
 }
 
 ISR(USART_RX_vect){
-
     scanf("%c", &readBuffer[readBufferindex]);
 
     if(stringbeginflag==false){                    //making sure that only first indicator gets detected
