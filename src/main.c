@@ -23,7 +23,7 @@ volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0,
 //sonic distance
 volatile unsigned char sonicoverflowcount = 0;
 volatile double sonicseconds = 0, sonic_distance = 0;
-volatile unsigned long sonictime = 0;
+volatile unsigned char sonictime = 0;
 volatile bool active_pulse = false;
 // Variables for the functions
 
@@ -62,17 +62,18 @@ void sonicdistance(void);
 //interrupts
 
 ISR(INT0_vect){
-sonictime = TCNT2+sonicoverflowcount*255;
-TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
-TCNT2 = 0;
-sonicseconds = ((double)sonictime*1000)/15625000;
-sonic_distance = ((sonictime*1000)/15625000)*1000000/58.0f;
-active_pulse = false;
-sonictime = 0;
-sonicoverflowcount = 0;
-TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
-//printf("debug");
-EIFR|= (1<<INTF0);
+    
+    sonictime = TCNT2/*+sonicoverflowcount*255*/;
+    TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
+    TCNT2 = 0;
+    sonicseconds = (float)sonictime/64.0f;
+    sonic_distance = sonicseconds/58.0f;
+    active_pulse = false;
+    sonictime = 0;
+    sonicoverflowcount = 0;
+    TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
+    printf("debug");
+    EIFR|= (1<<INTF0);
 
 }
 
