@@ -62,7 +62,7 @@ void sonicdistance(void);
 //interrupts
 
 ISR(INT0_vect){
-    
+    //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
     sonictime = TCNT2+sonicoverflowcount*255;
     TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
     TCNT2 = 0;
