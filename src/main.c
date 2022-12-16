@@ -63,7 +63,7 @@ void sonicdistance(void);
 
 ISR(INT0_vect){
     
-    sonictime = TCNT2/*+sonicoverflowcount*255*/;
+    sonictime = TCNT2+sonicoverflowcount*255;
     TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
     TCNT2 = 0;
     sonicseconds = (float)sonictime/64.0f;
@@ -72,7 +72,7 @@ ISR(INT0_vect){
     sonictime = 0;
     sonicoverflowcount = 0;
     TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
-    printf("debug");
+    //printf("debug");
     EIFR|= (1<<INTF0);
 
 }
