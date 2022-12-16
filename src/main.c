@@ -22,7 +22,7 @@ volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0,
 
 //sonic distance
 volatile unsigned char sonicoverflowcount = 0;
-volatile double sonicseconds = 0, sonic_distance = 0;
+volatile float sonicseconds = 0, sonic_distance = 0;
 volatile unsigned char sonictime = 0;
 volatile bool active_pulse = false;
 // Variables for the functions
@@ -64,9 +64,10 @@ void sonicdistance(void);
 ISR(INT0_vect){
     //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
     sonictime = TCNT2+sonicoverflowcount*255;
+    
     TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
     TCNT2 = 0;
-    sonicseconds = (float)sonictime/64.0f;
+    sonicseconds = (float)sonictime*64.0f;
     sonic_distance = sonicseconds/58.0f;
     active_pulse = false;
     sonictime = 0;
@@ -78,7 +79,8 @@ ISR(INT0_vect){
 }
 
 ISR(TIMER2_OVF_vect){
-    sonicoverflowcount++;   
+    sonicoverflowcount++;  
+    
 
 }
 
