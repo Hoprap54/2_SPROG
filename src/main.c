@@ -62,15 +62,29 @@ void sonicdistance(void);
 //interrupts
 
 ISR(INT0_vect){
-    //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
-    if(INT0){
-        sonictime = TCNT2+sonicoverflowcount*255;
+
+    if(active_pulse==false){
+
+        active_pulse = true;
+        TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+
     }
+    if(active_pulse==true){
+
+        active_pulse = false;
+        TCCR2B &= ~((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+        sonictime = TCNT2+sonicoverflowcount*255;
+        sonicseconds = (float)sonictime*64.0f;
+        sonic_distance = sonicseconds/58.0f;
+        sonictime = 0;
+    }
+   /* //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
+    sonictime = TCNT2+sonicoverflowcount*255;
     TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
     TCNT2 = 0;
-    /*sonicseconds = (float)sonictime/64.0f;*/
+    /*sonicseconds = (float)sonictime*64.0f;*/
     /*sonic_distance = sonicseconds/58.0f;*/
-    sonicseconds = (float)sonictime/64.0f;
+    /*sonicseconds = (float)sonictime/64.0f;
     sonic_distance = (sonicseconds/340.0f)/2.0f;
     active_pulse = false;
     sonictime = 0;
@@ -78,6 +92,7 @@ ISR(INT0_vect){
     TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
     //printf("debug");
     EIFR|= (1<<INTF0);
+    */
 }
 
 ISR(TIMER2_OVF_vect){
@@ -290,8 +305,8 @@ inline void initialize(void){
     ADCSRA = ADCSRA | 0xE7; //Enable, Start conversion, slow input clock
 
     //Distancecalc for not crashing - virtual airbag
-    EICRA |= ((1<<ISC01)|(1<<ISC00)); //rising edge on int 0 generates interrupt request
-    EIMSK |= (1<<INT0); //external interrupt 0 enable
+    EICRA |= (1<<ISC00); //rising edge on int 0 generates interrupt request
+    
 }   
 
 //potential function to save input
@@ -382,6 +397,7 @@ void cardriver(int stagecount){
     PWM_Motor(ocr0asetter);
     TCCR1B|= (1<<CS12)|(1<<CS10);
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
+    EIMSK |= (1<<INT0); //external interrupt 0 enable
     while(!stagecompleteflag){
         sonicdistance();
         if(voltagecalc()<=6.6)
@@ -442,6 +458,7 @@ void cardriver(int stagecount){
     
     TIMSK1 &= ~((1<<ICIE1)|(1<<TOIE1));
     TCNT1=0;
+    EIMSK &= ~(1<<INT0);
     
 
     
@@ -476,8 +493,8 @@ void batteryalert(void){
 inline void sonicdistance(void){
     //before make pulse
     
-    if(active_pulse == false){
-    TIMSK2 |= (1<<TOIE2);
+  if(active_pulse == false){
+   // TIMSK2 |= (1<<TOIE2);
     //making the pulse
     PORTD &= ~(0b00001000);
     _delay_us(2);
@@ -485,7 +502,7 @@ inline void sonicdistance(void){
     _delay_us(10);
     PORTD &= ~(0b00001000);
     
-    TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
-    active_pulse = true;
+    //TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+   // active_pulse = true;
     }
 }
