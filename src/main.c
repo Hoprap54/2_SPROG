@@ -477,7 +477,8 @@ inline void sonicdistance(void){
     if(active_pulse == false){
     TIMSK2 |= (1<<TOIE2);
     //making the pulse
-    
+    PORTD &= ~(0b00001000);
+    _delay_us(2);
     PORTD |= 0b00001000;//maybe to short
     _delay_us(10);
     PORTD &= ~(0b00001000);
