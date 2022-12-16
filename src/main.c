@@ -77,6 +77,7 @@ ISR(INT0_vect){
         sonicseconds = (float)sonictime*64.0f;
         sonic_distance = sonicseconds/58.0f;
         sonictime = 0;
+        sonicoverflowcount = 0;
     }
    /* //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
     sonictime = TCNT2+sonicoverflowcount*255;
