@@ -21,8 +21,9 @@ volatile char readBuffer[100]= {0}, rxexpect=0x71;
 volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0, prev_speed = 0, eigthcircumference = 0.02589182, distance = 0, distancetogo;
 
 //sonic distance
-volatile unsigned char sonictime = 0;
+volatile unsigned char sonicoverflowcount = 0;
 volatile double sonicseconds = 0, sonic_distance = 0;
+volatile unsigned long sonictime = 0;
 volatile bool active_pulse = false;
 // Variables for the functions
 
@@ -60,15 +61,23 @@ void sonicdistance(void);
 
 //interrupts
 
-ISR(INT1_vect){
-sonictime = TCNT2;
-TCCR2B |= ((0<<CS22)|(0<<CS21)|(0<<CS20));//switch of timer
+ISR(INT0_vect){
+sonictime = TCNT2+sonicoverflowcount*255;
+TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
 TCNT2 = 0;
 sonicseconds = ((double)sonictime*1000)/15625000;
-sonic_distance = ((sonictime*1000)/15625000)*1000000/58;
+sonic_distance = ((sonictime*1000)/15625000)*1000000/58.0f;
 active_pulse = false;
+sonictime = 0;
+sonicoverflowcount = 0;
+TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
+//printf("debug");
+EIFR|= (1<<INTF0);
 
+}
 
+ISR(TIMER2_OVF_vect){
+    sonicoverflowcount++;   
 
 }
 
@@ -270,8 +279,8 @@ inline void initialize(void){
     TCCR1B = (1<<ICNC1)/*(1<<ICES1)|*/;//noise cancel-/*falling*/ raising edge - 1024 prescaling
     DDRB &= ~0x01;//opto
     PORTB |= 0x01;
-    DDRD = (0b00001100|0x60);
-    PORTD |=0b00001000;
+    DDRD = (0b00111000|0x60);
+    PORTD |=0b11000111;//enable pullups and 
     TIFR1 |= 1<<ICF1;                   // Reseting input capture flag
 
     ADMUX = ADMUX | 0x40;//ADC0 single ended input on PortC0
@@ -326,7 +335,7 @@ inline void updatedata(void){
     printf("progress.n1.val=%ld%c%c%c", (long int)(voltagecalc()*10),255,255,255);
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
-
+    printf("progress.n2.val=%d%c%c%c", (int)(sonic_distance*10),255,255,255);
 }
 
 inline void getpage(void){
@@ -338,15 +347,15 @@ inline void getpage(void){
 
 void cardriver(int stagecount){
     
-    PORTD |=0b00001000;
-    PORTD &= ~(0b0000100);
+    PORTD |=0b00010000;
+    PORTD &= ~(0b00100000);
     secondstogo = 0;
         seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
     if(!rallystages[stages_driven].direction_flag){
-        PORTD &= ~(0b00001000);
-        PORTD |=0b0000100;
+        PORTD &= ~(0b00010000);
+        PORTD |=0b00100000;
     }
 
     distancetogo = rallystages[stages_driven].stagedistance;    
@@ -372,7 +381,7 @@ void cardriver(int stagecount){
     TCCR1B|= (1<<CS12)|(1<<CS10);
     TIMSK1 |= (1<<ICIE1)|(1<<TOIE1);    // Timer interrupts must be enabled
     while(!stagecompleteflag){
-        
+        sonicdistance();
         if(voltagecalc()<=6.6)
         batteryalert();
         
@@ -452,21 +461,28 @@ float voltagecalc(void){ // 90
 }
 
 void batteryalert(void){
-    if(((int)(voltagecalc()*10)<=66)){
+   /* if(((int)(voltagecalc()*10)<=66)){
     PWM_Motor(0);
     printf("page 7%c%c%c",255,255,255);
     while(1){
     printf("battery.x0.val=%d%c%c%c", (int)(voltagecalc()*10),255,255,255);
     _delay_ms(500);
     }
-    }
+    }*/
 }
 
 inline void sonicdistance(void){
     //before make pulse
-    if(active_pulse == false){
-    active_pulse = true;
-    TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
     
+    if(active_pulse == false){
+    TIMSK2 |= (1<<TOIE2);
+    //making the pulse
+    
+    PORTD |= 0b00001000;//maybe to short
+    _delay_us(10);
+    PORTD &= ~(0b00001000);
+    
+    TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+    active_pulse = true;
     }
 }
