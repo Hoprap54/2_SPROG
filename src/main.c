@@ -62,16 +62,15 @@ void sonicdistance(void);
 //interrupts
 
 ISR(INT0_vect){
-    
     //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
     sonictime = TCNT2+sonicoverflowcount*255;
-    printf("%db",sonictime);
-    //TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
-    //TCNT2 = 0;
-
-    sonicseconds = (float)sonictime/*64.0f*/;
-    sonic_distance = sonicseconds/58.0f;
-    //active_pulse = false;
+    TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
+    TCNT2 = 0;
+    /*sonicseconds = (float)sonictime/64.0f;*/
+    /*sonic_distance = sonicseconds/58.0f;*/
+    sonicseconds = (float)sonictime/64.0f;
+    sonic_distance = (sonicseconds/340.0f)/2.0f;
+    active_pulse = false;
     sonictime = 0;
     sonicoverflowcount = 0;
     TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
@@ -81,14 +80,7 @@ ISR(INT0_vect){
 }
 
 ISR(TIMER2_OVF_vect){
-    sonicoverflowcount++;  
-    if(sonicoverflowcount==236){
-        active_pulse = false;
-        sonicoverflowcount = 0;
-        TCCR2B &= ~(/*(1<<CS22)|(1<<CS21)|*/(1<<CS20));//stop of timer
-    }
-    
-
+    sonicoverflowcount++;   
 }
 
 ISR(USART_RX_vect){
@@ -345,7 +337,7 @@ inline void updatedata(void){
     printf("progress.n1.val=%ld%c%c%c", (long int)(voltagecalc()*10),255,255,255);
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
-    printf("progress.n2.val=%d%c%c%c", (int)(sonic_distance),255,255,255);
+    printf("progress.n2.val=%d%c%c%c", (int)(sonic_distance*10),255,255,255);
 }
 
 inline void getpage(void){
@@ -492,7 +484,7 @@ inline void sonicdistance(void){
     _delay_us(10);
     PORTD &= ~(0b00001000);
     
-    TCCR2B |= ((0<<CS22)|(0<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+    TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
     active_pulse = true;
     }
 }
