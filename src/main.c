@@ -23,8 +23,8 @@ volatile double seconds, secondstogo, secondsgone = 0, speed = 0, neededspeed=0,
 //sonic distance
 volatile unsigned char sonicoverflowcount = 0;
 volatile float sonicseconds = 0, sonic_distance = 0;
-volatile unsigned char sonictime = 0;
-volatile bool active_pulse = false;
+volatile unsigned long int sonictime = 0;
+volatile bool active_pulse = false, began_measurement = false, timerecieve = false;
 // Variables for the functions
 
 char acceleration_flag = 0;                 // Variable for indicating the state of aceleration
@@ -62,42 +62,34 @@ void sonicdistance(void);
 //interrupts
 
 ISR(INT0_vect){
-
-    if(active_pulse==false){
-
-        active_pulse = true;
-        TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
-
-    }
-    if(active_pulse==true){
-
-        active_pulse = false;
-        TCCR2B &= ~((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
+    
+    if(began_measurement==true){
+        TCCR2B &= ~(/*(1<<CS22)|*/(1<CS21)|(1<<CS20)); //reset timer2 
         sonictime = TCNT2+sonicoverflowcount*255;
-        sonicseconds = (float)sonictime*64.0f;
-        sonic_distance = sonicseconds/58.0f;
-        sonictime = 0;
-        sonicoverflowcount = 0;
+        sonicseconds = (float)sonictime*2.0f;
+    
+        sonic_distance = sonicseconds*0.034/2;
+        //sonic_distance = sonicseconds/58;
+
+        began_measurement=false;
+        active_pulse=false;
+        TCNT2=0;
+        sonicoverflowcount=0;
     }
-   /* //https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
-    sonictime = TCNT2+sonicoverflowcount*255;
-    TCCR2B &= ~((1<<CS22)|(1<<CS21)|(1<<CS20));//stop of timer
-    TCNT2 = 0;
-    /*sonicseconds = (float)sonictime*64.0f;*/
-    /*sonic_distance = sonicseconds/58.0f;*/
-    /*sonicseconds = (float)sonictime/64.0f;
-    sonic_distance = (sonicseconds/340.0f)/2.0f;
-    active_pulse = false;
-    sonictime = 0;
-    sonicoverflowcount = 0;
-    TIMSK2 &= ~(1<<TOIE2); //disabling interrupt again
-    //printf("debug");
-    EIFR|= (1<<INTF0);
-    */
+    if(began_measurement==false&&active_pulse==true){
+        TCCR2B |= (/*(1<<CS22)|*/(1<CS21)|(1<<CS20)); //start timer2 with 32
+        began_measurement = true;
+    }
+
 }
 
 ISR(TIMER2_OVF_vect){
-    sonicoverflowcount++;   
+    sonicoverflowcount++;  
+    /*if(sonicoverflowcount>117){
+        sonicoverflowcount = 0;
+        active_pulse = false;
+    }*/
+
 }
 
 ISR(USART_RX_vect){
@@ -306,7 +298,9 @@ inline void initialize(void){
     ADCSRA = ADCSRA | 0xE7; //Enable, Start conversion, slow input clock
 
     //Distancecalc for not crashing - virtual airbag
-    EICRA |= (1<<ISC00); //rising edge on int 0 generates interrupt request
+    TCCR2A = 0x00; //normal timer operation
+    TIMSK2 |= (1<<TOIE2); //overflow interrupt
+    EICRA |= (/*(1<<ISC01)|*/(1<<ISC00)); //any logical change causes interrupt
     
 }   
 
@@ -493,17 +487,19 @@ void batteryalert(void){
 
 inline void sonicdistance(void){
     //before make pulse
-    
-  if(active_pulse == false){
-   // TIMSK2 |= (1<<TOIE2);
-    //making the pulse
+    if(active_pulse == false){
+
     PORTD &= ~(0b00001000);
     _delay_us(2);
+
     PORTD |= 0b00001000;//maybe to short
     _delay_us(10);
     PORTD &= ~(0b00001000);
-    
-    //TCCR2B |= ((1<<CS22)|(1<CS21)|(1<<CS20)); //start timer2 with 1024 prescaling
-   // active_pulse = true;
+
+    active_pulse=true;
+
+
     }
+    
+  
 }
