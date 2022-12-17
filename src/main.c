@@ -68,8 +68,8 @@ ISR(INT0_vect){
         sonictime = TCNT2+sonicoverflowcount*255;
         sonicseconds = (float)sonictime*2.0f;
     
-        sonic_distance = sonicseconds*0.034/2;
-        //sonic_distance = sonicseconds/58;
+        //sonic_distance = sonicseconds*0.034/2;
+        sonic_distance = sonicseconds/58;
 
         began_measurement=false;
         active_pulse=false;
