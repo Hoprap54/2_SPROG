@@ -68,8 +68,8 @@ ISR(INT0_vect){
         sonictime = TCNT2+sonicoverflowcount*255;
         sonicseconds = (float)sonictime*2.0f;
     
-        //sonic_distance = sonicseconds*0.034/2;
-        sonic_distance = sonicseconds/58;
+        sonic_distance = sonicseconds*0.034;
+        //sonic_distance = sonicseconds/58;
 
         began_measurement=false;
         active_pulse=false;
@@ -301,6 +301,10 @@ inline void initialize(void){
     TCCR2A = 0x00; //normal timer operation
     TIMSK2 |= (1<<TOIE2); //overflow interrupt
     EICRA |= (/*(1<<ISC01)|*/(1<<ISC00)); //any logical change causes interrupt
+
+    //LEDs
+    DDRC = 0xFF;
+    PORTC = 0;
     
 }   
 
@@ -347,7 +351,7 @@ inline void updatedata(void){
     printf("progress.n1.val=%ld%c%c%c", (long int)(voltagecalc()*10),255,255,255);
     printf("progress.x3.val=%ld%c%c%c", (long int)(secondstogo*1000), 255,255,255);
     printf("progress.j0.val=%lu%c%c%c", (unsigned long int)((distance/rallystages[stages_driven].stagedistance)*100), 255,255,255);
-    printf("progress.n2.val=%d%c%c%c", (int)(sonic_distance*10),255,255,255);
+    printf("progress.n2.val=%u%c%c%c", (unsigned int)(sonic_distance/100),255,255,255);
 }
 
 inline void getpage(void){
@@ -365,9 +369,11 @@ void cardriver(int stagecount){
         seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
+    PORTC = 0b00000100;
     if(!rallystages[stages_driven].direction_flag){
         PORTD &= ~(0b00010000);
         PORTD |=0b00100000;
+        PORTC = 0b00000010;
     }
 
     distancetogo = rallystages[stages_driven].stagedistance;    
@@ -450,6 +456,7 @@ void cardriver(int stagecount){
     secondstogo = 0;
     seconds = 0;
     PWM_Motor(0);
+    PORTC = 0;
     
     TIMSK1 &= ~((1<<ICIE1)|(1<<TOIE1));
     TCNT1=0;
