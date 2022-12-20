@@ -174,14 +174,17 @@ int main(void) {
 
     //printf("%lf", speed); 
         rxexpect=0x65;
-        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x00 && readBuffer[2]==0x01));
+        while(!(readBuffer[0]==0x65 && readBuffer[1]==0x00 && readBuffer[2]==0x01)){
+            _delay_ms(1000);
+            batteryalert();
+        }
 
-        if(voltagecalc()<=6.6)
-        batteryalert();
+       
+        
 
         while(!(readBuffer[0]==0x65 && readBuffer[1]==0x04 && readBuffer[2]==0x06)){
         _delay_ms(1000);
-        
+        batteryalert();
         }
         _delay_ms(250);
         rxexpect=0x71;
@@ -303,8 +306,9 @@ inline void initialize(void){
     EICRA |= (/*(1<<ISC01)|*/(1<<ISC00)); //any logical change causes interrupt
 
     //LEDs
-    DDRC = 0xFF;
-    PORTC = 0;
+    DDRC |= ((1<<PINC1)|(1<<PINC2));
+   // DDRC = 0xFF;
+    //PORTC = 0;
     
 }   
 
@@ -338,7 +342,7 @@ inline char acceleration_index(double current_speed, double previous_speed){
 inline void PWM_Motor(unsigned char duty){  
     DDRD |= 0x60;    // Set Port D as output for the ENA (Motor) 0b0010 0000
 
-    TCCR0A |= 0XA3;  // Fast PWM
+    TCCR0A |= 0X83;  // Fast PWM
     TCCR0B |= 0X05;    // 1024 Prescaler
 
     OCR0A = duty;
@@ -365,15 +369,19 @@ void cardriver(int stagecount){
     
     PORTD |=0b00010000;
     PORTD &= ~(0b00100000);
+    
     secondstogo = 0;
         seconds = 0;
     printf("progress.n0.val=%d%c%c%c",stages_driven+1,255,255,255);
     bool stagecompleteflag = false;
-    PORTC = 0b00000100;
+    //PORTC = 0b00000100;
+    PORTC &= ~(1<<PINC1);
+    PORTC |= (1<<PINC2);
     if(!rallystages[stages_driven].direction_flag){
         PORTD &= ~(0b00010000);
         PORTD |=0b00100000;
-        PORTC = 0b00000010;
+        PORTC &= ~(1<<PINC2);
+        PORTC |= (1<<PINC1);
     }
 
     distancetogo = rallystages[stages_driven].stagedistance;    
@@ -388,7 +396,7 @@ void cardriver(int stagecount){
     distance=0;
     secondsgone = 0;
     if(rallystages[stages_driven].stagedistance>=2)
-    ocr0asetter = 75;
+    ocr0asetter = 60;
     if(rallystages[stages_driven].stagedistance<=2)
     ocr0asetter = 50;
     TIFR1 |= (1<<ICF1); //reseting input capture flag
@@ -409,14 +417,15 @@ void cardriver(int stagecount){
         updatedata();
         neededspeed = distancetogo/secondstogo;
         if(secondstogo<=0)
-        PWM_Motor(255);
+        ocr0asetter = 255;
+        //PWM_Motor(255);
         if(speed == 0)
         PWM_Motor(150);
         if (speed<neededspeed && ocr0asetter<253){
            
             ocr0asetter+=1;
         }
-        if (speed>neededspeed && ocr0asetter>30){
+        if (speed>neededspeed && ocr0asetter>46){
             ocr0asetter-=1;
         }
 
@@ -482,14 +491,14 @@ float voltagecalc(void){ // 90
 }
 
 void batteryalert(void){
-   /* if(((int)(voltagecalc()*10)<=66)){
+   if(((int)(voltagecalc()*10)<=66)){
     PWM_Motor(0);
     printf("page 7%c%c%c",255,255,255);
     while(1){
     printf("battery.x0.val=%d%c%c%c", (int)(voltagecalc()*10),255,255,255);
     _delay_ms(500);
     }
-    }*/
+    }
 }
 
 inline void sonicdistance(void){
@@ -505,8 +514,6 @@ inline void sonicdistance(void){
 
     active_pulse=true;
 
-
     }
     
-  
 }
