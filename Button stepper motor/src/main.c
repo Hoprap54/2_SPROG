@@ -47,6 +47,6 @@ int main(void) {
         }
 
         PORTB = pat[step % 4];
-        _delay_ms(5);
+        _delay_ms(10);
     }
 }

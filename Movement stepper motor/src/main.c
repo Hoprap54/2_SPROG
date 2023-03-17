@@ -19,6 +19,7 @@
 
 // Function prototypes
 void move(int, unsigned int);
+void delay_v(unsigned int);
 
 // Global variables
 char pat[4] = {0b0101, 0b0110, 0b1010, 0b1001};
@@ -49,7 +50,6 @@ int main(void) {
 }
 
 void move(int steps, unsigned int time){
-    printf("\n");
     int dir = 1;
     if(steps < 0){
         dir = -1;
@@ -62,17 +62,20 @@ void move(int steps, unsigned int time){
     unsigned int delay = time / steps;
     if(delay < 5) delay = 5;
 
-    while(steps){
-        steps--;
+    for(steps = steps; steps > 0; steps--){
+        delay_v(delay);
+
         pos += dir;
         if(pos > 3) pos = 0;
         if(pos < 0) pos = 3;
         
         PORTB = pat[pos % 4];
-
-        for(int i = 0; i < delay; i++){
-            _delay_ms(1);
-        }
     }
     printf("\nMovement finished\n");
+}
+
+void delay_v(unsigned int t){
+    for(int i = 0; i < t; i++){
+        _delay_ms(1);
+    }
 }
