@@ -15,50 +15,38 @@
 #define b0 0x3b
 #define b1 0x37 
 
-void moveF();
-void moveB();
+// Function prototypes
+
+// Global variables
+char pat[4] = {0b0101, 0b0110, 0b1010, 0b1001};
+unsigned char step = 1;
+char dir = 0;
+
 
 int main(void) {     
     /* Declaration of I/O Pins */
     DDRD = 0xF0;    // Set Port D as input for the buttons 0b1111 0000
     PORTD = 0x3F;   // Activate internall pull
     DDRB = 0xFF;    // Set Port B as output for the LN298N 0b1111 0000
-
-    /* Declare variables */
     
-    while (1){
-        //button_state = PIND;
-        switch (PIND)
-        {
-        case b0:
-            moveF();            
-            break;
-        
-        case b1:
-            moveB();            
-            break;
-        default:
-            PORTB = 0X00;       // Set all output to 0
-            break;
-        }
-    }
-}
 
-void moveF(){
-    int i;
-    char pos[4] = {0b0101, 0b0110, 0b1010, 0b1001};
-    for(int j = 0; j < 51 ; j++){
-        for(i = 0; i < 4 ; i++){
-            PORTB = pos[i];
-            _delay_ms(5);
+    while(1){
+        switch(PIND){
+            case b0:
+                step++;
+                break;
+            
+            case b1:
+                step--;
+                break;
         }
-    }
-}
-void moveB(){
-    int i;
-    char pos[4] = {0b0101, 0b0110, 0b1010, 0b1001};
-    for(i = 3; i >= 0 ; i--){
-        PORTB = pos[i];
+
+        if(step > 200){
+            if(dir > 0) step = 1;
+            if(dir < 0) step = 200;
+        }
+
+        PORTB = pat[step % 4];
         _delay_ms(5);
     }
 }
