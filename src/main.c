@@ -86,10 +86,7 @@ void move_step(int s){
 
 void move_d(int dis){
     int distance = dis*50/d;
-    for(int j = 0; j < distance ; j++){moveF();
-        /*for(int i = 0; i < 4 ; i++){
-            PORTB = pos[i];
-            _delay_ms(4);
-        }*/
+    for(int j = 0; j < distance ; j++){
+        moveF();
     }
 }
