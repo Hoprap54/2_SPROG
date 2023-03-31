@@ -77,10 +77,7 @@ void moveB(){
 void move_step(int s){
     int turns = 50*s;
     for(int j = 0; j < turns ; j++){
-        for(int i = 0; i < 4 ; i++){
-            PORTB = pos[i];
-            _delay_ms(4);
-        }
+        moveF();
     }
 }
 
