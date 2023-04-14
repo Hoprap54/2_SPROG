@@ -3,5 +3,6 @@
         "string.h": "c",
         "io.h": "c",
         "iom328p.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/.pio/libdeps/nanoatmega328/Unity"
 }
