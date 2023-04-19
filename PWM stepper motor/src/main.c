@@ -33,9 +33,9 @@ int main(void) {
     io_redirect();
 
     /* Declaration of I/O Pins */
-    DDRD =  0xF0;    // Set Port D as input for the buttons 0b1111 0000
+    DDRD =  0xF0;   // Set Port D as input for the buttons 0b1111 0000
     PORTD = 0x3F;   // Activate internall pull
-    DDRB =  0xFF;    // Set Port B as output for the LN298N 0b1111 0000
+    DDRB =  0xFF;   // Set Port B as output for the LN298N 0b1111 0000
     
     // Main variables
     int steps = 0;
@@ -83,11 +83,11 @@ void delay_v(unsigned int t){
 
 
 void PWM0_on(){
-    TCCR0A = ((1 << COM0A1) | (1 << WGM01) | (1 << WGM00));
-    TCCR0B = ((1 << CS02) | (1 << CS00));
+    TCCR0A = (1 << COM0A1) | (1 << WGM01) | (1 << WGM00); // Fast PWM mode - OC0A (PD6) clear at OC
+    TCCR0B = (1 << CS02) | (1 << CS00); // Turn on clock - prescale 1024
 }
 
 void PWM2_on(){
-    TCCR2A = ((1 << COM2A1) | (1 << WGM21) | (1 << WGM20));
-    TCCR2B = ((1 << CS22) | (1 << CS21) | (1 << CS20));
+    TCCR2A = (1 << COM2B1) | (1 << WGM21) | (1 << WGM20); // Fast PWM mode - OC2B (PD3) clear at OC
+    TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20); // Turn on clock - prescale 1024
 }
