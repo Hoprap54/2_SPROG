@@ -28,29 +28,8 @@ int main(void) {
     DDRB = 0xFF;    // Set Port B as output for the LN298N 0b1111 1111
    
     /* Declare variables */
-    int d_run;
 
     while (1){
-        switch (PIND){
-        case b0:
-            printf("\nDistance: ");
-            scanf("%d", &d_run);
-            move_d(d_run);
-            printf("\nDone");
-            break;
         
-        case b1:
-        /*
-            printf("\nTurns: ");
-            scanf("%d", &d_run);
-            move_step(d_run);
-            printf("\nDone");
-        */
-            moveB();
-            break;
-        default:
-            PORTB = 0X00;   // Set all output to 0
-            break;
-        }
     }
 }
