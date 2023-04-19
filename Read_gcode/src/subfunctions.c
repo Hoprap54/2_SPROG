@@ -13,9 +13,7 @@
 #include "subfunctions.h"
 #include <stdbool.h>
 
-#define stpa_motor 1.8  // Step angle of a motor
 #define d 7.89 // One turn moves 7.89mm
-int cycle = (int)360/stpa_motor; // Amount of steps for one turn
 char pos[4] = {0b0001, 0b0100, 0b1000, 0b0010}; // Motor configuration
 
 void moveF(){
@@ -30,7 +28,7 @@ void moveB(){
         _delay_ms(4);
     }
 }
-void move_step(int s){  // Move amount of steps
+void move_t(int s){  // Move amount of turns
     int turns = 50*s;
     for(int j = 0; j < turns ; j++){
         moveF();
