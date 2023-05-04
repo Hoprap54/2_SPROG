@@ -1,28 +1,17 @@
+/*
+Connections
+SS   (D10/PB2) -> CS
+MOSI (D11/PB3) -> MOSI
+MISO (D12/PB4) -> MISO
+SCK  (D13/PB5) -> SCK
+*/
+
 #include <stdio.h>
 #include <avr/io.h>
-#include <util/delay.h>
-
-#include "usart.h"
 
 
-// Function prototypes
 
 
-// Global variables
+int main(){
 
-
-int main(void) {
-
-    uart_init();
-    io_redirect();
-
-    /* Declaration of I/O Pins */
-    
-    
-    // Main variables
-    
-
-    while(1){
-        
-    }
 }
