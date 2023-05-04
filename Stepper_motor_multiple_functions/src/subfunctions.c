@@ -13,7 +13,7 @@
 #include "subfunctions.h"
 #include <stdbool.h>
 
-#define d 7.89 // One turn moves 7.89mm
+#define d 1.25 // One turn moves 1.25mm
 char pos[4] = {0b0001, 0b0100, 0b1000, 0b0010}; // Motor configuration
 
 void moveF(){

@@ -9,30 +9,35 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "usart.h"
+#include "subfunctions.h"
+void SPI_init();
+void SD_powerUpSeq();
+uint8_t SD_goIdleState();
 
-// SPI port available at port B
-#define SPI_SCK  5  // 13
-#define SPI_MISO 4  // 12
-#define SPI_MOSI 3  // 11
-#define SPI_CS   2  // 10
+int main(void){ 
+    // array to hold responses
+    uint8_t res[5];
 
-void SPI_MasterInit(void){
-    /* Set MOSI and SCK output, all others input */
-    PORTB = (1<<SPI_MOSI)|(1<<SPI_SCK)|(1<<SPI_CS);
-    /* Enable SPI, Master, set clock rate fck/16 */
-    SPCR = (1<<SPIE)|(1<<SPE)|(1<<MSTR)|(1<<SPR0);
-    SPSR = 0x00;    
-}
+    // initialize UART
+    UART_init(57600);
 
-int main(void) {     
-    uart_init();    // Open the communication to the micro controller
-    io_redirect();  // Redirect input and output to the communication
-        
-    DDRB = (1<<SPI_CS); // Set CS High
-    SPI_MasterInit();
-    SPDR = 0x00;
-    while (1){
-        char d = SPDR;
-        printf("\n Data: %s", d);
-    }
+    // initialize SPI
+    SPI_init();
+
+    // start power up sequence
+    SD_powerUpSeq();
+
+    // command card to idle
+    UART_puts("Sending CMD0...\r\n");
+    res[0] = SD_goIdleState();
+    UART_puts("Response:\r\n");
+    SD_printR1(res[0]);
+
+    // send if conditions
+    UART_puts("Sending CMD8...\r\n");
+    SD_sendIfCond(res);
+    UART_puts("Response:\r\n");
+    SD_printR7(res);
+
+    while(1){}
 }
