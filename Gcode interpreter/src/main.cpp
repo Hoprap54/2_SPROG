@@ -18,16 +18,17 @@ Connections
 
 // Global variables
 // gcode memory positions ranked in order of most used
-char   gcode_info_pos[]   = {'X','Y','Z','I','J','K','R','F','S','T'};
-double gcode_info_value[] = { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 };
+char   gcode_info_pos[]       = {'X','Y','Z','I','J','K','R','F','S'};
+double gcode_info_value[]     = { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 };
+double gcode_previous_value[] = { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 };
 unsigned int last_gcode = 0;
 
 
 // Function prototypes
-void SD_start(unsigned int);
-uint8_t file_read_line(File, char *);
 void g_code_exec(char [], uint8_t);
 void m_code_exec(char [], uint8_t);
+void SD_start(unsigned int);
+uint8_t file_read_line(File, char *);
 uint8_t has_letter(char, char [], uint8_t);
 double extract_number(uint8_t, char [], uint8_t);
 void bubble_sort(int *, uint8_t);
@@ -50,7 +51,7 @@ void setup()
   // Open file
   myFile = SD.open(name);
   // If file is opened succesfully, start executing file instructions
-  if(myFile) {
+  if(myFile){
     Serial.println(name);
 
     // Read from the file if there is gcode available
@@ -61,7 +62,9 @@ void setup()
 
       // Gather all information variables available
       for(uint8_t i = 0; i < 10; i++){
-        
+        if(has_letter(gcode_info_pos[i], instruction, ins_size)){
+          
+        }
       }
       m_code_exec(instruction, ins_size);
       g_code_exec(instruction, ins_size);
@@ -81,6 +84,50 @@ void setup()
 void loop()
 {
 	// Keep empty - arduino loop function thingy
+}
+
+
+void g_code_exec(char ins[], uint8_t size){
+  int gcodes[] = {-1,-1,-1,-1,-1}; // Array for storing multiple gcodes (this happens in NX cam, but always 1 operation code and then 1+ setup codes)
+  uint8_t number = 0;
+  // Check if G command is present
+  if(has_letter('G', ins, size)){
+    // Gather all g-codes in instruction in array gcodes
+    for(uint8_t i = 0; i < size; i++){
+      if(ins[i] == 'G'){
+        gcodes[number] = (int)extract_number(i, ins, size);
+        number++;
+      }
+    }
+
+    // Sort array from highest to lowest to order operations
+    bubble_sort(gcodes, 10);
+  }
+  else{ // If not present, load gcode from previous instruction into array
+    gcodes[0] = last_gcode;
+  }
+
+  // Execute all commands in gcodes queue
+  for(uint8_t i = 0; i < 5; i++){ // TO DO: check if highest to lowest operation queue is actually functional
+    if(gcodes[i] == -1){
+      break;
+    }
+
+    switch(gcodes[i]){
+      case 0: // Rapid repositioning
+      case 1: // Linear interpolation
+
+        break;
+
+      default:
+        Serial.print("Code is not implemented! (");
+        Serial.println(gcodes[i]);
+    }
+  }
+}
+
+void m_code_exec(char ins[], uint8_t size){
+
 }
 
 // Start the SD card
@@ -115,50 +162,6 @@ uint8_t file_read_line(File myFile, char *array_ptr){
   }
   *(array_ptr + count) = ' ';
   return count;
-}
-
-
-void g_code_exec(char ins[], uint8_t size){
-  int gcodes[5] = {-1,-1,-1,-1,-1}; // Array for storing multiple gcodes (this happens in NX cam, but always 1 operation code and then 1+ setup codes)
-  uint8_t number = 0;
-  // Check if G command is present
-  if(has_letter('G', ins, size)){
-    // Gather all g-codes in instruction in array gcodes
-    for(uint8_t i = 0; i < size; i++){
-      if(ins[i] == 'G'){
-        gcodes[number] = (int)extract_number(i, ins, size);
-        number++;
-      }
-    }
-
-    // Sort array from highest to lowest to order operations
-    bubble_sort(gcodes, 10);
-  }
-  else{ // If not present, load gcode from previous instruction into array
-    gcodes[0] = gcode_info_value[0];
-  }
-
-  // Execute all commands in gcodes queue
-  for(uint8_t i = 0; i < 5; i++){
-    if(gcodes[i] == -1){
-      break;
-    }
-
-    switch(gcodes[i]){
-      case 0: // Rapid repositioning
-      case 1: // Linear interpolation
-
-        break;
-
-      default:
-        Serial.print("Code is not implemented! (");
-        Serial.println(gcodes[i]);
-    }
-  }
-}
-
-void m_code_exec(char ins[], uint8_t size){
-
 }
 
 
