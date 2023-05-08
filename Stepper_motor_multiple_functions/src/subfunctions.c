@@ -40,3 +40,19 @@ void move_d(int dis){   // Move certain distance
         moveF();
     }
 }
+
+void dutyCycle(){
+    for(unsigned int i = 0; i < t_ms; i++){
+    // Compare count with delay value needed
+        while ((TIFR0 & (1 << OCF0A)) == 0){} // W ait for the overflow eventº
+        TIFR0 = (1 << OCF0A);                 // Set timer to start counting again
+    }
+}
+}
+
+void init_timer0(void){
+    TCNT0 = 0;      // Reset counter
+    OCR0A = 249;    // Set compare register A
+    TCCR0A |= (1 << WGM01);              // Timer Mode to CTC
+    TCCR0B |= (1 << CS01) | (1 << CS00); // Set prescaler to 64
+}
