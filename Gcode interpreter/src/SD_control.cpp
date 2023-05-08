@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <SPI.h>
-#include <SD.h>
+#include "SD_control.h"
 
 // Start the SD card
 void SD_start(unsigned int CS){

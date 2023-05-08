@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <avr/io.h>
+#include <SPI.h>
 #include <SD.h>
 
 #ifndef SD_FILE_H_INCLUDED
