@@ -14,19 +14,16 @@ Connections
 
 // chipSelect = SS digital pin number
 #define chipSelect 10
+#define FileName "lines.txt"
 
 // Global variables
-
-// ASDASDASDASDASDASDASD
-
 // Function prototypes
 
 // Main function
 void setup()
 {
-
   File myFile;
-  char name[20] = "lines.txt";
+  char name[20] = FileName;
 
   // Open serial communications - necessary for SPI
   Serial.begin(9600);
