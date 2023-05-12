@@ -22,18 +22,21 @@ void moveF(){
         _delay_ms(4);
     }
 }
+
 void moveB(){
     for(int i = 3; i >= 0 ; i--){
         PORTB = pos[i];
         _delay_ms(4);
     }
 }
+
 void move_t(int s){  // Move amount of turns
     int turns = 50*s;
     for(int j = 0; j < turns ; j++){
         moveF();
     }
 }
+
 void move_d(int dis){   // Move certain distance
     int distance = dis*50/d;
     for(int j = 0; j < distance ; j++){
@@ -47,7 +50,6 @@ void dutyCycle(){
         while ((TIFR0 & (1 << OCF0A)) == 0){} // W ait for the overflow eventº
         TIFR0 = (1 << OCF0A);                 // Set timer to start counting again
     }
-}
 }
 
 void init_timer0(void){
