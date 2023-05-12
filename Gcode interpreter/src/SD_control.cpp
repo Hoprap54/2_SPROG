@@ -35,7 +35,6 @@ uint8_t line_size(char *array){
   while(*(array + size) != 13){
     size++;
   }
-  *(array + size) = ' '; // Re CARRIAGE RETURN
-  size++;
+  *(array + size) = ' '; // Replace CARRIAGE RETURN with ' '
   return size;
 }
