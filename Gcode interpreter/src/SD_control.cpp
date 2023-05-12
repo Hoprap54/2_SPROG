@@ -21,12 +21,33 @@ void SD_start(unsigned int CS){
   Serial.println("initialization done.");
 }
 
-void file_open(char name[], uint8_t cs){
+uint8_t file_ready(){
+  if(myFile.available()){
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t file_open(char *name){
   myFile = SD.open(name);
+  if(myFile){
+    Serial.println(name);
+    return 1;
+  }
+  // if the file didn't open, print an error:
+  Serial.print("Error opening ");
+  Serial.println(name);
+  return 0;
+}
+
+void file_close(){
+  // Close the file when finished
+  myFile.close();
+  Serial.println("- Code completed");
 }
 
 // Reads a line in file and replaces values in array by given pointer
-void file_read_line(File myFile, char *array){
+void file_read_line(char *array){
   uint8_t count = 0; // Count for letter number in line
   while (myFile.available()){ // While there is stuff available in file
     *(array + count) = myFile.read(); // Set next read character to position in array inputted
