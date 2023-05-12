@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <SPI.h>
 
-#ifndef GCODE_INTERPRETER_H_INCLUDED
-#define GCODE_INTERPRETER_H_INCLUDED
+#ifndef INSTRUCTION_HANDLER_H_INCLUDED
+#define INSTRUCTION_HANDLER_H_INCLUDED
 
 uint8_t has_letter(char, char *, uint8_t);
 double extract_number(uint8_t, char *, uint8_t);

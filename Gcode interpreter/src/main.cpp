@@ -10,18 +10,15 @@ Connections
 #include <SPI.h>
 
 #include "SD_control.h"
-#include "gcode_interpreter.h"
+#include "instruction_handler.h"
 
 // chipSelect = SS digital pin number
 #define chipSelect 10
 #define FileName "lines.txt"
 
-// Global variables
-// Function prototypes
-
 // Main function
 void setup()
-{  
+{ 
   char name[20] = FileName;
   // Start SD card
   SD_start(chipSelect);
@@ -36,19 +33,20 @@ void setup()
 
     file_read_line(instruction);
     ins_size = line_size(instruction);
+
     Serial.print(instruction);
-    Serial.print(" - ");
+    Serial.print("- ");
     Serial.println(ins_size);
 
     // Gather info
     gather_info(instruction, ins_size);
     // Execute m codes available
-    // m_codes_exec(instruction, ins_size);
+    //m_codes_exec(instruction, ins_size);
     // Execute g codes available
-    // g_codes_exec(instruction, ins_size);
+    g_codes_exec(instruction, ins_size);
 
+    Serial.println(" ");
     _delay_ms(500);
-    // Read from the file if there is gcode available
   }
 }
 
