@@ -32,11 +32,11 @@ double extract_number(uint8_t pos, char *array, uint8_t size){
     if(*(array + pos) == ' '){
       break;
     }
-    temp[k] = array[pos];
+    temp[k] = *(array + pos);
     k++;
     pos++;
   }
-  Serial.print(strtod(temp, NULL));
+  Serial.println(temp);
   return strtod(temp, NULL);
 }
 
