@@ -22,15 +22,14 @@ Connections
 
 
 // Main function
-void setup()
-{
-  char instruction[75] = "";
-  uint8_t ins_size = 0;
+void setup(){
 
   File myFile;
   char name[20] = "lines.txt";
   
 
+  // Open serial communications - necessary for SPI
+  Serial.begin(9600);
   // Start SD card
   SD_start(chipSelect);
   
@@ -42,22 +41,27 @@ void setup()
 
     // Read from the file if there is gcode available
     while(myFile.available()){
+      char instruction[75] = "";
+      uint8_t ins_size = 0;
       
-      ins_size = file_read_line(myFile, instruction);
-      Serial.println(instruction);
-
+      file_read_line(myFile, instruction);
+      ins_size = line_size(instruction);
+      Serial.print(instruction);
+      Serial.print(" - ");
+      Serial.println(ins_size);
+      
       // Gather info
       gather_info(instruction, ins_size);
-      // Calculate deltas and remember last position
-      pos_delta();
       // Execute m codes available
-      m_codes_exec(instruction, ins_size);
+      //m_codes_exec(instruction, ins_size);
       // Execute g codes available
-      g_codes_exec(instruction, ins_size);
+      //g_codes_exec(instruction, ins_size);
+
+      _delay_ms(500);
     }
     // close the file when finished
     myFile.close();
-    Serial.println("Code completed");
+    Serial.println("- Code completed");
   } else {
   	// if the file didn't open, print an error:
     Serial.print("Error opening ");

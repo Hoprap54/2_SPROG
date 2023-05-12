@@ -6,6 +6,7 @@
 #define SD_FILE_H_INCLUDED
 
 void SD_start(unsigned int);
-unsigned char file_read_line(File, char *);
+void file_read_line(File, char *);
+unsigned char line_size(char *);
 
 #endif

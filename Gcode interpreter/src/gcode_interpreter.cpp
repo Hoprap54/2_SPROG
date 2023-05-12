@@ -1,15 +1,15 @@
 #include "gcode_interpreter.h"
 
 // gcode memory positions ranked in order of most used
-double move_gcodes[]       = { 0 , 1 , 2 , 3 , 28 , 30 };
+double move_gcodes[]      = { 0 , 1 , 2 , 3 , 28 , 30 };
 const uint8_t n_move_gcodes = 6;
 
 const uint8_t n_gcode_info = 9;
-char   gcode_info_pos[]    = {'X','Y','Z','I','J','K','R','F','S'};
-double gcode_info_value[]  = { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 };
+char   gcode_info_index[] = {'X','Y','Z','I','J','K','R','F','S'};
+double gcode_info_value[] = { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 };
 
-double pos_last_value[]    = { 0 , 0 , 0 };
-double pos_delta_value[]   = { 0 , 0 , 0 };
+double pos_last_value[]   = { 0 , 0 , 0 };
+double pos_delta_value[]  = { 0 , 0 , 0 };
 
 unsigned int last_gcode = 0;
 
@@ -36,23 +36,33 @@ double extract_number(uint8_t pos, char *array, uint8_t size){
     k++;
     pos++;
   }
+  Serial.print(strtod(temp, NULL));
   return strtod(temp, NULL);
 }
 
 // Gather all information variables available in array of size
 void gather_info(char *array, uint8_t size){
   for(uint8_t i = 0; i < n_gcode_info; i++){
-    if(has_letter(gcode_info_pos[i], array, size)){
+    if(has_letter(gcode_info_index[i], array, size)){
       gcode_info_value[i] = extract_number(i+1, array, size);
+      Serial.print(gcode_info_value[i]);
+      Serial.print(" ");
     }
   }
-}
-
-// Calculate deltas for position
-void pos_delta(){
+  Serial.println("- Extracted info");
+  // Calculate deltas for position and save current value as last value
   for(uint8_t i = 0; i < 3; i++){
     pos_delta_value[i] = pos_last_value[i] - gcode_info_value[i];
+    Serial.print(pos_last_value[i]);
+    Serial.print(" ");
+    pos_last_value[i] = gcode_info_value[i];
   }
+  Serial.println("- Last pos");
+  for(uint8_t i = 0; i < 3; i++){
+    Serial.print(pos_delta_value[i]);
+    Serial.print(" ");
+  }
+  Serial.println("- Delta pos");
 }
 
 // Swapping function using pointers
@@ -69,7 +79,7 @@ void g_codes_exec(char *array, uint8_t size){
   
   // Check if G command is present
   if(has_letter('G', array, size)){
-    // Gather all g-codes in instruction in array gcodes
+    // Gather all g-codes in instruction in array gcodes[]
     for(uint8_t i = 0; i < size; i++){
       if(*(array + i) == 'G'){
         gcodes[n] = (int)extract_number(i+1, array, size);
@@ -98,13 +108,12 @@ void g_codes_exec(char *array, uint8_t size){
 
         break;
       case 1: // Linear interpolation
-        
+        Serial.println();
         break;
 
       default:
-        printf("Code not implemented");
-        //Serial.print("Code is not implemented! (");
-        //Serial.println(gcodes[i]);
+        Serial.print("Code is not implemented! (");
+        Serial.println(gcodes[i]);
     }
   }
 }
