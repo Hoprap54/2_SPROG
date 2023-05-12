@@ -1,7 +1,12 @@
 #include "SD_control.h"
 
+File myFile;
+
 // Start the SD card
 void SD_start(unsigned int CS){
+  // Open serial communications - necessary for SPI
+  Serial.begin(9600);
+
   Serial.print("Initializing SD card...");
   // Note that even if it's not used as the CS pin, the hardware SS pin 
   // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
@@ -14,6 +19,10 @@ void SD_start(unsigned int CS){
     return;
   }
   Serial.println("initialization done.");
+}
+
+void file_open(char name[], uint8_t cs){
+  myFile = SD.open(name);
 }
 
 // Reads a line in file and replaces values in array by given pointer

@@ -27,9 +27,7 @@ void setup()
 
   File myFile;
   char name[20] = "lines.txt";
-
-  // Open serial communications - necessary for SPI
-  Serial.begin(9600);
+  
   // Start SD card
   SD_start(chipSelect);
 
