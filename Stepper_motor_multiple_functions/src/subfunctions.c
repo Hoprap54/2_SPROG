@@ -86,6 +86,14 @@ void move_same_time_F()
         delay_ms(3);
     }
 }
+
+void move_Center_From_X2()
+{
+    int stepsNeeded = 0; // here needs to be a formula to calculate how many steps are needed, it is not possible to do
+    // by hand, it needs a diffrent program that will sum all the steps it has done from one limit switch to another
+    for (int i = 0; i < stepsNeeded; i++)
+        move_B_PB(); // this does 3 or 4 steps at a time, so we need to take that in consideration
+}
 // void move_t(int s){  // Move amount of turns
 //     int turns = 50*s;
 //     for(int j = 0; j < turns ; j++){
