@@ -1,46 +1,79 @@
 /*
-*   D2 -> B.R.
-*   D3 -> B.L.
-*   ...
-*   D8 -> In1
-*   D9 -> In2
-*   D10 -> In3
-*   D11 -> In4
-*
-*   Step advance .. m
+* Buttons
+*   PC0 -> B0
+*   PC1 -> B1
+*   PC2 -> B2
+* M1
+*   PD4 -> In1
+*   PD5 -> In2
+*   PD6 -> In3
+*   PD7 -> In4
+* M2
+*   PB0 -> In1
+*   PB1 -> In2
+*   PB2 -> In3
+*   PB3 -> In4
 */
 
 #include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include "usart.h"
+#include "subfunctions.h"
 
-#define b0 0x3b
-#define b1 0x37 
+#define b0 0b00111110
+#define b1 0b00111101
+#define b2 0b00111011
+#define b3 0b00110111
+#define b4 0b00111010
+#define b5 0b00110101
+ 
 
 int main(void) {     
     uart_init();    // Open the communication to the micro controller
     io_redirect();  // Redirect input and output to the communication
 
     /* Declaration of I/O Pins */
-    DDRD = 0xF0;    // Set Port D as input for the buttons 0b1111 0000
-    PORTD = 0x3F;   // Activate internall pull
-    DDRB = 0xFF;    // Set Port B as output for the LN298N 0b1111 1111
-   
-    /* Declare variables */
+    // M1
+    DDRD = 0xFF;    // Output for M1
+    
+    // M2
+    DDRB = 0xFF;    // Output for M2
+
+    //Buttons    
+    DDRC = 0x00;    // Inputs for buttons
+    PORTC = 0x3F;   // Activate pullups
+    
+    unsigned int mm_data = 0;
 
     while (1){
-        switch (PIND){
-        case b0:
-            moveF();
-            break;
-        
-        case b1:
-            moveB();
-            break;
-        default:
-            PORTB = 0X00;   // Set all output to 0
-            break;
+        switch (PINC){  // Read buttons
+            case b0:
+                move_F_PD();
+                break;
+            case b1:
+                move_B_PD();
+                break;
+            case b2:
+                move_F_PB();
+                break;
+            case b3:
+                move_B_PB();
+                break;
+            case b4:
+                move_F_PB();
+                delay_ms(1);
+                move_F_PD();                                
+                break;
+            case b5:
+                move_B_PB();
+                delay_ms(1);
+                move_B_PD();                                
+                break;
+            default:
+                PORTD = 0X00;   // Set all output to 0
+                PORTB = 0X00;   // Set all output to 0
+                break;
         }
     }
 }
