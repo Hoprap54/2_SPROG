@@ -55,20 +55,20 @@ void gather_info(char *array, uint8_t size)
     if (pos)
     {
       gcode_info_value[i] = extract_number(pos + 1, array, size);
-      Serial.print(gcode_info_value[i]);
-      Serial.print(" ");
+      //Serial.print(gcode_info_value[i]);
+      //Serial.print(" ");
     }
   }
-  Serial.println("- Extracted info");
+  //Serial.println("- Extracted info");
   // Calculate deltas for position and save current value as last value
   for (uint8_t i = 0; i < 3; i++)
   {
     pos_delta_value[i] = gcode_info_value[i] - pos_last_value[i];
-    Serial.print(pos_delta_value[i]);
-    Serial.print(" ");
+    //Serial.print(pos_delta_value[i]);
+    //Serial.print(" ");
     pos_last_value[i] = gcode_info_value[i];
   }
-  Serial.println(" ");
+  //Serial.println(" ");
 }
 
 // Swapping function using pointers
@@ -85,44 +85,14 @@ void g_codes_exec(char *array, uint8_t size)
   uint8_t gcodes[] = {255,255,255,255,255}; // Array for storing multiple gcodes (this happens in NX cam, but always 1 operation code and then 1+ setup codes)
   uint8_t n = 0;     // Number of gcodes collected in array in function underneath
 
-  // Check if G command is present
-  if (has_letter('G', array, size))
-  {
-    // Gather all g-codes in instruction in array gcodes[]
-    for (uint8_t i = 0; i < size; i++)
-    {
-      if (*(array + i) == 'G') // If 'G' found
-      {
-        // Extract value after
-        gcodes[n] = (uint8_t)extract_number(i + 1, array, size);
-        n++;
-      }
-    }
-    
-    // Detect movement gcodes. If found swap to back
-    for (uint8_t i = 0; i < n; i++) // gcodes loop
-    {
-      for (uint8_t j = 0; j < n_move_gcodes; j++) // move_gcodes loop
-      {
-        if (gcodes[i] == move_gcodes[j]) // If value in gcodes is equal to a movement gcode
-        {
-          swap(&gcodes[i], &gcodes[n]); // Swap movement gcode to last position - to be executed last
-          break; // there will always only be 1 movement gcode in a line, so break
-        }
-      }
-    }
-    last_gcode = gcodes[n]; // Save last movement gcode
-  }
-  else
-  { // If not present, load gcode from previous instruction into array
-    gcodes[0] = last_gcode;
-    n++;
-  }
+  
 
+  /*
   for(uint8_t i = 0; i < 5; i++){
     Serial.print(gcodes[i]);
     Serial.print(" ");
   }
+  */
   Serial.println(" ");
 
   // Execute all commands in gcodes queue
@@ -145,6 +115,6 @@ void g_codes_exec(char *array, uint8_t size)
   }
 }
 
-void m_codes_exec(char *ins, uint8_t size)
+void m_codes_exec(char *array, uint8_t size)
 {
 }
