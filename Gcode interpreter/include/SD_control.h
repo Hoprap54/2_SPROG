@@ -9,7 +9,7 @@ void SD_start(unsigned int);
 uint8_t file_ready();
 uint8_t file_open(char *);
 void file_close();
-void file_read_line(char *);
+uint8_t file_read_ins(char *);
 unsigned char line_size(char *);
 
 #endif

@@ -26,28 +26,10 @@ void setup()
   // Open file
   file_open(name);
   // If file is opened succesfully, start executing file instructions
-  while(file_ready())
-  {
-    char instruction[75] = "";
-    uint8_t ins_size = 0;
-
-    file_read_line(instruction);
-    ins_size = line_size(instruction);
-
-    Serial.print(instruction);
-    Serial.print("- ");
-    Serial.println(ins_size);
-
-    // Gather info
-    gather_info(instruction, ins_size);
-    // Execute m codes available
-    //m_codes_exec(instruction, ins_size);
-    // Execute g codes available
-    g_codes_exec(instruction, ins_size);
-
-    Serial.println(" ");
-    _delay_ms(500);
+  while(file_ready()){
+    ins_exec();
   }
+  
 }
 
 void loop()

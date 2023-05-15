@@ -6,6 +6,7 @@ File myFile;
 void SD_start(unsigned int CS){
   // Open serial communications - necessary for SPI
   Serial.begin(9600);
+  while(!Serial){}
 
   Serial.print("Initializing SD card...");
   // Note that even if it's not used as the CS pin, the hardware SS pin 
@@ -47,24 +48,34 @@ void file_close(){
 }
 
 // Reads a line in file and replaces values in array by given pointer
-void file_read_line(char *array){
-  uint8_t count = 0; // Count for letter number in line
+uint8_t file_read_ins(char *array){
+  uint8_t i = 0; // Count for letter number in line
+  char temp = 0; // Temporary read character holder
   while (myFile.available()){ // While there is stuff available in file
-    *(array + count) = myFile.read(); // Set next read character to position in array inputted
-    //Serial.print(*(array + count));
-    if(*(array + count) == 13){ // If CARRIAGE RETURN character:
-      return;
+    temp = myFile.read();
+    if(temp == 10){ // Skip LINE FEED
+      continue;
     }
-    count++; // If not go on to next letter
+    if(temp == 0 || temp == '('){ // Exceptions: NULL character, NX comment (starts with '(')
+      return 0; // Failure
+    }
+    if(temp == '\r'){ // If CARRIAGE RETURN character
+      *(array + i) = temp;
+      return 1; // Succes
+    }
+    *(array + i) = temp; // Assign character to array after check
+    i++; // If no stop conditions move to next character
   }
+  return 0; // Failure
 }
 
 // Determines the size of a read line, but is dependent on a CARRIAGE RETURN character being preserved at the end of the line, otherwise it does not know that the line has ended and it will go outside the bounds of the array
 uint8_t line_size(char *array){
   uint8_t size = 0;
-  while(*(array + size) != 13){
+  while(*(array + size) != '\r'){ // While not equal to CARRIAGE RETURN character
     size++;
   }
   *(array + size) = ' '; // Replace CARRIAGE RETURN with ' '
+  size++;
   return size;
 }
