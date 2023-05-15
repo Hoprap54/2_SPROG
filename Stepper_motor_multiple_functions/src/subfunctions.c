@@ -13,6 +13,8 @@
 
 #define d 1.25                                  // One turn moves 1.25mm
 char pos[4] = {0b0001, 0b0100, 0b0010, 0b1000}; // Motor configuration
+char lastPosX = 0b0000;
+char lastPosY = 0b0000;
 
 void init_timer0(void)
 {
@@ -21,6 +23,7 @@ void init_timer0(void)
     TCCR0A |= (1 << WGM01);              // Timer Mode to CTC
     TCCR0B |= (1 << CS01) | (1 << CS00); // Set prescaler to 64
 }
+
 void delay_ms(unsigned int t_ms)
 {
     init_timer0();
@@ -33,36 +36,44 @@ void delay_ms(unsigned int t_ms)
         TIFR0 = (1 << OCF0A); // Set timer to start counting again
     }
 }
+
 void move_F_PB()
 {
     for (int i = 0; i < 4; i++)
     {
         PORTB = pos[i];
         delay_ms(3);
+        lastPosX = i;
     }
 }
+
 void move_B_PB()
 {
     for (int i = 3; i >= 0; i--)
     {
         PORTB = pos[i];
         delay_ms(3);
+        lastPosX = i;
     }
 }
+
 void move_F_PD()
 {
     for (int i = 3; i >= 0; i--)
     {
         PORTD = pos[i] << 4;
         delay_ms(3);
+        lastPosY = i;
     }
 }
+
 void move_B_PD()
 {
     for (int i = 0; i < 4; i++)
     {
         PORTD = pos[i] << 4;
         delay_ms(3);
+        lastPosY = i;
     }
 }
 
@@ -74,8 +85,11 @@ void move_same_time_B()
         PORTD = pos[j] << 4;
         PORTB = pos[i];
         delay_ms(3);
+        lastPosY = j;
+        lastPosX = i;
     }
 }
+
 void move_same_time_F()
 {
     int j = 3;
@@ -84,6 +98,8 @@ void move_same_time_F()
         PORTD = pos[j] << 4;
         PORTB = pos[i];
         delay_ms(3);
+        lastPosY = j;
+        lastPosX = i;
     }
 }
 
@@ -106,3 +122,61 @@ void move_Center_From_X2()
 //         moveB();
 //     }
 // }
+
+void make_step_X(bool direction)
+{
+    // 1 = forward
+    // 0 = back
+    if (direction)
+    {
+        if (lastPosX == 0)
+        {
+            lastPosX = 3;
+        }
+        else
+        {
+            lastPosX--;
+        }
+    }
+    else
+    {
+        if (lastPosX == 3)
+        {
+            lastPosX = 0;
+        }
+        else
+        {
+            lastPosX++;
+        }
+    }
+    PORTD = pos[lastPosX] << 4;
+}
+
+void make_step_Y(bool direction)
+{
+    // 1 = forward
+    // 0 = back
+    if (direction)
+    {
+        if (lastPosY == 3)
+        {
+            lastPosY = 0;
+        }
+        else
+        {
+            lastPosY++;
+        }
+    }
+    else
+    {
+        if (lastPosY == 0)
+        {
+            lastPosY = 3;
+        }
+        else
+        {
+            lastPosY--;
+        }
+    }
+    PORTB = pos[lastPosY];
+}

@@ -51,16 +51,20 @@ int main(void)
         switch (PINC)
         { // Read buttons
         case b0:
-            move_B_PD();
+            // move_B_PD();
+            make_step_X(0);
             break;
         case b1:
-            move_F_PD();
+            // move_F_PD();
+            make_step_X(1);
             break;
         case b2:
-            move_F_PB();
+            make_step_Y(1);
+            // move_F_PB();
             break;
         case b3:
-            move_B_PB();
+            make_step_Y(0);
+            // move_B_PB();
             break;
         case b4:
             move_same_time_F();
