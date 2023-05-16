@@ -68,7 +68,9 @@ void get_pos_delta(char *array, uint8_t size){
 }
 
 void set_current_pos(){
-
+  for(uint8_t i = 0; i < 3; i++){
+    pos_current[i] = pos_target[i];
+  }
 }
 
 void get_center(char *array, uint8_t size){
@@ -121,11 +123,8 @@ void g_codes_exec(char *array, uint8_t size)
   // Execute all commands in gcodes queue
   for (int i = n-1; i >= 0; i--)
   {
-    if(i == 0){
-      get_pos_delta(array, size);
-    }
-
     uint8_t index = 0;
+
     Serial.print(gcodes[i]);
     switch (gcodes[i])
     {
@@ -140,11 +139,14 @@ void g_codes_exec(char *array, uint8_t size)
     case 1: // Linear interpolation
       Serial.println(" Linear interpolation");
       get_pos_delta(array, size);
-      
       index = has_letter('F', array, size);
       if(index){
         F = extract_number(index, array, size);
       }
+
+      // Exec move
+
+      set_current_pos();
       break;
     
     case 2: // CW arc
