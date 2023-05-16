@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <util/delay.h> //here the delay functions are found
 #include "usart.h"
-#include "subfunctions.h"
+#include "motorMovementFunctions.h"
 #include <stdbool.h>
 #include <math.h>
 
@@ -130,6 +130,7 @@ void make_step_X(bool direction)
 {
     // 1 = forward
     // 0 = back
+
     if (direction)
     {
         if (lastPosX == 0)
@@ -186,52 +187,61 @@ void make_step_Y(bool direction)
     delay_ms(3);
 }
 
-void move_radial(int radius)
+void move_full_circle(int radius)
 {
     // uart_init();
     // io_redirect();
     // radius in mm
     uint16_t m = 0, n = 0, n_prev = 0, totalSteps = radius * stepHeightInv;
-    for (m = 0; m < 2 * totalSteps; m++)
+    bool direction = 1;
+    for (m = 0; m < 4 * totalSteps; m++)
     {
-        n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
+        if (m < 2 * totalSteps)
+            n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
+        else
+            n = (uint16_t)sqrt(2 * ((double)(4 * (double)totalSteps - 1 - m)) * radius * stepHeightInv - ((double)(4 * (double)totalSteps - 1 - m)) * (4 * (double)totalSteps - 1 - m));
         // // n = sqrt(-1000);
         // // printf("m = %u\nn = %u\nn_prev = %u\n\n", m, n, n_prev);
         if (((int32_t)n) - n_prev >= 1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
         {
             for (; n_prev < n; n_prev++)
             {
-                make_step_Y(1);
+                make_step_Y(direction);
             }
         }
         else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
         {
             for (; n_prev > n; n_prev--)
             {
-                make_step_Y(0);
+                make_step_Y(!direction);
             }
         }
-        make_step_X(1);
+        make_step_X(direction);
+
+        if (m == 2 * totalSteps - 1)
+        {
+            direction = 0;
+        }
     }
     // for (m = 2 * totalSteps; m >= 0; m--) HAHHAHAHA cannot be written like that, hahaha,
     // because m is gonna be equal to 0 after it gets decremented and starts again positive, bigger than 0, so it is infinite loop
-    for (m = 2 * totalSteps; m > 0; m--) // like that works
-    {
-        n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
-        if (((int32_t)n) - n_prev >= 1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
-        {
-            for (; n_prev < n; n_prev++)
-            {
-                make_step_Y(0);
-            }
-        }
-        else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
-        {
-            for (; n_prev > n; n_prev--)
-            {
-                make_step_Y(1);
-            }
-        }
-        make_step_X(0);
-    }
+    // for (m = 2 * totalSteps; m > 0; m--) // like that works
+    // {
+    //         n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
+    //         if (((int32_t)n) - n_prev >= 1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+    //         {
+    //                 for (; n_prev < n; n_prev++)
+    //                 {
+    //                         make_step_Y(0);
+    //                 }
+    //         }
+    //         else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+    //         {
+    //                 for (; n_prev > n; n_prev--)
+    //                 {
+    //                         make_step_Y(1);
+    //                 }
+    //         }
+    //         make_step_X(0);
+    // }
 }

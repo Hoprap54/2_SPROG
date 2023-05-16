@@ -9,4 +9,4 @@ void move_same_time_F();
 void move_Center_From_X2();
 void make_step_Y(_Bool direction);
 void make_step_X(_Bool direction);
-void move_radial(int radius);
+void move_full_circle(int radius);

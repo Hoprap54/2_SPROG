@@ -19,7 +19,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "usart.h"
-#include "subfunctions.h"
+#include "motorMovementFunctions.h"
 #include <stdbool.h>
 
 #define b0 0b00111110
@@ -78,7 +78,7 @@ int main(void)
             move_same_time_B();
             break;
         case b6:
-            move_radial(30);
+            move_full_circle(30);
             break;
         default:
             PORTD = 0X00; // Set all output to 0
