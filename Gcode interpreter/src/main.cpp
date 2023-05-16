@@ -7,6 +7,8 @@ Connections
    SCK  -> SCK  (D13/PB5)
 */
 
+// HELLOOOOOOOOOO CHRISTIAN
+
 #include <SPI.h>
 
 #include "SD_control.h"
@@ -18,7 +20,7 @@ Connections
 
 // Main function
 void setup()
-{ 
+{
   char name[20] = FileName;
   // Start SD card
   SD_start(chipSelect);
@@ -26,10 +28,10 @@ void setup()
   // Open file
   file_open(name);
   // If file is opened succesfully, start executing file instructions
-  while(file_ready()){
+  while (file_ready())
+  {
     ins_exec();
   }
-  
 }
 
 void loop()
