@@ -50,11 +50,13 @@ int main(void)
 
     while (1)
     {
+
         switch (PINC)
         { // Read buttons
         case b0:
             // move_B_PD();
-            make_step_X(0);
+            // make_step_X(0);
+            move_deltas(30, 10);
 
             break;
         case b1:
