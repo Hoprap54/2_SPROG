@@ -8,13 +8,13 @@ const uint8_t n_move_gcodes = 6;
 
 uint8_t last_gcode = 254;
 
-char pos_letters[]    = {'X','Y','Z'};
-double pos_target[]   = { 0 , 0 , 0 };
-double pos_current[]  = { 0 , 0 , 0 };
-double pos_delta[]    = { 0 , 0 , 0 };
+char pos_letters[]     = {'X','Y','Z'};
+double pos_target[]    = { 0 , 0 , 0 };
+double pos_current[]   = { 0 , 0 , 0 };
+double pos_delta[]     = { 0 , 0 , 0 };
 
-char center_letters[] = {'I','J','K'};
-double center_info[]  = { 0 , 0 , 0 };
+char center_letters[]  = {'I','J','K'};
+double center_target[] = { 0 , 0 , 0 };
 double R = 0;
 
 // Other info
@@ -67,8 +67,18 @@ void get_pos_delta(char *array, uint8_t size){
   }
 }
 
-void get_center(){
+void set_current_pos(){
 
+}
+
+void get_center(char *array, uint8_t size){
+  uint8_t index = 0;
+  for(uint8_t i = 0; i < 3; i++){ // Check through I J K
+    index = has_letter(pos_letters[i], array, size);
+    if(index){ // If I J OR K found
+      center_target[i] = extract_number(index, array, size); // Get number after letter from instruction
+    }
+  }
 }
 
 // Swapping function using pointers
@@ -108,23 +118,39 @@ void g_codes_exec(char *array, uint8_t size)
     n++;
   }
 
-  get_pos_delta(array, size);
-
   // Execute all commands in gcodes queue
   for (int i = n-1; i >= 0; i--)
   {
+    if(i == 0){
+      get_pos_delta(array, size);
+    }
+
+    uint8_t index = 0;
     Serial.print(gcodes[i]);
     switch (gcodes[i])
     {
     case 0: // Rapid repositioning
       Serial.println(" Rapid repositioning");
+      get_pos_delta(array, size);
+      F = 2;
+
+      // Exec move
       break;
+    
     case 1: // Linear interpolation
       Serial.println(" Linear interpolation");
+      get_pos_delta(array, size);
+      
+      index = has_letter('F', array, size);
+      if(index){
+        F = extract_number(index, array, size);
+      }
       break;
+    
     case 2: // CW arc
       Serial.println(" CW arc");
       break;
+    
     case 3: // CCW arc
       Serial.println(" CCW arc");
       break;
@@ -135,7 +161,7 @@ void g_codes_exec(char *array, uint8_t size)
   }
 }
 
-void m_codes_exec()
+void m_codes_exec(char *array, uint8_t size)
 {
 }
 
