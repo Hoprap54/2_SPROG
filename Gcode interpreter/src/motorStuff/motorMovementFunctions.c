@@ -245,3 +245,17 @@ void move_full_circle(int radius)
     //         make_step_X(0);
     // }
 }
+
+void move_deltas(int dx, int dy)
+{
+    // works only for dy > dx and / is natural
+
+    int r = dy / dx;
+
+    for (int i = 0; i < dx * stepHeightInv; i++)
+    {
+        make_step_X(1);
+        for (int j = 0; j < r; j++)
+            make_step_Y(1);
+    }
+}
