@@ -145,7 +145,7 @@ void g_codes_exec(char *array, uint8_t size)
     case 0: // Rapid repositioning
       Serial.println(" Rapid repositioning");
       get_pos_delta(array, size);
-      F = 2;
+      F = 2; // Max feedrate
 
       // Exec move
       break;
