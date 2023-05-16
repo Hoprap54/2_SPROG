@@ -32,10 +32,10 @@ uint8_t has_letter(char key, char *array, uint8_t size)
     //Serial.print(instruction[i]);
     if (*(array + i) == key)
     {
-      return i+1;
+      return i+1; // If yes return position number with counting logic (0 in array = 1)
     }
   }
-  return 0;
+  return 0; // If no return 0
 }
 
 // Extract number from string at start pos in array of size until space (' ')
@@ -56,15 +56,13 @@ double extract_number(uint8_t pos, char *array, uint8_t size)
   return strtod(temp, NULL);
 }
 
-void get_pos(char *array, uint8_t size){
+void get_pos_delta(char *array, uint8_t size){
   uint8_t index = 0;
   for(uint8_t i = 0; i < 3; i++){ // Check through X Y Z
     index = has_letter(pos_letters[i], array, size);
     if(index){ // If X Y OR Z found
-      index -= 1;
-      pos_target[i] = extract_number(index + 1, array, size); // Get number after letter from instruction
+      pos_target[i] = extract_number(index, array, size); // Get number after letter from instruction
       pos_delta[i] = pos_target[i] - pos_current[i]; // Calculate delta
-      pos_current[i] = pos_target[i]; // Set the current position to the target position
     }
   }
 }
@@ -110,25 +108,7 @@ void g_codes_exec(char *array, uint8_t size)
     n++;
   }
 
-  get_pos(array, size);
-
-  for(uint8_t i = 0; i < 3; i++){
-    Serial.print(pos_target[i]);
-    Serial.print(" ");
-  }
-  Serial.println("- target");
-
-  for(uint8_t i = 0; i < 3; i++){
-    Serial.print(pos_current[i]);
-    Serial.print(" ");
-  }
-  Serial.println("- current");
-
-  for(uint8_t i = 0; i < 3; i++){
-    Serial.print(pos_delta[i]);
-    Serial.print(" ");
-  }
-  Serial.println("- delta");
+  get_pos_delta(array, size);
 
   // Execute all commands in gcodes queue
   for (int i = n-1; i >= 0; i--)
