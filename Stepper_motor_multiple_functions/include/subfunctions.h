@@ -7,5 +7,6 @@ void move_B_PD();
 void move_same_time_B();
 void move_same_time_F();
 void move_Center_From_X2();
-void make_step_Y(bool direction);
-void make_step_X(bool direction);
+void make_step_Y(_Bool direction);
+void make_step_X(_Bool direction);
+void move_radial(int radius);

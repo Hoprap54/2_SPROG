@@ -20,6 +20,7 @@
 #include <util/delay.h>
 #include "usart.h"
 #include "subfunctions.h"
+#include <stdbool.h>
 
 #define b0 0b00111110
 #define b1 0b00111101
@@ -27,6 +28,7 @@
 #define b3 0b00110111
 #define b4 0b00111001
 #define b5 0b00110110
+#define b6 0b00110000
 
 int main(void)
 {
@@ -53,10 +55,13 @@ int main(void)
         case b0:
             // move_B_PD();
             make_step_X(0);
+
             break;
         case b1:
             // move_F_PD();
             make_step_X(1);
+            // for (int i = 0; i < 200; i++)
+            //     make_step_X(1);
             break;
         case b2:
             make_step_Y(1);
@@ -71,6 +76,9 @@ int main(void)
             break;
         case b5:
             move_same_time_B();
+            break;
+        case b6:
+            move_radial(30);
             break;
         default:
             PORTD = 0X00; // Set all output to 0

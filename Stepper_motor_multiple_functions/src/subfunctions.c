@@ -10,11 +10,14 @@
 #include "usart.h"
 #include "subfunctions.h"
 #include <stdbool.h>
+#include <math.h>
 
 #define d 1.25                                  // One turn moves 1.25mm
 char pos[4] = {0b0001, 0b0100, 0b0010, 0b1000}; // Motor configuration
 char lastPosX = 0b0000;
 char lastPosY = 0b0000;
+
+float stepHeightInv = 200 / 1.25;
 
 void init_timer0(void)
 {
@@ -150,6 +153,7 @@ void make_step_X(bool direction)
         }
     }
     PORTD = pos[lastPosX] << 4;
+    delay_ms(3);
 }
 
 void make_step_Y(bool direction)
@@ -179,4 +183,55 @@ void make_step_Y(bool direction)
         }
     }
     PORTB = pos[lastPosY];
+    delay_ms(3);
+}
+
+void move_radial(int radius)
+{
+    // uart_init();
+    // io_redirect();
+    // radius in mm
+    uint16_t m = 0, n = 0, n_prev = 0, totalSteps = radius * stepHeightInv;
+    for (m = 0; m < 2 * totalSteps; m++)
+    {
+        n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
+        // // n = sqrt(-1000);
+        // // printf("m = %u\nn = %u\nn_prev = %u\n\n", m, n, n_prev);
+        if (((int32_t)n) - n_prev >= 1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+        {
+            for (; n_prev < n; n_prev++)
+            {
+                make_step_Y(1);
+            }
+        }
+        else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+        {
+            for (; n_prev > n; n_prev--)
+            {
+                make_step_Y(0);
+            }
+        }
+        make_step_X(1);
+    }
+    // for (m = 2 * totalSteps; m >= 0; m--) HAHHAHAHA cannot be written like that, hahaha,
+    // because m is gonna be equal to 0 after it gets decremented and starts again positive, bigger than 0, so it is infinite loop
+    for (m = 2 * totalSteps; m > 0; m--) // like that works
+    {
+        n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
+        if (((int32_t)n) - n_prev >= 1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+        {
+            for (; n_prev < n; n_prev++)
+            {
+                make_step_Y(0);
+            }
+        }
+        else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+        {
+            for (; n_prev > n; n_prev--)
+            {
+                make_step_Y(1);
+            }
+        }
+        make_step_X(0);
+    }
 }
