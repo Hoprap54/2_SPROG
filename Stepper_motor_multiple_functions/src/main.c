@@ -56,7 +56,7 @@ int main(void)
         case b0:
             // move_B_PD();
             // make_step_X(0);
-            move_deltas(30, 10);
+            move_deltas(10, 30);
 
             break;
         case b1:
