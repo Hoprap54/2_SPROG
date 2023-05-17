@@ -41,7 +41,7 @@ void delay_ms(unsigned int t_ms){
 
 void move_F_PB()
 {
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 8; i++)
         {
                 PORTB = pos[i];
                 delay_ms(3);
@@ -51,7 +51,7 @@ void move_F_PB()
 
 void move_B_PB()
 {
-        for (int i = 5; i >= 0; i--)
+        for (int i = 7; i >= 0; i--)
         {
                 PORTB = pos[i];
                 delay_ms(3);
@@ -61,7 +61,7 @@ void move_B_PB()
 
 void move_F_PD()
 {
-        for (int i = 5; i >= 0; i--)
+        for (int i = 7; i >= 0; i--)
         {
                 PORTD = pos[i] << 4;
                 delay_ms(3);
@@ -71,7 +71,7 @@ void move_F_PD()
 
 void move_B_PD()
 {
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 8; i++)
         {
                 PORTD = pos[i] << 4;
                 delay_ms(3);
@@ -82,7 +82,7 @@ void move_B_PD()
 void move_same_time_B()
 {
         int j = 0;
-        for (int i = 6; i >= 0; i--, j++)
+        for (int i = 7; i >= 0; i--, j++)
         {
                 PORTD = pos[j] << 4;
                 PORTB = pos[i];
@@ -95,7 +95,7 @@ void move_same_time_B()
 void move_same_time_F()
 {
         int j = 3;
-        for (int i = 0; i < 6; i++, j--)
+        for (int i = 0; i < 8; i++, j--)
         {
                 PORTD = pos[j] << 4;
                 PORTB = pos[i];
