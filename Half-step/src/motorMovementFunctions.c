@@ -16,7 +16,7 @@
 char pos[8] = {0b0001, 0b0101, 0b0100, 0b0110, 0b0010, 0b1010, 0b1000, 0b1001}; // Motor configuration
 char lastPosX = 0b0000;
 char lastPosY = 0b0000;
-
+unsigned int sp = 1;
 float stepHeightInv = 200 / 1.25;
 
 void init_timer0(void)
@@ -44,7 +44,7 @@ void move_F_PB()
         for (int i = 0; i < 8; i++)
         {
                 PORTB = pos[i];
-                delay_ms(3);
+                delay_ms(sp);
                 lastPosX = i;
         }
 }
@@ -54,7 +54,7 @@ void move_B_PB()
         for (int i = 7; i >= 0; i--)
         {
                 PORTB = pos[i];
-                delay_ms(3);
+                delay_ms(sp);
                 lastPosX = i;
         }
 }
@@ -64,7 +64,7 @@ void move_F_PD()
         for (int i = 7; i >= 0; i--)
         {
                 PORTD = pos[i] << 4;
-                delay_ms(3);
+                _delay_us(800);
                 lastPosY = i;
         }
 }
@@ -74,33 +74,21 @@ void move_B_PD()
         for (int i = 0; i < 8; i++)
         {
                 PORTD = pos[i] << 4;
-                delay_ms(3);
+                _delay_us(900);
                 lastPosY = i;
         }
 }
 
-void move_same_time_B()
-{
-        int j = 0;
-        for (int i = 7; i >= 0; i--, j++)
-        {
-                PORTD = pos[j] << 4;
-                PORTB = pos[i];
-                delay_ms(3);
-                lastPosY = j;
-                lastPosX = i;
-        }
+void move_step_L(){
+    int turns = 50;
+    for(int j = 0; j < turns ; j++){
+        move_F_PB();
+    }
 }
 
-void move_same_time_F()
-{
-        int j = 3;
-        for (int i = 0; i < 8; i++, j--)
-        {
-                PORTD = pos[j] << 4;
-                PORTB = pos[i];
-                delay_ms(3);
-                lastPosY = j;
-                lastPosX = i;
-        }
+void move_step_R(){
+    int turns = 50;
+    for(int j = 0; j < turns ; j++){
+        move_F_PD();
+    }
 }
