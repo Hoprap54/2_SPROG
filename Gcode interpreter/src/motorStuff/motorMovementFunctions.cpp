@@ -259,3 +259,34 @@ void move_deltas(int dx, int dy)
             make_step_Y(1);
     }
 }
+
+void funny_arc_equations(double A[], double B[], double r){
+    // These equations calculate from:
+    // Start point, end point and radius
+    // to:
+    // An arc described by its origin (center) and span angle (turning CCW from start point to end point)
+
+    // Middle point coordinate calculations
+    double Mx = (B[0] - A[0])/2; // M x
+    double My = (B[1] - A[1])/2; // M y
+
+    // Delta value between point A and M
+    double dx = Mx - A[0]; // dx from M to A
+    double dy = My - A[1]; // dy from M to A
+
+    double c = sqrt(dx*dx + dy*dy); // Half chord length
+
+    double l = sqrt(r*r - c*c); // Perpendicular length from chord to center of arc
+
+    // Perpendicular unit vector for delta vector
+    double pe_dx = -dy/c;
+    double pe_dy =  dx/c;
+
+    // Perpendicular vector with proper length
+    double p_dx = pe_dx*l;
+    double p_dy = pe_dy*l;
+
+    // Vector AC from point A to center of arc C
+    double ACx = dx + p_dx;
+    double ACy = dy + p_dy;
+}
