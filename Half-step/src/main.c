@@ -51,23 +51,16 @@ int main(void){
     while (1){
         switch (PINC){ // Read buttons
             case b0:
-                // move_B_PD();
-                make_step_X(0);
-                // move_deltas(10, 30);
+                move_B_PD();
                 break;
             case b1:
-                // move_F_PD();
-                make_step_X(1);
-                // for (int i = 0; i < 200; i++)
-                //     make_step_X(1);
+                move_F_PD();
                 break;
             case b2:
-                make_step_Y(1);
-                // move_F_PB();
+                move_F_PB();
                 break;
             case b3:
-                make_step_Y(0);
-                // move_B_PB();
+                move_B_PB();
                 break;
             case b4:
                 move_same_time_F();
