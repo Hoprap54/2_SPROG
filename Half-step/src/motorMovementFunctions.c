@@ -11,10 +11,9 @@
 #include "motorMovementFunctions.h"
 #include <stdbool.h>
 #include <math.h>
-#include "algorithms.h"
 
-#define d 1.25                                  // One turn moves 1.25mm
-char pos[4] = {0b0001, 0b0100, 0b0010, 0b1000}; // Motor configuration
+#define d 1.25  // One turn moves 1.25mm
+char pos[6] = {0b0001, 0b0101, 0b0100, 0b0110, 0b0010, 0b1010, 0b1000, 0b1001}; // Motor configuration
 char lastPosX = 0b0000;
 char lastPosY = 0b0000;
 
@@ -28,8 +27,7 @@ void init_timer0(void)
         TCCR0B |= (1 << CS01) | (1 << CS00); // Set prescaler to 64
 }
 
-void delay_ms(unsigned int t_ms)
-{
+void delay_ms(unsigned int t_ms){
         init_timer0();
         for (unsigned int i = 0; i < t_ms; i++)
         {
@@ -43,7 +41,7 @@ void delay_ms(unsigned int t_ms)
 
 void move_F_PB()
 {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 8; i++)
         {
                 PORTB = pos[i];
                 delay_ms(3);
@@ -53,7 +51,7 @@ void move_F_PB()
 
 void move_B_PB()
 {
-        for (int i = 3; i >= 0; i--)
+        for (int i = 7; i >= 0; i--)
         {
                 PORTB = pos[i];
                 delay_ms(3);
@@ -63,7 +61,7 @@ void move_B_PB()
 
 void move_F_PD()
 {
-        for (int i = 3; i >= 0; i--)
+        for (int i = 7; i >= 0; i--)
         {
                 PORTD = pos[i] << 4;
                 delay_ms(3);
@@ -73,7 +71,7 @@ void move_F_PD()
 
 void move_B_PD()
 {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 8; i++)
         {
                 PORTD = pos[i] << 4;
                 delay_ms(3);
@@ -84,7 +82,7 @@ void move_B_PD()
 void move_same_time_B()
 {
         int j = 0;
-        for (int i = 3; i >= 0; i--, j++)
+        for (int i = 7; i >= 0; i--, j++)
         {
                 PORTD = pos[j] << 4;
                 PORTB = pos[i];
@@ -97,7 +95,7 @@ void move_same_time_B()
 void move_same_time_F()
 {
         int j = 3;
-        for (int i = 0; i < 4; i++, j--)
+        for (int i = 0; i < 8; i++, j--)
         {
                 PORTD = pos[j] << 4;
                 PORTB = pos[i];
@@ -247,65 +245,16 @@ void move_full_circle(int radius)
         // }
 }
 
-void move_deltas(double dx, double dy)
+void move_deltas(int dx, int dy)
 {
         // works only for dy > dx and / is natural
 
-        uart_init();
-        io_redirect();
+        int r = dy / dx;
 
-        int stepsDoneX = 0;
-        int stepsDoneY = 0;
-
-        bool xDirection = 1;
-        bool yDirection = 1;
-
-        if (dx < 0)
+        for (int i = 0; i < dx * stepHeightInv; i++)
         {
-                xDirection = 0;
-                dx = (-1) * dx;
-        }
-        if (dy < 0)
-        {
-                yDirection = 0;
-                dy = (-1) * dy;
-        }
-
-        if (dx >= dy)
-        {
-                double ratio = dx / dy;
-                uint16_t intPartOfRatio = truncf(ratio);
-                // double doublePartOfRatio = ratio - intPartOfRatio;
-                int precision = 10;
-                uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
-
-                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-                printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
-                printf("intPartOfRatio = %d\n", intPartOfRatio);
-
-                for (int i = 0; i < round(dy * stepHeightInv); i++)
-                {
-                        stepsDoneY++;
-                        // make_step_Y(yDirection);
-                        for (int j = 0; j < intPartOfRatio; j++)
-                        {
-                                stepsDoneX++;
-                                // make_step_X(xDirection);
-                        }
-                        if (doublePartOfRatio >= precision)
-                        {
-                                stepsDoneX++;
-                                // make_step_X(xDirection);
-                                doublePartOfRatio -= precision;
-                        }
-                        doublePartOfRatio += doublePartOfRatio;
-                        printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-                }
-                printf("xSteps = %d\n", stepsDoneX);
-                printf("ySteps = %d\n", stepsDoneY);
-                printf("ratio = %f\n", ratio);
-                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-                printf("intPartOfRatio = %d\n", intPartOfRatio);
-                delay_ms(1000);
+                make_step_X(1);
+                for (int j = 0; j < r; j++)
+                        make_step_Y(1);
         }
 }
