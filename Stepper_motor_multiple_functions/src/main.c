@@ -35,6 +35,10 @@
 #define b6 0b00110000
    
 volatile int flag; // Flag used to get out of the switch when a limit switch has been pressed
+void enable_int(void){
+    EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0 & INT1 
+    sei(); // Turn on interrupts
+}
 
 int main(void){
     /* Declaration of I/O Pins */
@@ -48,9 +52,8 @@ int main(void){
     // Buttons
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
-
-    EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0 & INT1 
-    sei(); // Turn on interrupts
+    
+    enable_int();
 
     while (1){
         flag = 1;
