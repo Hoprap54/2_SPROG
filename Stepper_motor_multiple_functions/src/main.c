@@ -49,6 +49,7 @@ int main(void){
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
 
+<<<<<<< Updated upstream
     EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0 & INT1 
     sei(); // Turn on interrupts
 
@@ -89,6 +90,47 @@ int main(void){
                     PORTB = 0X00; // Set all output to 0
                     break;
             }
+=======
+    unsigned int mm_data = 0;
+    move_deltas(67.994, 19.998);
+    while (1)
+    {
+        switch (PINC)
+        { // Read buttons
+        case b0:
+            // move_B_PD();
+            make_step_X(0);
+
+            break;
+        case b1:
+            // move_F_PD();
+            make_step_X(1);
+            // for (int i = 0; i < 200; i++)
+            //     make_step_X(1);
+            break;
+        case b2:
+            make_step_Y(1);
+            // move_F_PB();
+            break;
+        case b3:
+            make_step_Y(0);
+            // move_B_PB();
+            break;
+        case b4:
+            move_same_time_F();
+            break;
+        case b5:
+            move_same_time_B();
+            break;
+        case b6:
+            // move_full_circle(30);
+            move_deltas(67.994, 19.998);
+            break;
+        default:
+            PORTD = 0X00; // Set all output to 0
+            PORTB = 0X00; // Set all output to 0
+            break;
+>>>>>>> Stashed changes
         }
     }
 }

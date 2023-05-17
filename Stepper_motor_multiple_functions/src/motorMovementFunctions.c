@@ -11,6 +11,7 @@
 #include "motorMovementFunctions.h"
 #include <stdbool.h>
 #include <math.h>
+#include "algorithms.h"
 
 #define d 1.25                                  // One turn moves 1.25mm
 char pos[4] = {0b0001, 0b0100, 0b0010, 0b1000}; // Motor configuration
@@ -246,16 +247,65 @@ void move_full_circle(int radius)
         // }
 }
 
-void move_deltas(int dx, int dy)
+void move_deltas(double dx, double dy)
 {
         // works only for dy > dx and / is natural
 
-        int r = dy / dx;
+        uart_init();
+        io_redirect();
 
-        for (int i = 0; i < dx * stepHeightInv; i++)
+        int stepsDoneX = 0;
+        int stepsDoneY = 0;
+
+        bool xDirection = 1;
+        bool yDirection = 1;
+
+        if (dx < 0)
         {
-                make_step_X(1);
-                for (int j = 0; j < r; j++)
-                        make_step_Y(1);
+                xDirection = 0;
+                dx = (-1) * dx;
+        }
+        if (dy < 0)
+        {
+                yDirection = 0;
+                dy = (-1) * dy;
+        }
+
+        if (dx >= dy)
+        {
+                double ratio = dx / dy;
+                uint16_t intPartOfRatio = truncf(ratio);
+                // double doublePartOfRatio = ratio - intPartOfRatio;
+                int precision = 10;
+                uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+
+                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+                printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
+                printf("intPartOfRatio = %d\n", intPartOfRatio);
+
+                for (int i = 0; i < round(dy * stepHeightInv); i++)
+                {
+                        stepsDoneY++;
+                        // make_step_Y(yDirection);
+                        for (int j = 0; j < intPartOfRatio; j++)
+                        {
+                                stepsDoneX++;
+                                // make_step_X(xDirection);
+                        }
+                        if (doublePartOfRatio >= precision)
+                        {
+                                stepsDoneX++;
+                                // make_step_X(xDirection);
+                                doublePartOfRatio -= precision;
+                        }
+                        doublePartOfRatio += doublePartOfRatio;
+                        printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+                }
+                printf("xSteps = %d\n", stepsDoneX);
+                printf("ySteps = %d\n", stepsDoneY);
+                printf("ratio = %f\n", ratio);
+                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+                printf("intPartOfRatio = %d\n", intPartOfRatio);
+                delay_ms(1000);
         }
 }
