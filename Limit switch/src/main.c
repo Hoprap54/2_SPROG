@@ -5,7 +5,6 @@
 unsigned char n;
 
 int main(void){
-
     uart_init();   // Open the communication to the micro controller
     io_redirect(); // Redirect input and output to the communication
 
