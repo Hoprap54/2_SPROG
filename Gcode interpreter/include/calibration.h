@@ -1,3 +1,3 @@
-_Bool calibrationX();
-_Bool calibrationY();
-_Bool calibrationZ();
+bool calibrationX();
+bool calibrationY();
+bool calibrationZ();
