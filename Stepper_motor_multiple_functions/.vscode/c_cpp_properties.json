@@ -8,17 +8,17 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Stepper_motor_multiple_functions/include",
-                "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Stepper_motor_multiple_functions/src",
-                "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Stepper_motor_multiple_functions/.pio/libdeps/nanoatmega328/Unity/src",
+                "c:/Users/benit/Documents/GitHub/2_SPROG/Stepper_motor_multiple_functions/include",
+                "c:/Users/benit/Documents/GitHub/2_SPROG/Stepper_motor_multiple_functions/src",
+                "c:/Users/benit/Documents/GitHub/2_SPROG/Stepper_motor_multiple_functions/.pio/libdeps/nanoatmega328/Unity/src",
                 ""
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Stepper_motor_multiple_functions/include",
-                    "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Stepper_motor_multiple_functions/src",
-                    "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Stepper_motor_multiple_functions/.pio/libdeps/nanoatmega328/Unity/src",
+                    "c:/Users/benit/Documents/GitHub/2_SPROG/Stepper_motor_multiple_functions/include",
+                    "c:/Users/benit/Documents/GitHub/2_SPROG/Stepper_motor_multiple_functions/src",
+                    "c:/Users/benit/Documents/GitHub/2_SPROG/Stepper_motor_multiple_functions/.pio/libdeps/nanoatmega328/Unity/src",
                     ""
                 ]
             },
@@ -31,7 +31,7 @@
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",
-            "compilerPath": "C:/Users/svenm/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+            "compilerPath": "C:/Users/benit/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
             "compilerArgs": [
                 "-mmcu=atmega328p",
                 ""

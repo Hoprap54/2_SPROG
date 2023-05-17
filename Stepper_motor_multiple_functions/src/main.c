@@ -1,4 +1,7 @@
 /*
+ * Limit switch
+ *   PD2 -> LL1 & LR1
+ *   PD3 -> LL2 & LR2
  * Buttons
  *   PC0 -> B0
  *   PC1 -> B1
@@ -30,17 +33,14 @@
 #define b4 0b00111001
 #define b5 0b00110110
 #define b6 0b00110000
+   
+volatile int flag; // Flag used to get out of the switch when a limit switch has been pressed
 
-int main(void)
-{
-    uart_init();   // Open the communication to the micro controller
-    io_redirect(); // Redirect input and output to the communication
-
+int main(void){
     /* Declaration of I/O Pins */
     // M1
-    DDRD = 0xF0; // Output for M1
-    // PD2 (INT0 pin) is now an input
-    PORTD |= (1<<DD3)|(1<<DD2)(1<<DD1)(1<<DD0); // turn On the Pull-up
+    DDRD = 0xF0; // Output for M1 and Input for limit switch
+    PORTD |= (1<<DD3)|(1<<DD2)|(1<<DD1)|(1<<DD0); // Turn On the Pull-up
 
     // M2
     DDRB = 0xFF; // Output for M2
@@ -49,47 +49,54 @@ int main(void)
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
 
-    EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0
-    sei(); // turn on interrupts
+    EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0 & INT1 
+    sei(); // Turn on interrupts
 
-    while (1)
-    {
-        switch (PINC)
-        { // Read buttons
-        case b0:
-            // move_B_PD();
-            // make_step_X(0);
-
-            move_deltas(10, 30);
-
-            break;
-        case b1:
-            // move_F_PD();
-            make_step_X(1);
-            // for (int i = 0; i < 200; i++)
-            //     make_step_X(1);
-            break;
-        case b2:
-            make_step_Y(1);
-            // move_F_PB();
-            break;
-        case b3:
-            make_step_Y(0);
-            // move_B_PB();
-            break;
-        case b4:
-            move_same_time_F();
-            break;
-        case b5:
-            move_same_time_B();
-            break;
-        case b6:
-            move_full_circle(30);
-            break;
-        default:
-            PORTD = 0X00; // Set all output to 0
-            PORTB = 0X00; // Set all output to 0
-            break;
+    while (1){
+        flag = 1;
+        while(flag){
+            switch (PINC){ // Read buttons
+                case b0:
+                    // move_B_PD();
+                    make_step_X(0);
+                    // move_deltas(10, 30);
+                    break;
+                case b1:
+                    // move_F_PD();
+                    make_step_X(1);
+                    // for (int i = 0; i < 200; i++)
+                    //     make_step_X(1);
+                    break;
+                case b2:
+                    make_step_Y(1);
+                    // move_F_PB();
+                    break;
+                case b3:
+                    make_step_Y(0);
+                    // move_B_PB();
+                    break;
+                case b4:
+                    move_same_time_F();
+                    break;
+                case b5:
+                    move_same_time_B();
+                    break;
+                case b6:
+                    move_full_circle(30);
+                    break;
+                default:
+                    PORTD &= ~((1<<DD7)|(1<<DD6)|(1<<DD5)|(1<<DD4)); // Set all output to 0
+                    PORTB = 0X00; // Set all output to 0
+                    break;
+            }
         }
     }
+}
+
+ISR (INT0_vect){    // External interrupt for limit switch in down axis
+    flag = 0;
+}
+
+ISR (INT1_vect){ // External interrupt for limit switch in upper axis
+    flag = 0;
 }
