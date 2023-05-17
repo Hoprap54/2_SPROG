@@ -21,6 +21,7 @@
 #include "usart.h"
 #include "motorMovementFunctions.h"
 #include <stdbool.h>
+#include <avr/interrupt.h>
 
 #define b0 0b00111110
 #define b1 0b00111101
@@ -37,7 +38,9 @@ int main(void)
 
     /* Declaration of I/O Pins */
     // M1
-    DDRD = 0xFF; // Output for M1
+    DDRD = 0xF0; // Output for M1
+    // PD2 (INT0 pin) is now an input
+    PORTD |= (1<<DD3)|(1<<DD2)(1<<DD1)(1<<DD0); // turn On the Pull-up
 
     // M2
     DDRB = 0xFF; // Output for M2
@@ -46,11 +49,11 @@ int main(void)
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
 
-    unsigned int mm_data = 0;
+    EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0
+    sei(); // turn on interrupts
 
     while (1)
     {
-
         switch (PINC)
         { // Read buttons
         case b0:
