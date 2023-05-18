@@ -65,7 +65,7 @@ void move_F_PD()
         for (int i = 7; i >= 0; i--)
         {
                 PORTD = pos[i] << 4;
-                _delay_us(00);
+                _delay_us(900);
                 lastPosY = i;
         }
 }
@@ -257,7 +257,7 @@ void make_step_Y(bool direction)
                 }
         }
         PORTB = pos[lastPosY];
-        delay_ms(3);
+        _delay_us(900);
 }
 
 void move_full_circle(int radius)
