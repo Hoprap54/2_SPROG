@@ -46,7 +46,7 @@ void move_F_PB()
         for (int i = 0; i < 4; i++)
         {
                 PORTB = pos[i];
-                delay_ms(3);
+                _delay_us(v);
                 lastPosX = i;
         }
 }
@@ -101,7 +101,7 @@ void move_same_time_F()
         {
                 PORTD = pos[j] << 4;
                 PORTB = pos[i];
-                delay_ms(3);
+                _delay_us(3);
                 lastPosY = j;
                 lastPosX = i;
         }
