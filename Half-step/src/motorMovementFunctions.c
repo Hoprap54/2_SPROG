@@ -174,8 +174,12 @@ void move_same_time_one_step(bool xDirection, bool yDirection)
                 }
         }
 
-        PORTB = pos[lastPosY];
-        PORTD = pos[lastPosX] << 4;
+        PORTD &= 0x0F;
+        PORTD |= pos[lastPosX] << 4;
+
+        PORTB &= 0xF0;
+        PORTB |= pos[lastPosY];
+
         _delay_us(900);
 }
 
@@ -226,7 +230,9 @@ void make_step_X(bool direction)
                         lastPosX++;
                 }
         }
-        PORTD = pos[lastPosX] << 4;
+
+        PORTD &= 0x0F;
+        PORTD |= pos[lastPosX] << 4;
         _delay_us(900);
 }
 
@@ -256,7 +262,8 @@ void make_step_Y(bool direction)
                         lastPosY--;
                 }
         }
-        PORTB = pos[lastPosY];
+        PORTB &= 0xF0;
+        PORTB |= pos[lastPosY];
         _delay_us(900);
 }
 
