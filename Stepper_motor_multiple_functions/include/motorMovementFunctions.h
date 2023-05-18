@@ -11,3 +11,4 @@ void make_step_Y(_Bool direction);
 void make_step_X(_Bool direction);
 void move_full_circle(int radius);
 void move_deltas(double dx, double dy);
+void move_same_time_one_step(_Bool xDirection, _Bool yDirection);
