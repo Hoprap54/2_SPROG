@@ -15,5 +15,6 @@ void swap(uint8_t *, uint8_t *);
 void g_codes_exec(char *, uint8_t);
 void m_codes_exec(char *, uint8_t);
 void ins_exec();
+void file_exec(char name[]);
 
 #endif

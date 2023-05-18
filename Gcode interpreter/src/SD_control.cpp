@@ -1,3 +1,12 @@
+/*
+Connections
+// SD   -> Arduino Nano //
+   CS   -> SS   (D10/PB2)
+   MOSI -> MOSI (D11/PB3)
+   MISO -> MISO (D12/PB4)
+   SCK  -> SCK  (D13/PB5)
+*/
+
 #include "SD_control.h"
 
 File myFile;

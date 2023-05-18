@@ -1,12 +1,3 @@
-/*
-Connections
-// SD   -> Arduino Nano //
-   CS   -> SS   (D10/PB2)
-   MOSI -> MOSI (D11/PB3)
-   MISO -> MISO (D12/PB4)
-   SCK  -> SCK  (D13/PB5)
-*/
-
 // HELLOOOOOOOOOO CHRISTIAN
 
 #include <SPI.h>
@@ -16,22 +7,16 @@ Connections
 
 // chipSelect = SS digital pin number
 #define chipSelect 10
-#define FileName "lines.txt"
 
 // Main function
 void setup()
 {
-  char name[20] = FileName;
   // Start SD card
   SD_start(chipSelect);
 
-  // Open file
-  file_open(name);
-  // If file is opened succesfully, start executing file instructions
-  while (file_ready())
-  {
-    ins_exec();
-  }
+  file_exec("square.txt");
+  _delay_ms(1000);
+  file_exec("triangle.txt");
 }
 
 void loop()
