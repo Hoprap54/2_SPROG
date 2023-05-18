@@ -11,12 +11,14 @@
 // Main function
 void setup()
 {
+  char file1[20] = "square.txt";
+  char file2[20] = "triangle.txt";
   // Start SD card
   SD_start(chipSelect);
 
-  file_exec("square.txt");
+  file_exec(file1);
   _delay_ms(1000);
-  file_exec("triangle.txt");
+  file_exec(file2);
 }
 
 void loop()
