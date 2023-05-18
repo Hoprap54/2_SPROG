@@ -257,7 +257,7 @@ void make_step_Y(bool direction)
                 }
         }
         PORTB = pos[lastPosY];
-        delay_ms(3);
+        _delay_us(900);
 }
 
 void move_full_circle(int radius)

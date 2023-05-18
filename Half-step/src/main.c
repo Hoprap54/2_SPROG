@@ -47,7 +47,8 @@ int main(void)
     // Buttons
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
-
+    for (int i = 0; i < 400; i++)
+        make_step_X(0);
     while (1)
     {
         switch (PINC)
