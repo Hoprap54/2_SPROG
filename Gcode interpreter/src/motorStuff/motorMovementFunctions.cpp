@@ -260,7 +260,7 @@ void move_deltas(int dx, int dy)
     }
 }
 
-void funny_arc_equations(double A[], double B[], double r){
+void arc_move(double A[], double B[], double r){
     // These equations calculate from:
     // Start point, end point and radius
     // to:

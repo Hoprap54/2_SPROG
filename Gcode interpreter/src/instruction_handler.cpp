@@ -145,9 +145,10 @@ void g_codes_exec(char *array, uint8_t size)
     case 0: // Rapid repositioning
       Serial.println(" Rapid repositioning");
       get_pos_delta(array, size);
-      F = 2; // Max feedrate
 
-      // Exec move
+      
+
+      set_current_pos();
       break;
 
     case 1: // Linear interpolation
@@ -199,5 +200,15 @@ void ins_exec()
   }
 
   Serial.println(" ");
-  _delay_ms(500);
+}
+
+void file_exec(char name[]){
+  // Open file
+  file_open(name);
+  // If file is opened succesfully, start executing file instructions
+  while (file_ready())
+  {
+    ins_exec();
+  }
+  file_close();
 }

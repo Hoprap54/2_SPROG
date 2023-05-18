@@ -11,3 +11,4 @@ void make_step_Y(bool direction);
 void make_step_X(bool direction);
 void move_full_circle(int radius);
 void move_deltas(int dx, int dy);
+void arc_move(double A[], double B[], double r);
