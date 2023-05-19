@@ -1,5 +1,3 @@
-// HELLOOOOOOOOOO CHRISTIAN
-
 #include <SPI.h>
 
 #include "SD_control.h"
