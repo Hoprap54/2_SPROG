@@ -17,3 +17,16 @@ char usart_receive_char(){
     while(!(UCSR0A & (1 << RXC0))); // Wait for new data
     return UDR0; // Received data
 }
+
+void usart_send_string(char str[], uint8_t size){
+    for(uint8_t i = 0; i < size; i++){
+        usart_send_char(str[i]);
+    }
+}
+
+uint8_t usart_receive_string(char str[]){
+    uint8_t size = usart_receive_char();
+    for(uint8_t i = 0; i < size; i++){
+        *(str + i) = usart_receive_char();
+    }
+}

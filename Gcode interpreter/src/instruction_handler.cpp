@@ -1,5 +1,4 @@
 #include "instruction_handler.h"
-#include "SD_control.h"
 #include "motorMovementFunctions.h"
 
 // gcode memory positions ranked in order of most used
@@ -139,11 +138,11 @@ void g_codes_exec(char *array, uint8_t size)
   {
     uint8_t index = 0;
 
-    Serial.print(gcodes[i]);
+    // Serial.print(gcodes[i]);
     switch (gcodes[i])
     {
     case 0: // Rapid repositioning
-      Serial.println(" Rapid repositioning");
+      // Serial.println(" Rapid repositioning");
       get_pos_delta(array, size);
 
       
@@ -152,7 +151,7 @@ void g_codes_exec(char *array, uint8_t size)
       break;
 
     case 1: // Linear interpolation
-      Serial.println(" Linear interpolation");
+      // Serial.println(" Linear interpolation");
       get_pos_delta(array, size);
       index = has_letter('F', array, size);
       if (index)
@@ -167,15 +166,15 @@ void g_codes_exec(char *array, uint8_t size)
       break;
 
     case 2: // CW arc
-      Serial.println(" CW arc");
+      // Serial.println(" CW arc");
       break;
 
     case 3: // CCW arc
-      Serial.println(" CCW arc");
+      // Serial.println(" CCW arc");
       break;
 
     default:
-      Serial.println(" Code is not implemented!");
+      // Serial.println(" Code is not implemented!");
     }
   }
 }
@@ -184,31 +183,13 @@ void m_codes_exec(char *array, uint8_t size)
 {
 }
 
-void ins_exec()
+void ins_exec(char ins[], uint8_t size)
 {
-  char instruction[75] = "";
-  uint8_t succes = file_read_ins(instruction);
-  uint8_t ins_size = line_size(instruction);
+  // Serial.print(ins);
+  // Serial.print("- ");
+  // Serial.println(size);
 
-  if (succes)
-  {
-    Serial.print(instruction);
-    Serial.print("- ");
-    Serial.println(ins_size);
+  g_codes_exec(ins, size);
 
-    g_codes_exec(instruction, ins_size);
-  }
-
-  Serial.println(" ");
-}
-
-void file_exec(char name[]){
-  // Open file
-  file_open(name);
-  // If file is opened succesfully, start executing file instructions
-  while (file_ready())
-  {
-    ins_exec();
-  }
-  file_close();
+  // Serial.println(" ");
 }
