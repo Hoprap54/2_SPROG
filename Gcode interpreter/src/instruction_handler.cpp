@@ -174,6 +174,7 @@ void g_codes_exec(char *array, uint8_t size)
       break;
 
     default:
+      H++;
       // Serial.println(" Code is not implemented!");
     }
   }

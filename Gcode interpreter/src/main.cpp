@@ -11,10 +11,9 @@ void setup()
   
   while(1){
     char instruction[75] = "";
-    uint8_t ins_size = 0;
-    ins_size = usart_receive_string(instruction); // Get instruction and get size
-    ins_exec(instruction, ins_size); // Execute instruction
-    usart_send_char(1); // Send confirmation
+    uint8_t ins_size = usart_receive_string(instruction); // Get instruction and get size
+    //ins_exec(instruction, ins_size); // Execute instruction
+    usart_send_char('n'); // Send confirmation
   }
 }
 
