@@ -65,17 +65,18 @@ uint8_t file_read_ins(char *array){
     if(temp == 10){ // Skip LINE FEED
       continue;
     }
-    else if(temp == 0 || temp == '('){ // Exceptions: NULL character, NX comment (starts with '(')
+    else if(temp == '('){ // Exceptions: NX comment = starts with '('
       return 0; // Failure - due to exception
     }
-    else if(temp == '\r'){ // If CARRIAGE RETURN character
-      *(array + i) = temp;
-      return 1; // Succes
+    else if(temp == '\r' || temp == 0){ // If CARRIAGE RETURN or NULL character
+      *(array + i) = '\r';
+      return 1; // Succesfully read full instruction
     }
     *(array + i) = temp; // Assign character to array after check
     i++; // If no stop conditions move to next character
   }
-  return 0; // Failure
+  *(array + i) = '\r';
+  return 1; // Succes - file end, no CARRIAGE RETURN character
 }
 
 // Determines the size of a read line, but is dependent on a CARRIAGE RETURN character being preserved at the end of the line, otherwise it does not know that the line has ended and it will go outside the bounds of the array

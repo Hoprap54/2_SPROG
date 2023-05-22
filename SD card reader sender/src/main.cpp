@@ -10,14 +10,13 @@ void send_file(char []);
 // Main function
 void setup(){
     // Start SD card
-    Serial.begin(BAUD);
+    //Serial.begin(BAUD);
     SD_start(chip_select);
-    //usart_init(BAUD);
+    usart_init(BAUD);
 
     char file_exp[] = "thecube.txt";
     char file1[] = "square.txt";
     char file2[] = "triangle.txt";
-
 
     send_file(file1);
 }
@@ -33,24 +32,12 @@ void send_file(char file[]){
 
     while(file_ready()){ // If file is available
         char instruction[75] = ""; // Prepare for 1 instruction
-
+        
         if(file_read_ins(instruction)){ // read instruction and if read succesfully
             uint8_t ins_size = line_size(instruction); // Determine size of instruction
             usart_send_char(ins_size); // Send instruction size
             usart_send_string(instruction, ins_size); // Send instruction
             usart_receive_char(); // Wait for next instruction
-
-            /*
-            for(uint8_t i = 0; i < ins_size; i++){
-                Serial.print((uint8_t)instruction[i]);
-                Serial.print(" ");
-            }
-            Serial.println(" ");
-            for(uint8_t i = 0; i < ins_size; i++){
-                Serial.print(instruction[i]);
-            }
-            Serial.println(" ");
-            */
         }
         else{
             break;
