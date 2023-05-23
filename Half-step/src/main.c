@@ -3,9 +3,10 @@
  *   PD2 -> LL1 & LR1
  *   PD3 -> LL2 & LR2
  * Buttons
- *   PC0 -> B0
- *   PC1 -> B1
- *   PC2 -> B2
+ *   PD2 ->
+ *   PD3 ->
+ *   PD4 ->
+ *   PD5 ->
  * M1
  *   PD4 -> In1
  *   PD5 -> In2
@@ -33,53 +34,48 @@
 #define b4 0b00111001
 #define b5 0b00110110
 #define b6 0b00110000
-
-volatile int flag; // Flag used to get out of the switch when a limit switch has been pressed
+   
 
 int main(void){
-    /* Declaration of I/O Pins */ 
+    /* Declaration of I/O Pins */
     // M1
-    DDRD = 0xF0; // Output for M1 and Input for limit switch
-    PORTD |= (1<<DD3)|(1<<DD2)|(1<<DD1)|(1<<DD0); // Turn On the Pull-up
-
     // M2
-    DDRB = 0xFF; // Output for M2
+    // DDRC |= (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3) | (1 << DDC4) | (1 << DDC5) | (1 << DDC6) | (1 << 7);
+    // DDRC = 0xFF;
+    // PORTC = 0x00;
+    DDRD |= (1 << DD4) | (1 << DD5) | (1 << DD6) | (1 << DD7);
+    DDRB |= (1 << DDB0) | (1 << DDB1) | (1 << DDB2) | (1 << DDB3);
 
     // Buttons
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
-    
-    enable_int();
 
     while (1){
-        flag = 1;
-        while(flag){        
-            switch (PINC){ // Read buttons
-                case b0:    
-                    move_B_PB();
-                    break;
-                case b1:
-                    move_F_PB();
-                    break;
-                case b2:        
-                    move_F_PD();
-                    break;
-                case b3:
-                    move_B_PD();
-                    break;
-                case b4:
-                    move_step_L();
-                    break;
-                case b5:
-                    move_step_R();
-                    break;
-                case b6:
-                    break;
-                default:
-                    PORTD &= ~((1<<DD7)|(1<<DD6)|(1<<DD5)|(1<<DD4)); // Set all output to 0
-                    PORTB = 0X00; // Set all output to 0
-                    break;
-            }
+        switch (PINC){ // Read buttons
+            case b0:
+                move_B_PB();
+                break;
+            case b1:
+                move_F_PB();
+                break;
+            case b2:        
+                move_F_PD();
+                break;
+            case b3:
+                move_B_PD();
+                break;
+            case b4:
+                move_step_L();
+                break;
+            case b5:
+                move_step_R();
+                break;
+            case b6:
+                break;
+            default:
+                PORTD &= ~((1<<DD7)|(1<<DD6)|(1<<DD5)|(1<<DD4)); // Set all output to 0
+                PORTB = 0X00; // Set all output to 0
+                break;
         }
     }
 }

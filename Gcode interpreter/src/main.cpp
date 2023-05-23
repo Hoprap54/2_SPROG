@@ -1,36 +1,25 @@
-/*
-Connections
-// SD   -> Arduino Nano //
-   CS   -> SS   (D10/PB2)
-   MOSI -> MOSI (D11/PB3)
-   MISO -> MISO (D12/PB4)
-   SCK  -> SCK  (D13/PB5)
-*/
-
-// HELLOOOOOOOOOO CHRISTIAN
-
-#include <SPI.h>
-
-#include "SD_control.h"
 #include "instruction_handler.h"
+#include "usart_comm.h"
 
-// chipSelect = SS digital pin number
-#define chipSelect 10
-#define FileName "lines.txt"
+#include <util/delay.h>
+#include <stdio.h>
+
+#define BAUD 9600
 
 // Main function
 void setup()
 {
-  char name[20] = FileName;
-  // Start SD card
-  SD_start(chipSelect);
+  usart_init(BAUD);
 
-  // Open file
-  file_open(name);
-  // If file is opened succesfully, start executing file instructions
-  while (file_ready())
+  while (1)
   {
-    ins_exec();
+    char instruction[75] = "";
+
+    uint8_t ins_size = usart_receive_char();     // Receive instruction size
+    usart_receive_string(instruction, ins_size); // Get instruction
+
+    ins_exec(instruction, ins_size); // Execute instruction
+    usart_send_char('n');            // Send confirmation
   }
 }
 
