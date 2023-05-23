@@ -10,7 +10,6 @@
             "includePath": [
                 "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/include",
                 "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/src",
-                "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/.pio/libdeps/nanoatmega328new/SD",
                 "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
                 "C:/Users/Christian/.platformio/packages/framework-arduino-avr/cores/arduino",
                 "C:/Users/Christian/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
@@ -25,7 +24,6 @@
                 "path": [
                     "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/include",
                     "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/src",
-                    "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/.pio/libdeps/nanoatmega328new/SD",
                     "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
                     "C:/Users/Christian/.platformio/packages/framework-arduino-avr/cores/arduino",
                     "C:/Users/Christian/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",

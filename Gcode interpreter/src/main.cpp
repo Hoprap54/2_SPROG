@@ -1,24 +1,25 @@
-// HELLOOOOOOOOOO CHRISTIAN
-
-#include <SPI.h>
-
-#include "SD_control.h"
 #include "instruction_handler.h"
+#include "usart_comm.h"
 
-// chipSelect = SS digital pin number
-#define chipSelect 10
+#include <util/delay.h>
+#include <stdio.h>
+
+#define BAUD 9600
 
 // Main function
 void setup()
 {
-  char file1[20] = "square.txt";
-  char file2[20] = "triangle.txt";
-  // Start SD card
-  SD_start(chipSelect);
+  usart_init(BAUD);
 
-  file_exec(file1);
-  _delay_ms(1000);
-  file_exec(file2);
+  while(1){
+    char instruction[75] = "";
+
+    uint8_t ins_size = usart_receive_char(); // Receive instruction size
+    usart_receive_string(instruction, ins_size); // Get instruction
+
+    ins_exec(instruction, ins_size); // Execute instruction
+    usart_send_char('n'); // Send confirmation
+  }
 }
 
 void loop()

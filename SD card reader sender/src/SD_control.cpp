@@ -14,10 +14,10 @@ File myFile;
 // Start the SD card
 void SD_start(unsigned int CS){
   // Open serial communications - necessary for SPI
-  Serial.begin(9600);
-  while(!Serial){}
+  //Serial.begin(9600);
+  //while(!Serial){}
 
-  Serial.print("Initializing SD card...");
+  //Serial.print("Initializing SD card...");
   // Note that even if it's not used as the CS pin, the hardware SS pin 
   // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
   // or the SD library functions will not work. 
@@ -25,10 +25,10 @@ void SD_start(unsigned int CS){
   
   // Initialize SD card
   if(!SD.begin(CS)) {
-    Serial.println("initialization failed!");
+    //Serial.println("initialization failed!");
     return;
   }
-  Serial.println("initialization done.");
+  //Serial.println("initialization done.");
 }
 
 uint8_t file_ready(){
@@ -41,19 +41,19 @@ uint8_t file_ready(){
 uint8_t file_open(char *name){
   myFile = SD.open(name);
   if(myFile){
-    Serial.println(name);
+    //Serial.println(name);
     return 1;
   }
   // if the file didn't open, print an error:
-  Serial.print("Error opening ");
-  Serial.println(name);
+  //Serial.print("Error opening ");
+  //Serial.println(name);
   return 0;
 }
 
 void file_close(){
   // Close the file when finished
   myFile.close();
-  Serial.println("- Code completed");
+  //Serial.println("- Code completed");
 }
 
 // Reads a line in file and replaces values in array by given pointer
@@ -65,17 +65,18 @@ uint8_t file_read_ins(char *array){
     if(temp == 10){ // Skip LINE FEED
       continue;
     }
-    if(temp == 0 || temp == '('){ // Exceptions: NULL character, NX comment (starts with '(')
-      return 0; // Failure
+    else if(temp == '('){ // Exceptions: NX comment = starts with '('
+      return 0; // Failure - due to exception
     }
-    if(temp == '\r'){ // If CARRIAGE RETURN character
-      *(array + i) = temp;
-      return 1; // Succes
+    else if(temp == '\r' || temp == 0){ // If CARRIAGE RETURN or NULL character
+      *(array + i) = '\r';
+      return 1; // Succesfully read full instruction
     }
     *(array + i) = temp; // Assign character to array after check
     i++; // If no stop conditions move to next character
   }
-  return 0; // Failure
+  *(array + i) = '\r';
+  return 1; // Succes - file end, no CARRIAGE RETURN character
 }
 
 // Determines the size of a read line, but is dependent on a CARRIAGE RETURN character being preserved at the end of the line, otherwise it does not know that the line has ended and it will go outside the bounds of the array
