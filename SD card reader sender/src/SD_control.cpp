@@ -66,6 +66,7 @@ uint8_t file_read_ins(char *array){
       continue;
     }
     else if(temp == '('){ // Exceptions: NX comment = starts with '('
+      while(myFile.read() != '\r'){} // Set it to start at the next line by making the file handler run through every letter in line until CARRIAGE RETURN character
       return 0; // Failure - due to exception
     }
     else if(temp == '\r' || temp == 0){ // If CARRIAGE RETURN or NULL character
