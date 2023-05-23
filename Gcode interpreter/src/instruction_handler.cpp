@@ -3,18 +3,18 @@
 
 // gcode memory positions ranked in order of most used
 const uint8_t move_gcodes[] = {0, 1, 2, 3, 28, 30}; // The different movement gcodes, necessary to find the singular movement gcode in any instruction
-const uint8_t n_move_gcodes = 6; // Number of different movement gcodes in array above
+const uint8_t n_move_gcodes = 6;                    // Number of different movement gcodes in array above
 
 uint8_t last_gcode = 254; // Needed to save the last movement gcode executed
 
 const char pos_letters[] = {'X', 'Y', 'Z'}; // Letters to identify position
-double pos_target[] = {0, 0, 0}; // Target XYZ position
-double pos_current[] = {0, 0, 0}; // Current XYZ position
-double pos_delta[] = {0, 0, 0}; // XYZ position delta
+double pos_target[] = {0, 0, 0};            // Target XYZ position
+double pos_current[] = {0, 0, 0};           // Current XYZ position
+double pos_delta[] = {0, 0, 0};             // XYZ position delta
 
 const char center_letters[] = {'I', 'J', 'K'}; // Letters to identify arc center position
-double center_target[] = {0, 0, 0}; // Arc center XYZ position
-double R = 0; // Radius
+double center_target[] = {0, 0, 0};            // Arc center XYZ position
+double R = 0;                                  // Radius
 
 // Other info
 double F = 0; // Feedrate
@@ -38,8 +38,8 @@ uint8_t has_letter(char key, char *array, uint8_t size)
 // Extract number from string at start pos in array of size until space (' ')
 double extract_number(uint8_t pos, char *array, uint8_t size)
 {
-  uint8_t k = 0; // Position in temp array
-  char temp[10] = ""; // Number extraction temp array
+  uint8_t k = 0;               // Position in temp array
+  char temp[10] = "";          // Number extraction temp array
   while (pos < size && k < 10) // While remaining within the bounds of the temp array and the argument array
   {
     if (*(array + pos) == ' ') // When space occurs, break
@@ -59,7 +59,7 @@ void get_pos_delta(char *array, uint8_t size)
 {
   uint8_t index = 0;
   for (uint8_t i = 0; i < 3; i++)
-  { // Check through X Y Z
+  {                                                  // Check through X Y Z
     index = has_letter(pos_letters[i], array, size); // If letter found, index = start pos of number after
     if (index)
     {                                                     // If X Y OR Z found
@@ -114,14 +114,14 @@ void g_codes_exec(char *array, uint8_t size)
       if (*(array + i) == 'G') // If 'G' found
       {
         gcodes[n] = (uint8_t)extract_number(i + 1, array, size); // Extract gcode number
-        if (move_found == 0) // If the movement gcode has not been found yet, check if found code is movement code
+        if (move_found == 0)                                     // If the movement gcode has not been found yet, check if found code is movement code
         {
           for (uint8_t k = 0; k < n_move_gcodes; k++) // Check with all known movement gcodes
           {
             if (gcodes[n] == move_gcodes[k]) // If found
             {
               swap(&gcodes[n], &gcodes[0]); // Swap movement gcode to index 0 of move_gcodes array
-              move_found = 1; // Set variable to 1, so movement code is not checked for the rest of the gcodes available - there is only 1 movement gcode in a single instruction
+              move_found = 1;               // Set variable to 1, so movement code is not checked for the rest of the gcodes available - there is only 1 movement gcode in a single instruction
             }
           }
         }
@@ -147,20 +147,21 @@ void g_codes_exec(char *array, uint8_t size)
       get_pos_delta(array, size);
 
       // Exec move
+      move_deltas(pos_delta[0], pos_delta[1]);
 
       set_current_pos();
       break;
 
-    case 1: // Linear interpolation
-      get_pos_delta(array, size); // Get position information
+    case 1:                                 // Linear interpolation
+      get_pos_delta(array, size);           // Get position information
       index = has_letter('F', array, size); // Check for possible feedrate
-      if (index) // If presenet
+      if (index)                            // If presenet
       {
         F = extract_number(index, array, size); // Extract the number
       }
 
       // Exec move
-      move_deltas((int)pos_delta[0], (int)pos_delta[1]); // Execute move
+      move_deltas(pos_delta[0], pos_delta[1]); // Execute move
 
       set_current_pos(); // Save target position as current position, as the move has been made
       break;

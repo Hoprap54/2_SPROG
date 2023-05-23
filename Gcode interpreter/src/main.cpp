@@ -11,14 +11,15 @@ void setup()
 {
   usart_init(BAUD);
 
-  while(1){
+  while (1)
+  {
     char instruction[75] = "";
 
-    uint8_t ins_size = usart_receive_char(); // Receive instruction size
+    uint8_t ins_size = usart_receive_char();     // Receive instruction size
     usart_receive_string(instruction, ins_size); // Get instruction
 
     ins_exec(instruction, ins_size); // Execute instruction
-    usart_send_char('n'); // Send confirmation
+    usart_send_char('n');            // Send confirmation
   }
 }
 
