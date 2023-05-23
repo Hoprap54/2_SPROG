@@ -147,8 +147,8 @@ void g_codes_exec(char *array, uint8_t size)
       get_pos_delta(array, size);
 
       // Exec move
-      move_deltas(pos_delta[0], pos_delta[1]);
-
+      //move_deltas(pos_delta[0], pos_delta[1]);
+      move_deltas(10, 10);
       set_current_pos();
       break;
 
@@ -182,7 +182,7 @@ void m_codes_exec(char *array, uint8_t size)
 {
 }
 
-void ins_exec(char ins[], uint8_t size)
+void ins_exec(char *ins, uint8_t size)
 {
   g_codes_exec(ins, size);
 }
