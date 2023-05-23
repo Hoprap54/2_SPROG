@@ -17,9 +17,13 @@ void setup()
 
     uint8_t ins_size = usart_receive_char();     // Receive instruction size
     usart_receive_string(instruction, ins_size); // Get instruction
-
-    ins_exec(instruction, ins_size); // Execute instruction
-    usart_send_char('n');            // Send confirmation
+    if (ins_size > 0)
+    {
+      DDRB |= 1 << PB5;
+      PORTB |= 1 << PB5;
+      ins_exec(instruction, ins_size); // Execute instruction
+      usart_send_char('n');            // Send confirmation
+    }
   }
 }
 

@@ -5,12 +5,13 @@
 #define chip_select 10
 #define BAUD 9600
 
-void send_file(char []);
+void send_file(char[]);
 
 // Main function
-void setup(){
+void setup()
+{
     // Start SD card
-    //Serial.begin(BAUD);
+    // Serial.begin(BAUD);
     SD_start(chip_select);
     usart_init(BAUD);
 
@@ -21,25 +22,34 @@ void setup(){
     send_file(file1);
 }
 
-void loop(){
+void loop()
+{
     // Necessary loop for arduino
 }
 
-
-
-void send_file(char file[]){
+void send_file(char file[])
+{
     file_open(file); // Open file specified
 
-    while(file_ready()){ // If file is available
+    while (file_ready())
+    {                              // If file is available
         char instruction[75] = ""; // Prepare for 1 instruction
-        
-        if(file_read_ins(instruction)){ // read instruction and if read succesfully
+
+        if (file_read_ins(instruction))
+        {                                              // read instruction and if read succesfully
             uint8_t ins_size = line_size(instruction); // Determine size of instruction
-            usart_send_char(ins_size); // Send instruction size
+            usart_send_char(ins_size);                 // Send instruction size
+            if (ins_size > 5)
+            {
+                DDRB |= 1 << PB5;
+                PORTB |= 1 << PB5;
+            }
+            // printf("%s\n", instruction);
             usart_send_string(instruction, ins_size); // Send instruction
-            usart_receive_char(); // Wait for next instruction
+            usart_receive_char();                     // Wait for next instruction
         }
-        else{
+        else
+        {
             break;
         }
     }
