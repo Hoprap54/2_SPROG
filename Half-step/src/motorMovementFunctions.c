@@ -180,7 +180,11 @@ void move_same_time_one_step(bool xDirection, bool yDirection)
         PORTB &= 0xF0;
         PORTB |= pos[lastPosY];
 
-        _delay_us(900);
+        // _delay_us(900);
+        _delay_us(2000);
+
+        PORTD &= 0x0F;
+        PORTB &= 0xF0;
 }
 
 void move_Center_From_X2()
@@ -233,7 +237,9 @@ void make_step_X(bool direction)
 
         PORTD &= 0x0F;
         PORTD |= pos[lastPosX] << 4;
-        _delay_us(900);
+        _delay_us(2000);
+        // delay_ms(1);
+        PORTD &= 0x0F;
 }
 
 void make_step_Y(bool direction)
@@ -264,7 +270,8 @@ void make_step_Y(bool direction)
         }
         PORTB &= 0xF0;
         PORTB |= pos[lastPosY];
-        _delay_us(900);
+        _delay_us(2000);
+        PORTB &= 0xF0;
 }
 
 void move_full_circle(int radius)
@@ -388,5 +395,31 @@ void move_deltas(double dx, double dy)
                 // printf("sumOfDoubles = %lu\n", sumOfDoubles);
                 // printf("intPartOfRatio = %d\n", intPartOfRatio);
                 // delay_ms(1000);
+        }
+        else
+        {
+                double ratio = dy / dx;
+                uint16_t intPartOfRatio = truncf(ratio);
+                int precision = 1000;
+                uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+                uint32_t sumOfDoubles = 0;
+                for (int i = 0; i < round(dx * stepHeightInv); i++)
+                {
+                        stepsDoneY++;
+                        stepsDoneX++;
+                        move_same_time_one_step(xDirection, yDirection);
+                        for (int j = 1; j < intPartOfRatio; j++)
+                        {
+                                stepsDoneY++;
+                                make_step_Y(yDirection);
+                        }
+                        if (sumOfDoubles >= precision)
+                        {
+                                stepsDoneY++;
+                                make_step_Y(yDirection);
+                                sumOfDoubles -= precision;
+                        }
+                        sumOfDoubles += doublePartOfRatio;
+                }
         }
 }
