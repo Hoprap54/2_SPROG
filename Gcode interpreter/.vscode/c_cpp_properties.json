@@ -8,29 +8,29 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/include",
-                "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/src",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/cores/arduino",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
-                "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Gcode interpreter/include",
+                "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Gcode interpreter/src",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
                 ""
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/include",
-                    "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/src",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/cores/arduino",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
-                    "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                    "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Gcode interpreter/include",
+                    "c:/Users/svenm/OneDrive/Desktop/github clone/2_SPROG/Gcode interpreter/src",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/cores/arduino",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                    "C:/Users/svenm/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
                     ""
                 ]
             },
@@ -45,7 +45,7 @@
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",
-            "compilerPath": "C:/Users/Christian/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+            "compilerPath": "C:/Users/svenm/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
             "compilerArgs": [
                 "-mmcu=atmega328p",
                 ""
