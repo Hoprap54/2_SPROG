@@ -39,11 +39,6 @@ void send_file(char file[])
         {                                              // read instruction and if read succesfully
             uint8_t ins_size = line_size(instruction); // Determine size of instruction
             usart_send_char(ins_size);                 // Send instruction size
-            if (ins_size > 5)
-            {
-                DDRB |= 1 << PB5;
-                PORTB |= 1 << PB5;
-            }
             // printf("%s\n", instruction);
             usart_send_string(instruction, ins_size); // Send instruction
             usart_receive_char();                     // Wait for next instruction
