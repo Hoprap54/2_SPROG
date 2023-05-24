@@ -17,13 +17,14 @@ void setup()
   {
     char instruction[75] = "";
 
+    usart_send_char(1);                      // Send confirmation
     uint8_t ins_size = usart_receive_char(); // Receive instruction size
                                              // if(ins_size > 5){
     PORTB |= (1 << PB5);
     //}
     usart_receive_string(instruction, ins_size); // Get instruction
-    ins_exec(instruction, ins_size);             // Execute instruction
-    usart_send_char(1); // Send confirmation
+    // _delay_ms(1000);
+    ins_exec(instruction, ins_size); // Execute instruction
     PORTB &= ~(1 << PB5);
   }
 }
