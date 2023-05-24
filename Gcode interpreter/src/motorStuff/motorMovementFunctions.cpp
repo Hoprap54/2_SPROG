@@ -356,70 +356,86 @@ void move_deltas(double dx, double dy)
         yDirection = 0;
         dy = (-1) * dy;
     }
-
+    double ratio;
     if (dx >= dy)
     {
-        double ratio = dx / dy;
-        uint16_t intPartOfRatio = truncf(ratio);
-        // double doublePartOfRatio = ratio - intPartOfRatio;
-        int precision = 1000;
-        uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
-        uint32_t sumOfDoubles = 0;
-        // printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-        // printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
-        // printf("intPartOfRatio = %d\n", intPartOfRatio);
-
-        for (int i = 0; i < round(dy * stepHeightInv); i++)
+        if (dy != 0)
         {
-            stepsDoneY++;
-            // make_step_Y(yDirection);
-            stepsDoneX++;
-            move_same_time_one_step(xDirection, yDirection);
-            for (int j = 1; j < intPartOfRatio; j++)
-            {
-                stepsDoneX++;
-                make_step_X(xDirection);
-            }
-            if (sumOfDoubles >= precision)
-            {
-                stepsDoneX++;
-                make_step_X(xDirection);
-                sumOfDoubles -= precision;
-            }
-            sumOfDoubles += doublePartOfRatio;
-        }
+            ratio = dx / dy;
+            uint16_t intPartOfRatio = truncf(ratio);
+            // double doublePartOfRatio = ratio - intPartOfRatio;
+            int precision = 1000;
+            uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+            uint32_t sumOfDoubles = 0;
+            // printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+            // printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
+            // printf("intPartOfRatio = %d\n", intPartOfRatio);
 
-        // printf("xSteps = %d\n", stepsDoneX);
-        // printf("ySteps = %d\n", stepsDoneY);
-        // printf("ratio = %f\n", ratio);
-        // printf("sumOfDoubles = %lu\n", sumOfDoubles);
-        // printf("intPartOfRatio = %d\n", intPartOfRatio);
-        // delay_ms(1000);
+            for (int i = 0; i < round(dy * stepHeightInv); i++)
+            {
+                // stepsDoneY++;
+                // make_step_Y(yDirection);
+                // stepsDoneX++;
+                move_same_time_one_step(xDirection, yDirection);
+                for (int j = 1; j < intPartOfRatio; j++)
+                {
+                    // stepsDoneX++;
+                    make_step_X(xDirection);
+                }
+                if (sumOfDoubles >= precision)
+                {
+                    // stepsDoneX++;
+                    make_step_X(xDirection);
+                    sumOfDoubles -= precision;
+                }
+                sumOfDoubles += doublePartOfRatio;
+            }
+
+            // printf("xSteps = %d\n", stepsDoneX);
+            // printf("ySteps = %d\n", stepsDoneY);
+            // printf("ratio = %f\n", ratio);
+            // printf("sumOfDoubles = %lu\n", sumOfDoubles);
+            // printf("intPartOfRatio = %d\n", intPartOfRatio);
+            // delay_ms(1000);
+        }
+        else
+        {
+            for (int i = 0; i < dx * stepHeightInv; i++)
+                make_step_X(xDirection);
+        }
     }
     else
     {
-        double ratio = dy / dx;
-        uint16_t intPartOfRatio = truncf(ratio);
-        int precision = 1000;
-        uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
-        uint32_t sumOfDoubles = 0;
-        for (int i = 0; i < round(dx * stepHeightInv); i++)
+        if (dx != 0)
         {
-            stepsDoneY++;
-            stepsDoneX++;
-            move_same_time_one_step(xDirection, yDirection);
-            for (int j = 1; j < intPartOfRatio; j++)
+            ratio = dy / dx;
+            uint16_t intPartOfRatio = truncf(ratio);
+            int precision = 1000;
+            uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+            uint32_t sumOfDoubles = 0;
+            for (int i = 0; i < round(dx * stepHeightInv); i++)
             {
-                stepsDoneY++;
-                make_step_Y(yDirection);
+                // stepsDoneY++;
+                // stepsDoneX++;
+                move_same_time_one_step(xDirection, yDirection);
+                for (int j = 1; j < intPartOfRatio; j++)
+                {
+                    // stepsDoneY++;
+                    make_step_Y(yDirection);
+                }
+                if (sumOfDoubles >= precision)
+                {
+                    // stepsDoneY++;
+                    make_step_Y(yDirection);
+                    sumOfDoubles -= precision;
+                }
+                sumOfDoubles += doublePartOfRatio;
             }
-            if (sumOfDoubles >= precision)
-            {
-                stepsDoneY++;
+        }
+        else
+        {
+            for (int i = 0; i < dy * stepHeightInv; i++)
                 make_step_Y(yDirection);
-                sumOfDoubles -= precision;
-            }
-            sumOfDoubles += doublePartOfRatio;
         }
     }
 }
