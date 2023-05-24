@@ -23,8 +23,7 @@ void setup()
     //}
     usart_receive_string(instruction, ins_size); // Get instruction
     ins_exec(instruction, ins_size);             // Execute instruction
-    _delay_ms(1000);
-    usart_send_char('n');                        // Send confirmation
+    usart_send_char(1);                        // Send confirmation
     PORTB &= ~(1 << PB5);
   }
 }
