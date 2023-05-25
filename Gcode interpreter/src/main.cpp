@@ -17,7 +17,6 @@ void setup()
   {
     char instruction[75] = "";
 
-    usart_send_char(1);                      // Send confirmation
     uint8_t ins_size = usart_receive_char(); // Receive instruction size
                                              // if(ins_size > 5){
     PORTB |= (1 << PB5);
@@ -26,6 +25,7 @@ void setup()
     // _delay_ms(1000);
     ins_exec(instruction, ins_size); // Execute instruction
     PORTB &= ~(1 << PB5);
+    usart_send_char(1);                      // Send confirmation
   }
 }
 
