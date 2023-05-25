@@ -20,8 +20,8 @@ void setup()
     char file2[] = "triangle.txt";
 
     send_file(file1);
-    _delay_ms(5000);
-    send_file(file2);
+    //     _delay_ms(5000);
+    //     send_file(file2);
 }
 
 void loop()
