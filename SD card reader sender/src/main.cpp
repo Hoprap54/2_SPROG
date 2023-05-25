@@ -39,11 +39,11 @@ void send_file(char file[])
 
         if (file_read_ins(instruction))
         {                                              // read instruction and if read succesfully
-            usart_receive_char();                      // Wait for confirmation
             uint8_t ins_size = line_size(instruction); // Determine size of instruction
             usart_send_char(ins_size);                 // Send instruction size
             // printf("%s\n", instruction);
             usart_send_string(instruction, ins_size); // Send instruction
+            usart_receive_char();                      // Wait for confirmation
         }
         else
         {
