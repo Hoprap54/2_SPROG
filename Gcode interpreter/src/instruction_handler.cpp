@@ -181,14 +181,11 @@ void ins_exec(char *array, uint8_t size)
         n++;
       }
     }
-    last_gcode = gcodes[0]; // Save movement gcode as last gcode
-  }
-
-
-  // Execute all setting gcodes, if there are any
-  for (uint8_t i = 0; i < n; i++)
-  {
-    g_code_exec(gcodes[i], array, size);
+    // Execute all setting gcodes, if there are any
+    for (uint8_t i = 0; i < n; i++)
+    {
+      g_code_exec(gcodes[i], array, size);
+    }
   }
 
   // Execute m code, if there are any

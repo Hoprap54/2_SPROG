@@ -31,24 +31,25 @@ void loop()
 
 void send_file(char file[])
 {
-    file_open(file); // Open file specified
+    if(file_open(file)){ // Open file specified
 
-    while (file_ready())
-    {                              // If file is available
-        char instruction[75] = ""; // Prepare for 1 instruction
+        while (file_ready())
+        {                              // If file is available
+            char instruction[75] = ""; // Prepare for 1 instruction
 
-        if (file_read_ins(instruction))
-        {                                              // read instruction and if read succesfully
-            uint8_t ins_size = line_size(instruction); // Determine size of instruction
-            usart_send_char(ins_size);                 // Send instruction size
-            // printf("%s\n", instruction);
-            usart_send_string(instruction, ins_size); // Send instruction
-            usart_receive_char();                      // Wait for confirmation
+            if (file_read_ins(instruction))
+            {                                              // read instruction and if read succesfully
+                uint8_t ins_size = line_size(instruction); // Determine size of instruction
+                usart_send_char(ins_size);                 // Send instruction size
+                usart_send_string(instruction, ins_size); // Send instruction
+                usart_receive_char();                      // Wait for confirmation
+            }
+            else
+            {
+                break;
+            }
         }
-        else
-        {
-            break;
-        }
+        file_close();
+
     }
-    file_close();
 }
