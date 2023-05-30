@@ -34,9 +34,9 @@
 #define b4 0b00111001
 #define b5 0b00110110
 #define b6 0b00110000
-   
 
-int main(void){
+int main(void)
+{
     /* Declaration of I/O Pins */
     // M1
     // M2
@@ -50,32 +50,35 @@ int main(void){
     DDRC = 0x00;  // Inputs for buttons
     PORTC = 0x3F; // Activate pullups
 
-    while (1){
-        switch (PINC){ // Read buttons
-            case b0:
-                move_B_PB();
-                break;
-            case b1:
-                move_F_PB();
-                break;
-            case b2:        
-                move_F_PD();
-                break;
-            case b3:
-                move_B_PD();
-                break;
-            case b4:
-                move_step_L();
-                break;
-            case b5:
-                move_step_R();
-                break;
-            case b6:
-                break;
-            default:
-                PORTD &= ~((1<<DD7)|(1<<DD6)|(1<<DD5)|(1<<DD4)); // Set all output to 0
-                PORTB = 0X00; // Set all output to 0
-                break;
-        }
-    }
+    // move_deltas(71.0, 21.0);
+    move_deltas(80.0, 1.0);
+
+    // while (1){
+    //     switch (PINC){ // Read buttons
+    //         case b0:
+    //             move_B_PB();
+    //             break;
+    //         case b1:
+    //             move_F_PB();
+    //             break;
+    //         case b2:
+    //             move_F_PD();
+    //             break;
+    //         case b3:
+    //             move_B_PD();
+    //             break;
+    //         case b4:
+    //             move_step_L();
+    //             break;
+    //         case b5:
+    //             move_step_R();
+    //             break;
+    //         case b6:
+    //             break;
+    //         default:
+    //             PORTD &= ~((1<<DD7)|(1<<DD6)|(1<<DD5)|(1<<DD4)); // Set all output to 0
+    //             PORTB = 0X00; // Set all output to 0
+    //             break;
+    //     }
+    // }
 }

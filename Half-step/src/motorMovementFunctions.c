@@ -17,11 +17,12 @@ char pos[8] = {0b0001, 0b0101, 0b0100, 0b0110, 0b0010, 0b1010, 0b1000, 0b1001}; 
 char lastPosX = 0b0000;
 char lastPosY = 0b0000;
 unsigned int v = 1;
-float stepHeightInv = 200 / 1.25;
+float stepHeightInv = 400 / 1.25;
 
-void enable_int(void){
-    EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0 & INT1 
-    sei(); // Turn on interrupts
+void enable_int(void)
+{
+        EIMSK |= (1 << INT1) | (1 << INT0); // Turns on interrupt for INT0 & INT1
+        sei();                              // Turn on interrupts
 }
 void init_timer0(void)
 {
@@ -31,7 +32,8 @@ void init_timer0(void)
         TCCR0B |= (1 << CS01) | (1 << CS00); // Set prescaler to 64
 }
 
-void delay_ms(unsigned int t_ms){
+void delay_ms(unsigned int t_ms)
+{
         init_timer0();
         for (unsigned int i = 0; i < t_ms; i++)
         {
@@ -43,7 +45,8 @@ void delay_ms(unsigned int t_ms){
         }
 }
 
-void move_F_PB(){
+void move_F_PB()
+{
         for (int i = 0; i < 8; i++)
         {
                 PORTB = pos[i];
@@ -339,8 +342,8 @@ void move_deltas(double dx, double dy)
 {
         // works only for dy > dx and / is natural
 
-        // uart_init();
-        // io_redirect();
+        uart_init();
+        io_redirect();
 
         int stepsDoneX = 0;
         int stepsDoneY = 0;
@@ -359,19 +362,21 @@ void move_deltas(double dx, double dy)
                 dy = (-1) * dy;
         }
 
+        uint32_t precision = 100000;
+
         if (dx >= dy)
         {
                 double ratio = dx / dy;
                 uint16_t intPartOfRatio = truncf(ratio);
                 // double doublePartOfRatio = ratio - intPartOfRatio;
-                int precision = 1000;
-                uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+
+                uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL;
                 uint32_t sumOfDoubles = 0;
-                // printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
                 // printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
                 // printf("intPartOfRatio = %d\n", intPartOfRatio);
 
-                for (int i = 0; i < round(dy * stepHeightInv); i++)
+                for (uint16_t i = 0; i < round(dy * stepHeightInv); i++)
                 {
                         stepsDoneY++;
                         // make_step_Y(yDirection);
@@ -380,19 +385,28 @@ void move_deltas(double dx, double dy)
                         for (int j = 1; j < intPartOfRatio; j++)
                         {
                                 stepsDoneX++;
-                                make_step_X(xDirection);
+                                // make_step_X(xDirection);
                         }
                         if (sumOfDoubles >= precision)
                         {
                                 stepsDoneX++;
-                                make_step_X(xDirection);
+                                // make_step_X(xDirection);
                                 sumOfDoubles -= precision;
+                                if (sumOfDoubles < 9UL)
+                                        sumOfDoubles = 0;
+                                printf("sumOfDoubles = %lu\n", sumOfDoubles);
                         }
                         sumOfDoubles += doublePartOfRatio;
+                        printf("sumOfDoubles = %lu\n", sumOfDoubles);
                 }
-
-                // printf("xSteps = %d\n", stepsDoneX);
-                // printf("ySteps = %d\n", stepsDoneY);
+                if (sumOfDoubles >= precision)
+                {
+                        make_step_X(xDirection);
+                        sumOfDoubles = 0;
+                }
+                printf("sumOfDoubles = %lu\n", sumOfDoubles);
+                printf("xSteps = %d\n", stepsDoneX);
+                printf("ySteps = %d\n", stepsDoneY);
                 // printf("ratio = %f\n", ratio);
                 // printf("sumOfDoubles = %lu\n", sumOfDoubles);
                 // printf("intPartOfRatio = %d\n", intPartOfRatio);
@@ -402,10 +416,9 @@ void move_deltas(double dx, double dy)
         {
                 double ratio = dy / dx;
                 uint16_t intPartOfRatio = truncf(ratio);
-                int precision = 1000;
-                uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+                uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL;
                 uint32_t sumOfDoubles = 0;
-                for (int i = 0; i < round(dx * stepHeightInv); i++)
+                for (uint16_t i = 0; i < round(dx * stepHeightInv); i++)
                 {
                         stepsDoneY++;
                         stepsDoneX++;
@@ -420,8 +433,15 @@ void move_deltas(double dx, double dy)
                                 stepsDoneY++;
                                 make_step_Y(yDirection);
                                 sumOfDoubles -= precision;
+                                if (sumOfDoubles < 9UL)
+                                        sumOfDoubles = 0;
                         }
                         sumOfDoubles += doublePartOfRatio;
+                }
+                if (sumOfDoubles >= precision)
+                {
+                        make_step_Y(yDirection);
+                        sumOfDoubles = 0;
                 }
         }
 }

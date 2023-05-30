@@ -19,9 +19,9 @@ void setup()
     char file1[] = "square.txt";
     char file2[] = "triangle.txt";
 
+    send_file(file2);
+    _delay_ms(5000);
     send_file(file1);
-    //     _delay_ms(5000);
-    //     send_file(file2);
 }
 
 void loop()
@@ -43,7 +43,7 @@ void send_file(char file[])
             usart_send_char(ins_size);                 // Send instruction size
             // printf("%s\n", instruction);
             usart_send_string(instruction, ins_size); // Send instruction
-            usart_receive_char();                      // Wait for confirmation
+            usart_receive_char();                     // Wait for confirmation
         }
         else
         {

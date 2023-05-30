@@ -11,6 +11,7 @@
 #include "motorMovementFunctions.h"
 #include <stdbool.h>
 #include <math.h>
+#include <calibration.h>
 
 #define d 1.25                                                                  // One turn moves 1.25mm
 char pos[8] = {0b0001, 0b0101, 0b0100, 0b0110, 0b0010, 0b1010, 0b1000, 0b1001}; // Motor configuration
@@ -18,6 +19,10 @@ char lastPosX = 0b0000;
 char lastPosY = 0b0000;
 unsigned int v = 1;
 float stepHeightInv = 400 / 1.25;
+
+bool xAxisDirection = 1;
+bool yAxisDirection = 1;
+bool machineState = 1;
 
 void init_timer0(void)
 {
@@ -128,6 +133,11 @@ void move_same_time_one_step(bool xDirection, bool yDirection)
 {
     // 1 = forward
     // 0 = back
+    if (machineState == 0)
+        return;
+
+    xAxisDirection = xDirection;
+    yAxisDirection = yDirection;
 
     if (xDirection)
     {
@@ -182,18 +192,12 @@ void move_same_time_one_step(bool xDirection, bool yDirection)
 
     // _delay_us(900);
     _delay_us(2000);
+    // delay_ms(1);
 
     PORTD &= 0x0F;
     PORTB &= 0xF0;
 }
 
-void move_Center_From_X2()
-{
-    int stepsNeeded = 0; // here needs to be a formula to calculate how many steps are needed, it is not possible to do
-    // by hand, it needs a diffrent program that will sum all the steps it has done from one limit switch to another
-    for (int i = 0; i < stepsNeeded; i++)
-        move_B_PB(); // this does 3 or 4 steps at a time, so we need to take that in consideration
-}
 // void move_t(int s){  // Move amount of turns
 //     int turns = 50*s;
 //     for(int j = 0; j < turns ; j++){
@@ -211,6 +215,10 @@ void make_step_X(bool direction)
 {
     // 1 = forward
     // 0 = back
+    if (machineState == 0)
+        return;
+
+    xAxisDirection = direction;
 
     if (direction)
     {
@@ -246,6 +254,11 @@ void make_step_Y(bool direction)
 {
     // 1 = forward
     // 0 = back
+    if (machineState == 0)
+        return;
+
+    yAxisDirection = direction;
+
     if (direction)
     {
         if (lastPosY == 7)
@@ -271,6 +284,7 @@ void make_step_Y(bool direction)
     PORTB &= 0xF0;
     PORTB |= pos[lastPosY];
     _delay_us(2000);
+    // delay_ms(1);
     PORTB &= 0xF0;
 }
 
@@ -335,28 +349,35 @@ void move_full_circle(int radius)
 
 void move_deltas(double dx, double dy)
 {
-    // works only for dy > dx and / is natural
 
     // uart_init();
     // io_redirect();
 
-    int stepsDoneX = 0;
-    int stepsDoneY = 0;
-
-    bool xDirection = 1;
-    bool yDirection = 1;
+    // int stepsDoneX = 0;
+    // int stepsDoneY = 0;
 
     if (dx < 0)
     {
-        xDirection = 0;
+        xAxisDirection = 0;
         dx = (-1) * dx;
+    }
+    else
+    {
+        xAxisDirection = 1;
     }
     if (dy < 0)
     {
-        yDirection = 0;
+        yAxisDirection = 0;
         dy = (-1) * dy;
     }
+    else
+    {
+        yAxisDirection = 1;
+    }
+
     double ratio;
+    uint32_t precision = 100000;
+
     if (dx >= dy)
     {
         if (dy != 0)
@@ -364,31 +385,38 @@ void move_deltas(double dx, double dy)
             ratio = dx / dy;
             uint16_t intPartOfRatio = truncf(ratio);
             // double doublePartOfRatio = ratio - intPartOfRatio;
-            int precision = 1000;
-            uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+            uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL;
             uint32_t sumOfDoubles = 0;
-            // printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+            printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
             // printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
             // printf("intPartOfRatio = %d\n", intPartOfRatio);
 
-            for (int i = 0; i < round(dy * stepHeightInv); i++)
+            for (uint16_t i = 0; i < round(dy * stepHeightInv); i++)
             {
                 // stepsDoneY++;
                 // make_step_Y(yDirection);
                 // stepsDoneX++;
-                move_same_time_one_step(xDirection, yDirection);
+                move_same_time_one_step(xAxisDirection, yAxisDirection);
                 for (int j = 1; j < intPartOfRatio; j++)
                 {
                     // stepsDoneX++;
-                    make_step_X(xDirection);
+                    make_step_X(xAxisDirection);
                 }
                 if (sumOfDoubles >= precision)
                 {
                     // stepsDoneX++;
-                    make_step_X(xDirection);
+                    make_step_X(xAxisDirection);
                     sumOfDoubles -= precision;
+                    if (sumOfDoubles < 9UL)
+                        sumOfDoubles = 0;
                 }
                 sumOfDoubles += doublePartOfRatio;
+            }
+
+            if (sumOfDoubles >= precision)
+            {
+                make_step_X(xAxisDirection);
+                sumOfDoubles = 0;
             }
 
             // printf("xSteps = %d\n", stepsDoneX);
@@ -400,8 +428,8 @@ void move_deltas(double dx, double dy)
         }
         else
         {
-            for (int i = 0; i < dx * stepHeightInv; i++)
-                make_step_X(xDirection);
+            for (uint16_t i = 0; i < dx * stepHeightInv; i++)
+                make_step_X(xAxisDirection);
         }
     }
     else
@@ -410,32 +438,39 @@ void move_deltas(double dx, double dy)
         {
             ratio = dy / dx;
             uint16_t intPartOfRatio = truncf(ratio);
-            int precision = 1000;
-            uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
+            uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL;
             uint32_t sumOfDoubles = 0;
-            for (int i = 0; i < round(dx * stepHeightInv); i++)
+            for (uint16_t i = 0; i < round(dx * stepHeightInv); i++)
             {
                 // stepsDoneY++;
                 // stepsDoneX++;
-                move_same_time_one_step(xDirection, yDirection);
+                move_same_time_one_step(xAxisDirection, yAxisDirection);
                 for (int j = 1; j < intPartOfRatio; j++)
                 {
                     // stepsDoneY++;
-                    make_step_Y(yDirection);
+                    make_step_Y(yAxisDirection);
                 }
                 if (sumOfDoubles >= precision)
                 {
                     // stepsDoneY++;
-                    make_step_Y(yDirection);
+                    make_step_Y(yAxisDirection);
                     sumOfDoubles -= precision;
+                    if (sumOfDoubles < 9UL)
+                        sumOfDoubles = 0;
                 }
                 sumOfDoubles += doublePartOfRatio;
+            }
+
+            if (sumOfDoubles >= precision)
+            {
+                make_step_Y(yAxisDirection);
+                sumOfDoubles = 0;
             }
         }
         else
         {
-            for (int i = 0; i < dy * stepHeightInv; i++)
-                make_step_Y(yDirection);
+            for (uint16_t i = 0; i < dy * stepHeightInv; i++)
+                make_step_Y(yAxisDirection);
         }
     }
 }
@@ -469,4 +504,13 @@ void arc_move(double A[], double B[], double r)
     // Vector AC from point A to center of arc C
     double ACx = dx + p_dx;
     double ACy = dy + p_dy;
+}
+
+bool giveXDirection()
+{
+    return xAxisDirection;
+}
+void changeMachineState(bool newState)
+{
+    machineState = newState;
 }
