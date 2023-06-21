@@ -26,17 +26,17 @@ void limitSwitchSetUp()
     EIMSK |= 1 << INT0;
     EICRA |= (1 << ISC01); // set INT0 to trigger on falling edge
 
-    DDRD &= ~(1 << PD3);
-    PORTD |= 1 << PD3;
-    EIMSK |= 1 << INT1;
-    EICRA |= (1 << ISC11); // set INT0 to trigger on falling edge
+    // DDRD &= ~(1 << PD3);
+    // PORTD |= 1 << PD3;
+    // EIMSK |= 1 << INT1;
+    // EICRA |= (1 << ISC11); // set INT1 to trigger on falling edge
 
     sei();
 }
 
 void calibrationX()
 {
-    isCalibratingX = 1;
+    isCalibratingX = true;
 
     isEndX = 0;
     while (!isEndX)
@@ -55,13 +55,13 @@ void calibrationX()
     delay_ms(2000);
     isEndX = 0;
 
-    isCalibratingX = 0;
+    isCalibratingX = false;
 
     for (unsigned long i = 0; i < totalPossibleStepsForX / 2; i++)
     {
         make_step_X(0);
     }
-    delay_ms(2000);
+    delay_ms(500);
 }
 
 void calibrationY()
@@ -102,11 +102,15 @@ ISR(INT0_vect)
 {
     // PORTD &= ~((1 << PD4) || (1 << PD5) || (1 << PD6) || (1 << PD7));
     // PORTB &= ~((1 << PB0) || (1 << PB1) || (1 << PB2) || (1 << PB3));
-    // // PORTD = 0b00000000;
-    // // PORTB = 0b00000000;
+    // PORTD = 0b00000000;
+    // PORTB = 0b00000000;
     if (isCalibratingX)
     {
         isEndX = true;
+    }
+    else if (isCalibratingY)
+    {
+        isEndY = true;
     }
     else
     {
@@ -117,13 +121,13 @@ ISR(INT0_vect)
 
 ISR(INT1_vect)
 {
-    if (isCalibratingY)
-    {
-        isEndY = true;
-    }
-    else
-    {
-        PORTB = (1 << PB5);
-        changeMachineState(0);
-    }
+    // if (isCalibratingY)
+    // {
+    //     isEndY = true;
+    // }
+    // else
+    // {
+    //     PORTB = (1 << PB5);
+    //     changeMachineState(0);
+    // }
 }

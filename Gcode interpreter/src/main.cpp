@@ -13,7 +13,7 @@
 // Main function
 void setup()
 {
-  // usart_init(BAUD);
+  usart_init(BAUD);
 
   DDRB |= (1 << PB5);
 
@@ -21,31 +21,42 @@ void setup()
 
   // move_full_circle(30);
 
-  // limitSwitchSetUp();
-
-  for (int i = 0; i < 20000; i++)
-  {
-    // make_step_Y(1);
-    make_step_X(1);
-  }
-
+  // for (uint16_t i = 0; i < 32000; i++)
+  // {
+  //   // move_same_time_one_step(1, 1);
+  //   make_step_X(1);
+  // }
+  limitSwitchSetUp();
   // calibrationX();
   // calibrationY();
 
-  // while (1)
-  // {
-  //   char instruction[75] = "";
+  while (1)
+  {
+    char instruction[75] = "";
+    char incomingChar = '1';
 
-  //   uint8_t ins_size = usart_receive_char(); // Receive instruction size
-  //                                            // if(ins_size > 5){
-  //   // PORTB |= (1 << PB5);
-  //   //}
-  //   usart_receive_string(instruction, ins_size); // Get instruction
-  //   // _delay_ms(1000);
-  //   ins_exec(instruction, ins_size); // Execute instruction
-  //   // PORTB &= ~(1 << PB5);
-  //   usart_send_char(1); // Send confirmation
-  // }
+    incomingChar = usart_receive_char();
+    if (incomingChar >= 'a' && incomingChar <= 'z')
+    {
+      dPadSignalProcessing(incomingChar);
+      // for (int i = 0; i < 1000; i++)
+      // {
+      //   make_step_X(0);
+      // }
+    }
+    else
+    {
+      uint8_t ins_size = incomingChar; // Receive instruction size
+                                       // if(ins_size > 5){
+      PORTB |= (1 << PB5);
+      //}
+      usart_receive_string(instruction, ins_size); // Get instruction
+      // _delay_ms(1000);
+      ins_exec(instruction, ins_size); // Execute instruction
+      PORTB &= ~(1 << PB5);
+      usart_send_char(1); // Send confirmation
+    }
+  }
 }
 
 void loop()

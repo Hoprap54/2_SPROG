@@ -102,10 +102,10 @@ void swap(uint8_t *a, uint8_t *b)
 
 void m_code_exec(uint8_t code, char *array, uint8_t size)
 {
-
 }
 
-void g_code_exec(uint8_t code, char *array, uint8_t size){
+void g_code_exec(uint8_t code, char *array, uint8_t size)
+{
   uint8_t index = 0;
 
   switch (code) // Switch to do specific gcode function depending on number
@@ -158,7 +158,7 @@ void ins_exec(char *array, uint8_t size)
       if (*(array + i) == 'G') // If 'G' found
       {
         uint8_t temp = (uint8_t)extract_number(i + 1, array, size); // Extract gcode number
-        if (move_found == 0)                                     // If the movement gcode has not been found yet, check if found code is movement code
+        if (move_found == 0)                                        // If the movement gcode has not been found yet, check if found code is movement code
         {
           for (uint8_t k = 0; k < n_move_gcodes; k++) // Check with all known movement gcodes
           {
@@ -169,7 +169,7 @@ void ins_exec(char *array, uint8_t size)
               break;
             }
           }
-          if(move_found == 0)
+          if (move_found == 0)
           {
             gcodes[n] = temp;
           }
@@ -199,4 +199,35 @@ void ins_exec(char *array, uint8_t size)
 
   // Execute movement gcode
   g_code_exec(last_gcode, array, size);
+}
+
+void dPadSignalProcessing(char incomingChar)
+{
+  switch (incomingChar)
+  {
+  case 'r':
+    make_step_X(1);
+    break;
+  case 'l':
+    make_step_X(0);
+    break;
+  case 'f':
+    make_step_Y(1);
+    break;
+  case 'b':
+    make_step_Y(0);
+    break;
+  case 'c':
+    move_same_time_one_step(1, 1);
+    break;
+  case 'd':
+    move_same_time_one_step(1, 0);
+    break;
+  case 'e':
+    move_same_time_one_step(0, 0);
+    break;
+  case 'g':
+    move_same_time_one_step(0, 1);
+    break;
+  }
 }
