@@ -43,7 +43,7 @@ void calibrationX()
     {
         make_step_X(0);
     }
-
+    cli();
     delay_ms(2000);
 
     isEndX = 0;
@@ -51,7 +51,12 @@ void calibrationX()
     {
         make_step_X(1);
         totalPossibleStepsForX++;
+        if (totalPossibleStepsForX == 5)
+        {
+            sei();
+        }
     }
+
     delay_ms(2000);
     isEndX = 0;
 
@@ -73,7 +78,7 @@ void calibrationY()
     {
         make_step_Y(0);
     }
-
+    cli();
     delay_ms(2000);
 
     isEndY = 0;
@@ -81,6 +86,10 @@ void calibrationY()
     {
         make_step_Y(1);
         totalPossibleStepsForY++;
+        if (totalPossibleStepsForY == 5)
+        {
+            sei();
+        }
     }
     delay_ms(2000);
     isEndY = 0;
