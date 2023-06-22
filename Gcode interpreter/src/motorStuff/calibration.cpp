@@ -16,7 +16,6 @@ volatile bool isCalibratingX = 0;
 volatile bool isEndX = 0;
 volatile bool isCalibratingY = 0;
 volatile bool isEndY = 0;
-volatile bool bouncingProblem = false;
 
 // this will increment till the max possible steps that can be done from one limit switch to another.
 unsigned long totalPossibleStepsForX = 0;
@@ -32,6 +31,7 @@ void limitSwitchSetUp()
     EIMSK |= (1 << INT0);
     EICRA |= (1 << ISC01); // set INT0 to trigger on falling edge.
 
+
     sei(); // activate all interrupts.
 
     // P.S when working with this i could not cli(); because when eventually i would sei(); for no reason the ISR would start working.
@@ -39,23 +39,27 @@ void limitSwitchSetUp()
 
 void calibrationX()
 {
+
     // reseting variables to their appropriate start value.
     totalPossibleStepsForX = 0;
+
     isCalibratingX = true;
-    bouncingProblem = false;
 
     isEndX = 0;     // this variable will be changed in the ISR when the limit switch will be pressed.
     while (!isEndX) // if isEndX = true it means it has reached the end and the axis will not continue in that direction.
     {
         make_step_X(0); // moving backward on X axis.
     }
+
     bouncingProblem = true; // the limit switch has the problem of bouncing after it has been released and bouncingProblem
                             // set to true will bypass the ISR functions for a number of steps.
     delay_ms(2000);         // after it got to the first limit switch it will wait for 2 seconds because why not.
 
+
     isEndX = 0; // reset this to allow for the next part of the X axis calibration.
     while (!isEndX)
     {
+
         make_step_X(1);           // moving forward on X axis.
         totalPossibleStepsForX++; // for each step increment the total steps that have been done.
 
@@ -65,6 +69,7 @@ void calibrationX()
                                      // in order for the bouncing to occur, which means that after this moment any
                                      // limit swtich press will be from the actual machine not limit switch bouncings.
         }
+
     }
     delay_ms(2000);
     isEndX = 0;
@@ -80,8 +85,6 @@ void calibrationX()
 
 void calibrationY()
 {
-    bouncingProblem = false;
-    totalPossibleStepsForY = 0;
     isCalibratingY = 1;
 
     isEndY = 0;
@@ -89,7 +92,7 @@ void calibrationY()
     {
         make_step_Y(0);
     }
-    bouncingProblem = true;
+
     delay_ms(2000);
 
     isEndY = 0;
@@ -97,11 +100,6 @@ void calibrationY()
     {
         make_step_Y(1);
         totalPossibleStepsForY++;
-
-        if (totalPossibleStepsForY == (unsigned long)3200) // for 10 mm
-        {
-            bouncingProblem = false;
-        }
     }
     delay_ms(2000);
     isEndY = 0;
@@ -125,20 +123,17 @@ ISR(INT0_vect)
     // PORTB &= ~((1 << PB0) || (1 << PB1) || (1 << PB2) || (1 << PB3));
     // PORTD = 0b00000000;
     // PORTB = 0b00000000;
-    if (!bouncingProblem)
+    if (isCalibratingX)
     {
-        if (isCalibratingX)
-        {
-            isEndX = true;
-        }
-        else if (isCalibratingY)
-        {
-            isEndY = true;
-        }
-        else
-        {
-            PORTB = (1 << PB5);
-            changeMachineState(0);
-        }
+        isEndX = true;
+    }
+    else if (isCalibratingY)
+    {
+        isEndY = true;
+    }
+    else
+    {
+        PORTB = (1 << PB5);
+        changeMachineState(0);
     }
 }
