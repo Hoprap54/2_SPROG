@@ -15,6 +15,7 @@ volatile bool isCalibratingX = 0;
 volatile bool isEndX = 0;
 volatile bool isCalibratingY = 0;
 volatile bool isEndY = 0;
+volatile bool bouncingProblem = false;
 
 unsigned long totalPossibleStepsForX = 0;
 unsigned long totalPossibleStepsForY = 0;
@@ -36,14 +37,16 @@ void limitSwitchSetUp()
 
 void calibrationX()
 {
+    totalPossibleStepsForX = 0;
     isCalibratingX = true;
+    bouncingProblem = false;
 
     isEndX = 0;
     while (!isEndX)
     {
         make_step_X(0);
     }
-
+    bouncingProblem = true;
     delay_ms(2000);
 
     isEndX = 0;
@@ -51,6 +54,11 @@ void calibrationX()
     {
         make_step_X(1);
         totalPossibleStepsForX++;
+
+        if (totalPossibleStepsForX == (unsigned long)3200) // for 10 mm
+        {
+            bouncingProblem = false;
+        }
     }
     delay_ms(2000);
     isEndX = 0;
@@ -66,6 +74,8 @@ void calibrationX()
 
 void calibrationY()
 {
+    bouncingProblem = false;
+    totalPossibleStepsForY = 0;
     isCalibratingY = 1;
 
     isEndY = 0;
@@ -73,7 +83,7 @@ void calibrationY()
     {
         make_step_Y(0);
     }
-
+    bouncingProblem = true;
     delay_ms(2000);
 
     isEndY = 0;
@@ -81,6 +91,11 @@ void calibrationY()
     {
         make_step_Y(1);
         totalPossibleStepsForY++;
+
+        if (totalPossibleStepsForY == (unsigned long)3200) // for 10 mm
+        {
+            bouncingProblem = false;
+        }
     }
     delay_ms(2000);
     isEndY = 0;
@@ -104,18 +119,21 @@ ISR(INT0_vect)
     // PORTB &= ~((1 << PB0) || (1 << PB1) || (1 << PB2) || (1 << PB3));
     // PORTD = 0b00000000;
     // PORTB = 0b00000000;
-    if (isCalibratingX)
+    if (!bouncingProblem)
     {
-        isEndX = true;
-    }
-    else if (isCalibratingY)
-    {
-        isEndY = true;
-    }
-    else
-    {
-        PORTB = (1 << PB5);
-        changeMachineState(0);
+        if (isCalibratingX)
+        {
+            isEndX = true;
+        }
+        else if (isCalibratingY)
+        {
+            isEndY = true;
+        }
+        else
+        {
+            PORTB = (1 << PB5);
+            changeMachineState(0);
+        }
     }
 }
 
