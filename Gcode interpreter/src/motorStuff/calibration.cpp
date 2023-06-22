@@ -22,8 +22,8 @@ unsigned long totalPossibleStepsForY = 0;
 void limitSwitchSetUp()
 {
     DDRD &= ~(1 << PD2);
-    PORTD |= 1 << PD2;
-    EIMSK |= 1 << INT0;
+    PORTD |= (1 << PD2);
+    EIMSK |= (1 << INT0);
     EICRA |= (1 << ISC01); // set INT0 to trigger on falling edge
 
     // DDRD &= ~(1 << PD3);
