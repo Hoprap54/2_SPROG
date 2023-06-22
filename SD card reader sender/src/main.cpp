@@ -104,6 +104,8 @@ void setup()
         }
     }
 
+    usart_send_char(1);
+
     char file_exp[] = "thecube.txt";
     char file1[] = "square.txt";
     char file2[] = "triangle.txt";
@@ -111,6 +113,8 @@ void setup()
     send_file(file2);
     _delay_ms(5000);
     send_file(file1);
+
+    usart_send_char(0);
 }
 
 void loop()

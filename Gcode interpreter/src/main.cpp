@@ -46,12 +46,13 @@ void setup()
       // }
     }
   
-    char instruction[75] = "";
-    uint8_t ins_size = usart_receive_char(); // Receive instruction size
-    
-    usart_receive_string(instruction, ins_size); // Get instruction
-    ins_exec(instruction, ins_size); // Execute instruction
-    usart_send_char(1); // Send confirmation
+    while(uint8_t ins_size = usart_receive_char()){
+      char instruction[75] = "";
+      
+      usart_receive_string(instruction, ins_size); // Get instruction
+      ins_exec(instruction, ins_size); // Execute instruction
+      usart_send_char(1); // Send confirmation
+    }
   
   }
 }
