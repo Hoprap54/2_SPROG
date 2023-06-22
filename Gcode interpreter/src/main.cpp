@@ -10,6 +10,8 @@
 
 #define BAUD 9600
 
+volatile char incomingChar = 's';
+
 // Main function
 void setup()
 {
@@ -30,13 +32,12 @@ void setup()
   calibrationX();
   calibrationY();
 
+  UCSR0B |= (1 << RXCIE0); // USART RX interrupt enable
+
   while (1)
   {
-    char instruction[75] = "";
-    char incomingChar = '1';
 
-    incomingChar = usart_receive_char();
-    if (incomingChar >= 'a' && incomingChar <= 'z')
+    if(incomingChar >= 'a' && incomingChar <= 'z')
     {
       dPadSignalProcessing(incomingChar);
       // for (int i = 0; i < 1000; i++)
@@ -46,14 +47,11 @@ void setup()
     }
     else
     {
-      uint8_t ins_size = incomingChar; // Receive instruction size
-                                       // if(ins_size > 5){
-      PORTB |= (1 << PB5);
-      //}
+      char instruction[75] = "";
+      uint8_t ins_size = usart_receive_char(); // Receive instruction size
+      
       usart_receive_string(instruction, ins_size); // Get instruction
-      // _delay_ms(1000);
       ins_exec(instruction, ins_size); // Execute instruction
-      PORTB &= ~(1 << PB5);
       usart_send_char(1); // Send confirmation
     }
   }
@@ -62,4 +60,11 @@ void setup()
 void loop()
 {
   // Keep empty - arduino loop function thingy
+}
+
+ISR(USART_RX_vect){
+  incomingChar = usart_receive_char();
+  if(incomingChar < 'a' || incomingChar > 'z'){ // If not dpad control code
+    UCSR0B &= ~(1 << RXCIE0); // USART RX interrupt disable - start reading gcode
+  }
 }

@@ -30,6 +30,8 @@ void setup()
     // DDRC = 0xFF;
     // PORTC = 0xFF;
     // _delay_ms(10000);
+    char now_char = 's';
+    char last_char = 's';
     while (mode)
     {
         x = adc_read(ADC_P1);
@@ -47,44 +49,59 @@ void setup()
         else if (x < 20 && y > 950)
         {
             // printf("Right \n");
-            usart_send_char('r');
+            // usart_send_char('r');
+            now_char = 'r';
         }
         else if (x > 660 && x < 710 && y > 950)
         {
             // printf("Left \n");
-            usart_send_char('l');
+            // usart_send_char('l');
+            now_char = 'l';
         }
         else if (x > 950 && y > 490 && y < 530)
         {
             // printf("Forward \n");
-            usart_send_char('f');
+            // usart_send_char('f');
+            now_char = 'f';
         }
         else if (x > 950 && y < 50)
         {
             // printf("Backward \n");
-            usart_send_char('b');
+            // usart_send_char('b');
+            now_char = 'b';
         }
         else if (x < 50 && y > 480 && y < 550)
         {
             // printf("Forward Right \n");
-            usart_send_char('c');
+            // usart_send_char('c');
+            now_char = 'c';
         }
         else if (x < 30 && y < 30)
         {
             // printf("Backward Right \n");
-            usart_send_char('d');
+            // usart_send_char('d');
+            now_char = 'd';
         }
         else if (x > 660 && x < 710 && y < 30)
         {
             // printf("Backward Left \n");
-            usart_send_char('e');
+            // usart_send_char('e');
+            now_char = 'e';
         }
         else if (x > 660 && x < 720 && y > 480 && y < 550)
         {
             // printf("Forward Left \n");
-            usart_send_char('g');
+            // usart_send_char('g');
+            now_char = 'g';
         }
-        _delay_us(100);
+        else{ // If no buttons are active, send 's' for stop
+            now_char = 's';
+        }
+
+        if(now_char != last_char){ // If command has changed, send change
+            usart_send_char(now_char);
+            last_char = now_char;
+        }
     }
 
     _delay_ms(2000);
