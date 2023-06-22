@@ -22,7 +22,7 @@ float stepHeightInv = 400 / 1.25;
 
 bool xAxisDirection = 1;
 bool yAxisDirection = 1;
-bool machineState = 1;
+volatile bool machineState = 1;
 
 void init_timer0(void)
 {
@@ -510,7 +510,7 @@ bool giveXDirection()
 {
     return xAxisDirection;
 }
-void changeMachineState(bool newState)
+void changeMachineState(volatile bool newState)
 {
     machineState = newState;
 }

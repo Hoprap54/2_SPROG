@@ -27,8 +27,8 @@ void setup()
   //   make_step_X(1);
   // }
   limitSwitchSetUp();
-  // calibrationX();
-  // calibrationY();
+  calibrationX();
+  calibrationY();
 
   while (1)
   {
