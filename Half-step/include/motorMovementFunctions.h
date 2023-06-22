@@ -1,4 +1,5 @@
 void init_timer0(void);
+void enable_int(void);
 void delay_ms(unsigned int t_ms);
 void move_F_PB();
 void move_B_PB();
@@ -6,3 +7,9 @@ void move_F_PD();
 void move_B_PD();
 void move_step_L();
 void move_step_R();
+void move_same_time_one_step(_Bool xDirection, _Bool yDirection);
+void move_Center_From_X2();
+void make_step_X(_Bool direction);
+void make_step_Y(_Bool direction);
+void move_full_circle(int radius);
+void move_deltas(double dx, double dy);

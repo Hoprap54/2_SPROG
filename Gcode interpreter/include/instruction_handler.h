@@ -12,8 +12,8 @@ void set_current_pos();
 void get_center(char *, uint8_t);
 void swap(uint8_t *, uint8_t *);
 
-void g_codes_exec(char *, uint8_t);
-void m_codes_exec(char *, uint8_t);
-void ins_exec();
-
+void g_code_exec(uint8_t, char *, uint8_t);
+void m_code_exec(uint8_t, char *, uint8_t);
+void ins_exec(char *, uint8_t);
+void dPadSignalProcessing(char incomingChar);
 #endif

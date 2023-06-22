@@ -46,7 +46,7 @@ void move_F_PB()
         for (int i = 0; i < 4; i++)
         {
                 PORTB = pos[i];
-                delay_ms(3);
+                _delay_us(v);
                 lastPosX = i;
         }
 }
@@ -101,10 +101,65 @@ void move_same_time_F()
         {
                 PORTD = pos[j] << 4;
                 PORTB = pos[i];
-                delay_ms(3);
+                _delay_us(3);
                 lastPosY = j;
                 lastPosX = i;
         }
+}
+
+void move_same_time_one_step(bool xDirection, bool yDirection)
+{
+        // 1 = forward
+        // 0 = back
+
+        if (xDirection)
+        {
+                if (lastPosX == 0)
+                {
+                        lastPosX = 3;
+                }
+                else
+                {
+                        lastPosX--;
+                }
+        }
+        else
+        {
+                if (lastPosX == 3)
+                {
+                        lastPosX = 0;
+                }
+                else
+                {
+                        lastPosX++;
+                }
+        }
+        if (yDirection)
+        {
+                if (lastPosY == 3)
+                {
+                        lastPosY = 0;
+                }
+                else
+                {
+                        lastPosY++;
+                }
+        }
+        else
+        {
+                if (lastPosY == 0)
+                {
+                        lastPosY = 3;
+                }
+                else
+                {
+                        lastPosY--;
+                }
+        }
+
+        PORTB = pos[lastPosY];
+        PORTD = pos[lastPosX] << 4;
+        delay_ms(3);
 }
 
 void move_Center_From_X2()
@@ -276,36 +331,38 @@ void move_deltas(double dx, double dy)
                 double ratio = dx / dy;
                 uint16_t intPartOfRatio = truncf(ratio);
                 // double doublePartOfRatio = ratio - intPartOfRatio;
-                int precision = 10;
+                int precision = 1000;
                 uint32_t doublePartOfRatio = (ratio - intPartOfRatio) * precision;
-
-                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-                printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
-                printf("intPartOfRatio = %d\n", intPartOfRatio);
+                uint32_t sumOfDoubles = 0;
+                // printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+                // printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
+                // printf("intPartOfRatio = %d\n", intPartOfRatio);
 
                 for (int i = 0; i < round(dy * stepHeightInv); i++)
                 {
                         stepsDoneY++;
                         // make_step_Y(yDirection);
-                        for (int j = 0; j < intPartOfRatio; j++)
+                        stepsDoneX++;
+                        move_same_time_one_step(xDirection, yDirection);
+                        for (int j = 1; j < intPartOfRatio; j++)
                         {
                                 stepsDoneX++;
-                                // make_step_X(xDirection);
+                                make_step_X(xDirection);
                         }
-                        if (doublePartOfRatio >= precision)
+                        if (sumOfDoubles >= precision)
                         {
                                 stepsDoneX++;
-                                // make_step_X(xDirection);
-                                doublePartOfRatio -= precision;
+                                make_step_X(xDirection);
+                                sumOfDoubles -= precision;
                         }
-                        doublePartOfRatio += doublePartOfRatio;
-                        printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+                        sumOfDoubles += doublePartOfRatio;
                 }
-                printf("xSteps = %d\n", stepsDoneX);
-                printf("ySteps = %d\n", stepsDoneY);
-                printf("ratio = %f\n", ratio);
-                printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-                printf("intPartOfRatio = %d\n", intPartOfRatio);
-                delay_ms(1000);
+
+                // printf("xSteps = %d\n", stepsDoneX);
+                // printf("ySteps = %d\n", stepsDoneY);
+                // printf("ratio = %f\n", ratio);
+                // printf("sumOfDoubles = %lu\n", sumOfDoubles);
+                // printf("intPartOfRatio = %d\n", intPartOfRatio);
+                // delay_ms(1000);
         }
 }

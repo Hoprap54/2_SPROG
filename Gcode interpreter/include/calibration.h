@@ -1,3 +1,4 @@
-bool calibrationX();
-bool calibrationY();
-bool calibrationZ();
+void calibrationX();
+void calibrationY();
+void calibrationZ();
+void limitSwitchSetUp();
