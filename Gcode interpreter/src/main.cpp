@@ -37,7 +37,7 @@ void setup()
   while (1)
   {
 
-    if(incomingChar >= 'a' && incomingChar <= 'z')
+    while(incomingChar >= 'a' && incomingChar <= 'z')
     {
       dPadSignalProcessing(incomingChar);
       // for (int i = 0; i < 1000; i++)
@@ -45,15 +45,14 @@ void setup()
       //   make_step_X(0);
       // }
     }
-    else
-    {
-      char instruction[75] = "";
-      uint8_t ins_size = usart_receive_char(); // Receive instruction size
-      
-      usart_receive_string(instruction, ins_size); // Get instruction
-      ins_exec(instruction, ins_size); // Execute instruction
-      usart_send_char(1); // Send confirmation
-    }
+  
+    char instruction[75] = "";
+    uint8_t ins_size = usart_receive_char(); // Receive instruction size
+    
+    usart_receive_string(instruction, ins_size); // Get instruction
+    ins_exec(instruction, ins_size); // Execute instruction
+    usart_send_char(1); // Send confirmation
+  
   }
 }
 

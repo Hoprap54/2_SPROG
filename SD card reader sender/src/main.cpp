@@ -104,8 +104,6 @@ void setup()
         }
     }
 
-    _delay_ms(2000);
-
     char file_exp[] = "thecube.txt";
     char file1[] = "square.txt";
     char file2[] = "triangle.txt";
