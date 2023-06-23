@@ -36,7 +36,7 @@ void setup()
   {
     UCSR0B |= (1 << RXCIE0); // USART RX interrupt enable
     incomingChar = 's';
-    while(incomingChar >= 'a' && incomingChar <= 'z')
+    while (incomingChar >= 'a' && incomingChar <= 'z')
     {
       dPadSignalProcessing(incomingChar);
     }
