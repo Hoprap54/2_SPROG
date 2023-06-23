@@ -41,8 +41,10 @@ void setup()
       dPadSignalProcessing(incomingChar);
     }
 
-    //calibrationX();
-    //calibrationY();
+    calibrationX();
+    calibrationY();
+
+    usart_send_char(1);
 
     while (uint8_t ins_size = usart_receive_char())
     {
