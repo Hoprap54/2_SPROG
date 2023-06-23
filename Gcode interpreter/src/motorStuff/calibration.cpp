@@ -72,9 +72,14 @@ void calibrationX()
     isCalibratingX = false; // Tells the ISR that another limit switch press will not be considered as
     // calibration but as an actual terrible mistake
 
+    bouncingProblem = true;                                        // when coming back it can also have a bouncing problem
     for (unsigned long i = 0; i < totalPossibleStepsForX / 2; i++) // reposition the block in the exact center.
     {
         make_step_X(0);
+        if (i == (unsigned long)3200) // for 10 mm.
+        {
+            bouncingProblem = false;
+        }
     }
     delay_ms(500);
 }
@@ -109,10 +114,14 @@ void calibrationY()
     isEndY = 0;
 
     isCalibratingY = 0;
-
+    bouncingProblem = true; // when coming back it can also have a bouncing problem
     for (unsigned long i = 0; i < totalPossibleStepsForY / 2; i++)
     {
         make_step_Y(0);
+        if (i == (unsigned long)3200) // for 10 mm.
+        {
+            bouncingProblem = false;
+        }
     }
     delay_ms(500);
 }
