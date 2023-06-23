@@ -27,10 +27,10 @@ void limitSwitchSetUp()
     // using only one External interrupt for all 4 limit switches, we do not care which
     // limit switch was activated because if at least one of them is activated that means
     // that something went wrong and will be left to the machinest to solve.
-    DDRD &= ~(1 << PD2);
-    PORTD |= (1 << PD2);
-    EIMSK |= (1 << INT0);
-    EICRA |= (1 << ISC01); // set INT0 to trigger on falling edge.
+    DDRD &= ~(1 << PD3) | (1 << PD2);
+    PORTD |= (1 << PD3) | (1 << PD2);
+    EIMSK |= (1 << INT1) | (1 << INT0);
+    EICRA |= (1 << ISC11) | (1 << ISC01); // set INT0 to trigger on falling edge.
 
     sei(); // activate all interrupts.
 
@@ -87,9 +87,9 @@ void calibrationX()
 // this is just as the X axis.
 void calibrationY()
 {
-    bouncingProblem = false;
     totalPossibleStepsForY = 0;
-    isCalibratingY = 1;
+    isCalibratingY = true;
+    bouncingProblem = false;
 
     isEndY = 0;
     while (!isEndY)
@@ -115,6 +115,7 @@ void calibrationY()
 
     isCalibratingY = 0;
     bouncingProblem = true; // when coming back it can also have a bouncing problem
+
     for (unsigned long i = 0; i < totalPossibleStepsForY / 2; i++)
     {
         make_step_Y(0);
