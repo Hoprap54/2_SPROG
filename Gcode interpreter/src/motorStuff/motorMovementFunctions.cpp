@@ -308,17 +308,18 @@ void move_deltas(double dx, double dy) // used for linear movement in gcode mode
                 {
                     make_step_X(xAxisDirection);
                 }
-                if (sumOfDoubles >= precision) // because in most cases the ratio would look like 1.2 2.532. 3.1234
+                if (sumOfDoubles >= precision) // because in most cases the ratio would look like 2.245 after doing the upper forloops a
+                // couple of time the 0.245*the number of times > 1 which means it can do another step and it should be done as fast as possible
                 {
                     make_step_X(xAxisDirection);
-                    sumOfDoubles -= precision;
-                    if (sumOfDoubles < 9UL)
+                    sumOfDoubles -= precision; // we substract the just made step (-1, which is actually - precision)
+                    if (sumOfDoubles < 9UL)    // there are still some errors in calculations that are small and this is used to correct for them.
                         sumOfDoubles = 0;
                 }
-                sumOfDoubles += doublePartOfRatio;
+                sumOfDoubles += doublePartOfRatio; // this is were the reminders get summed up
             }
 
-            if (sumOfDoubles >= precision)
+            if (sumOfDoubles >= precision) // this is here only to make sure that after the last step has been done it is not possible to do another step.
             {
                 make_step_X(xAxisDirection);
                 sumOfDoubles = 0;
