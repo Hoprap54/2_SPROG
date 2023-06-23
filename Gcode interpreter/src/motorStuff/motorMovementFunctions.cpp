@@ -297,17 +297,18 @@ void move_deltas(double dx, double dy) // used for linear movement in gcode mode
             ratio = dx / dy;
             uint16_t intPartOfRatio = truncf(ratio);                                        // taking full number from the ratio
             uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL; // taking the double part of the number and multipling with the precision.
-            uint32_t sumOfDoubles = 0;
-            printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
+            uint32_t sumOfDoubles = 0;                                                      // this will take care of when the sum of the remainders till this point
 
-            for (uint16_t i = 0; i < round(dy * stepHeightInv); i++)
+            for (uint16_t i = 0; i < round(dy * stepHeightInv); i++) // the number of steps that needs to be
+            // done by the axis with the smallest numbers of steps, which is Y axis in this case
             {
-                move_same_time_one_step(xAxisDirection, yAxisDirection);
-                for (int j = 1; j < intPartOfRatio; j++)
+                move_same_time_one_step(xAxisDirection, yAxisDirection); // move together one step
+                // because x axis has to do more steps lets see how many it needs to do
+                for (int j = 1; j < intPartOfRatio; j++) // intPartOfRatio can have values like 1 2 3... and this would mean that dx is 1 times bigger than dy, 2 times bigger....
                 {
                     make_step_X(xAxisDirection);
                 }
-                if (sumOfDoubles >= precision)
+                if (sumOfDoubles >= precision) // because in most cases the ratio would look like 1.2 2.532. 3.1234
                 {
                     make_step_X(xAxisDirection);
                     sumOfDoubles -= precision;
