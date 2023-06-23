@@ -30,11 +30,10 @@ void setup()
   // }
   limitSwitchSetUp();
 
-  UCSR0B |= (1 << RXCIE0); // USART RX interrupt enable
-
   while (1)
   {
-
+    UCSR0B |= (1 << RXCIE0); // USART RX interrupt enable
+    incomingChar = 's';
     while(incomingChar >= 'a' && incomingChar <= 'z')
     {
       dPadSignalProcessing(incomingChar);
@@ -44,12 +43,11 @@ void setup()
       // }
     }
 
-    calibrationX();
-    calibrationY();
-  
+    //calibrationX();
+    //calibrationY();
     while(uint8_t ins_size = usart_receive_char()){
       char instruction[75] = "";
-      
+    
       usart_receive_string(instruction, ins_size); // Get instruction
       ins_exec(instruction, ins_size); // Execute instruction
       usart_send_char(1); // Send confirmation

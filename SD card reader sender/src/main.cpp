@@ -46,7 +46,7 @@ void setup()
                 // printf("Enable \n");
                 mode = 0;
                 PORTC &= ~(1 << PC3);
-                PORTC |= 1 << PC4;
+                PORTC |=  (1 << PC4);
             }
             else if (x < 20 && y > 950)
             {
@@ -108,15 +108,14 @@ void setup()
 
         usart_send_char(1);
 
-        char file_exp[] = "thecube.txt";
-        char file1[] = "square.txt";
-        char file2[] = "triangle.txt";
+        char target_file[] = "CNC.txt";
 
-        send_file(file2);
-        _delay_ms(5000);
-        send_file(file1);
+        send_file(target_file);
 
         usart_send_char(0);
+        mode = 1;
+        PORTC &= ~(1 << PC4);
+        PORTC |=  (1 << PC3);
     }
 }
 
