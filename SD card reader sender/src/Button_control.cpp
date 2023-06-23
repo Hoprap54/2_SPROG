@@ -102,4 +102,5 @@ bool E_enable(void)
         e_prestate = e_enable;
         return 1;
     }
+    return 0;
 }
