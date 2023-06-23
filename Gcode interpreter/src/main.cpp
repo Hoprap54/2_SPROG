@@ -29,8 +29,6 @@ void setup()
   //   make_step_X(1);
   // }
   limitSwitchSetUp();
-  calibrationX();
-  calibrationY();
 
   UCSR0B |= (1 << RXCIE0); // USART RX interrupt enable
 
@@ -45,6 +43,9 @@ void setup()
       //   make_step_X(0);
       // }
     }
+
+    calibrationX();
+    calibrationY();
   
     while(uint8_t ins_size = usart_receive_char()){
       char instruction[75] = "";
