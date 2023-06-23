@@ -106,8 +106,8 @@ void setup()
             }
         }
 
-        usart_receive_char();
         usart_send_char(1);
+        usart_receive_char();
 
         char target_file[] = "CNC.txt";
 
