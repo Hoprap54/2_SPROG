@@ -308,7 +308,7 @@ void move_deltas(double dx, double dy) // used for linear movement in gcode mode
                 {
                     make_step_X(xAxisDirection);
                 }
-                if (sumOfDoubles >= precision)
+                if (sumOfDoubles >= precision) // because in most cases the ratio would look like 1.2 2.532. 3.1234
                 {
                     make_step_X(xAxisDirection);
                     sumOfDoubles -= precision;
