@@ -14,17 +14,18 @@
 #include <calibration.h>
 
 #define d 1.25                                                                  // One turn moves 1.25mm
-char pos[8] = {0b0001, 0b0101, 0b0100, 0b0110, 0b0010, 0b1010, 0b1000, 0b1001}; // Motor configuration
-char lastPosX = 0b0000;
-char lastPosY = 0b0000;
-unsigned int v = 1;
-float stepHeightInv = 400 / 1.25;
+char pos[8] = {0b0001, 0b0101, 0b0100, 0b0110, 0b0010, 0b1010, 0b1000, 0b1001}; // Motor configuration, this can be understood by
+// looking in the report where it explains how this bits get transformed into specific coils being energised
+char lastPosX = 0b0000;           // remembers the last motor configuration for X
+char lastPosY = 0b0000;           // remembers the last motor configuration for Y
+float stepHeightInv = 400 / 1.25; // this is the inverse of what distance it is gained from one step.
+// it is used the inverse of it only because i wanted to write number * stepHeightInv but not number * stepHeight.
 
-bool xAxisDirection = 1;
-bool yAxisDirection = 1;
-volatile bool machineState = 1;
+bool xAxisDirection = 1;        // remembers the direction of X axis, 1 = true = forward, 0 = false = backwards
+bool yAxisDirection = 1;        // remembers the direction of Y axis, 1 = true = forward, 0 = false = backwards
+volatile bool machineState = 1; // remembers the machine state.
 
-void init_timer0(void)
+void init_timer0(void) // set timer
 {
     TCNT0 = 0;                           // Reset counter
     OCR0A = 249;                         // Set compare register A
@@ -32,7 +33,7 @@ void init_timer0(void)
     TCCR0B |= (1 << CS01) | (1 << CS00); // Set prescaler to 64
 }
 
-void delay_ms(unsigned int t_ms)
+void delay_ms(unsigned int t_ms) // make our own delay function with the timer0
 {
     init_timer0();
     for (unsigned int i = 0; i < t_ms; i++)
@@ -45,103 +46,25 @@ void delay_ms(unsigned int t_ms)
     }
 }
 
-void move_F_PB()
-{
-    for (int i = 0; i < 8; i++)
-    {
-        PORTB = pos[i];
-        delay_ms(v);
-        lastPosX = i;
-    }
-}
-
-void move_B_PB()
-{
-    for (int i = 7; i >= 0; i--)
-    {
-        PORTB = pos[i];
-        delay_ms(v);
-        lastPosX = i;
-    }
-}
-
-void move_F_PD()
-{
-    for (int i = 7; i >= 0; i--)
-    {
-        PORTD = pos[i] << 4;
-        _delay_us(900);
-        lastPosY = i;
-    }
-}
-
-void move_B_PD()
-{
-    for (int i = 0; i < 8; i++)
-    {
-        PORTD = pos[i] << 4;
-        _delay_us(900);
-        lastPosY = i;
-    }
-}
-
-void move_step_L()
-{
-    int turns = 50;
-    for (int j = 0; j < turns; j++)
-    {
-        move_F_PB();
-    }
-}
-
-void move_step_R()
-{
-    int turns = 50;
-    for (int j = 0; j < turns; j++)
-    {
-        move_F_PD();
-    }
-}
-
-void move_same_time_B()
-{
-    int j = 0;
-    for (int i = 3; i >= 0; i--, j++)
-    {
-        PORTD = pos[j] << 4;
-        PORTB = pos[i];
-        delay_ms(3);
-        lastPosY = j;
-        lastPosX = i;
-    }
-}
-
-void move_same_time_F()
-{
-    int j = 3;
-    for (int i = 0; i < 4; i++, j--)
-    {
-        PORTD = pos[j] << 4;
-        PORTB = pos[i];
-        delay_ms(3);
-        lastPosY = j;
-        lastPosX = i;
-    }
-}
-
 void move_same_time_one_step(bool xDirection, bool yDirection)
 {
     // 1 = forward
     // 0 = back
     if (machineState == 0)
-        return;
+        return; // if the machineState = 0 it means the limit switch got pressed when it was not
+    // in calibration sequence which indicates that a big mistake has happened and that it should just live the
+    // function everytime it wants to do a step
 
+    // update the new directions for the current movement
     xAxisDirection = xDirection;
     yAxisDirection = yDirection;
 
-    if (xDirection)
+    if (xDirection) // because it is used a list and not a ciclical list when it
+    // gets to position 0 and 7 in the array it needs to restart from value 7 or 0 respectively
+    // so the movement can continue in the apropriate order. This order can be seen in the report.
+    // if the direction is forward = true it needs to go backwards through the array, I know, confussing xd.
     {
-        if (lastPosX == 0)
+        if (lastPosX == 0) // if it needs to go backwards through the array and the last position was 0 it means that it the next one needs to be 7
         {
             lastPosX = 7;
         }
@@ -152,7 +75,7 @@ void move_same_time_one_step(bool xDirection, bool yDirection)
     }
     else
     {
-        if (lastPosX == 7)
+        if (lastPosX == 7) // forward through the array if the last position was 7 the next one can be only 0 if not continue just incrementing the position.
         {
             lastPosX = 0;
         }
@@ -184,32 +107,21 @@ void move_same_time_one_step(bool xDirection, bool yDirection)
         }
     }
 
+    // after all that the last position variable lastPos(X/Y) got updated with the
+    // new position and the PORTs will be appropriately changed to the new lastPos(X/Y) value
+
     PORTD &= 0x0F;
-    PORTD |= pos[lastPosX] << 4;
+    PORTD |= pos[lastPosX] << 4; // because the motors on port B are set on the pins 4 5 6 and 7
+    // any array set like 0b0000xxxx needs to be bitshifted in order to work on the motors 0bxxxx0000
 
     PORTB &= 0xF0;
     PORTB |= pos[lastPosY];
 
-    // _delay_us(900);
-    // _delay_us(2000);
     delay_ms(1);
 
     PORTD &= 0x0F;
     PORTB &= 0xF0;
 }
-
-// void move_t(int s){  // Move amount of turns
-//     int turns = 50*s;
-//     for(int j = 0; j < turns ; j++){
-//         moveF();
-//     }
-// }
-// void move_d(int dis){   // Move certain distance
-//     int distance = dis*50/d;
-//     for(int j = 0; j < distance ; j++){
-//         moveB();
-//     }
-// }
 
 void make_step_X(bool direction)
 {
@@ -245,7 +157,6 @@ void make_step_X(bool direction)
 
     PORTD &= 0x0F;
     PORTD |= pos[lastPosX] << 4;
-    // _delay_us(2000);
     delay_ms(1);
     PORTD &= 0x0F;
 }
@@ -283,26 +194,21 @@ void make_step_Y(bool direction)
     }
     PORTB &= 0xF0;
     PORTB |= pos[lastPosY];
-    // _delay_us(2000);
     delay_ms(1);
     PORTB &= 0xF0;
 }
 
 void move_full_circle(int radius)
 {
-    // uart_init();
-    // io_redirect();
     // radius in mm
-    uint16_t m = 0, n = 0, n_prev = 0, totalSteps = radius * stepHeightInv;
-    bool direction = 1;
+    uint16_t m = 0, n = 0, n_prev = 0, totalSteps = radius * stepHeightInv; // totalSteps it is calculated only for a quarter of the circle
+    bool direction = 1;                                                     // keeps track of the direction in order to move.
     for (m = 0; m < 4 * totalSteps; m++)
     {
         if (m < 2 * totalSteps)
             n = (uint16_t)sqrt(2 * ((double)m) * radius * stepHeightInv - ((double)m) * m);
         else
             n = (uint16_t)sqrt(2 * ((double)(4 * (double)totalSteps - 1 - m)) * radius * stepHeightInv - ((double)(4 * (double)totalSteps - 1 - m)) * (4 * (double)totalSteps - 1 - m));
-        // // n = sqrt(-1000);
-        // // printf("m = %u\nn = %u\nn_prev = %u\n\n", m, n, n_prev);
         if (((int32_t)n) - n_prev >= 1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
         {
             for (; n_prev < n; n_prev++)
@@ -310,7 +216,7 @@ void move_full_circle(int radius)
                 make_step_Y(direction);
             }
         }
-        else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of tyoe uint16_t the - operation between them will give a result in uint16_t which cannot be negative
+        else if (((int32_t)n) - n_prev <= -1) // Because n and n_prev are of type uint16_t the - operation between them will give a result in uint16_t which cannot be negative
         {
             for (; n_prev > n; n_prev--)
             {
@@ -347,7 +253,7 @@ void move_full_circle(int radius)
     // }
 }
 
-void move_deltas(double dx, double dy)
+void move_deltas(double dx, double dy) // used for linear movement in gcode mode
 {
 
     // uart_init();
@@ -356,12 +262,13 @@ void move_deltas(double dx, double dy)
     // int stepsDoneX = 0;
     // int stepsDoneY = 0;
 
-    if (dx < 0)
+    if (dx < 0) // checking in what direction it moves on x axis
     {
-        xAxisDirection = 0;
-        dx = (-1) * dx;
+        xAxisDirection = 0; // if dx < 0 the direction will be set to 0
+        dx = (-1) * dx;     // because we know that the direction is backward we can
+        // just work with positive numbers in order to make life easier
     }
-    else
+    else // same for y axis
     {
         xAxisDirection = 1;
     }
@@ -376,35 +283,32 @@ void move_deltas(double dx, double dy)
     }
 
     double ratio;
-    uint32_t precision = 100000;
+    uint32_t precision = 100000; // because double calculations make aproximations mistakes it was decided
+    // to use uint32_t by multypling the really small double number by precision and taking it as the workable value
+    // after this any time of number and calculations needs to take in the account this change
+    // the problem can be exemplified  lets say that 0.000040000 + 0.000040000 = 0.000080000
+    // but c will make it as 0.000040000 + 0.000040000 = 0.000080001
+    // this algorithm can make tens of thousands of calculations which means that this error adds up.
 
-    if (dx >= dy)
+    if (dx >= dy) // taking for which one is bigger, because ratio>=1, the way the algorithm is made
     {
-        if (dy != 0)
+        if (dy != 0) // make sure dy is no 0, cause division by 0 xd
         {
             ratio = dx / dy;
-            uint16_t intPartOfRatio = truncf(ratio);
-            // double doublePartOfRatio = ratio - intPartOfRatio;
-            uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL;
+            uint16_t intPartOfRatio = truncf(ratio);                                        // taking full number from the ratio
+            uint32_t doublePartOfRatio = round((ratio - intPartOfRatio) * precision) + 1UL; // taking the double part of the number and multipling with the precision.
             uint32_t sumOfDoubles = 0;
             printf("doublePartOfRatio = %lu\n", doublePartOfRatio);
-            // printf("round(dy * stepHeightInv) = %f\n", round(dy * stepHeightInv));
-            // printf("intPartOfRatio = %d\n", intPartOfRatio);
 
             for (uint16_t i = 0; i < round(dy * stepHeightInv); i++)
             {
-                // stepsDoneY++;
-                // make_step_Y(yDirection);
-                // stepsDoneX++;
                 move_same_time_one_step(xAxisDirection, yAxisDirection);
                 for (int j = 1; j < intPartOfRatio; j++)
                 {
-                    // stepsDoneX++;
                     make_step_X(xAxisDirection);
                 }
                 if (sumOfDoubles >= precision)
                 {
-                    // stepsDoneX++;
                     make_step_X(xAxisDirection);
                     sumOfDoubles -= precision;
                     if (sumOfDoubles < 9UL)
@@ -418,15 +322,8 @@ void move_deltas(double dx, double dy)
                 make_step_X(xAxisDirection);
                 sumOfDoubles = 0;
             }
-
-            // printf("xSteps = %d\n", stepsDoneX);
-            // printf("ySteps = %d\n", stepsDoneY);
-            // printf("ratio = %f\n", ratio);
-            // printf("sumOfDoubles = %lu\n", sumOfDoubles);
-            // printf("intPartOfRatio = %d\n", intPartOfRatio);
-            // delay_ms(1000);
         }
-        else
+        else // if dy = 0 only one axis moves
         {
             for (uint16_t i = 0; i < dx * stepHeightInv; i++)
                 make_step_X(xAxisDirection);
@@ -442,17 +339,14 @@ void move_deltas(double dx, double dy)
             uint32_t sumOfDoubles = 0;
             for (uint16_t i = 0; i < round(dx * stepHeightInv); i++)
             {
-                // stepsDoneY++;
-                // stepsDoneX++;
+
                 move_same_time_one_step(xAxisDirection, yAxisDirection);
                 for (int j = 1; j < intPartOfRatio; j++)
                 {
-                    // stepsDoneY++;
                     make_step_Y(yAxisDirection);
                 }
                 if (sumOfDoubles >= precision)
                 {
-                    // stepsDoneY++;
                     make_step_Y(yAxisDirection);
                     sumOfDoubles -= precision;
                     if (sumOfDoubles < 9UL)
@@ -474,7 +368,8 @@ void move_deltas(double dx, double dy)
         }
     }
 }
-void arc_move(double A[], double B[], double r)
+
+void arc_move(double A[], double B[], double r) // this is a nice way of calculating to make arc movement but it was not implemented in the end.
 {
     // These equations calculate from:
     // Start point, end point and radius
@@ -506,11 +401,11 @@ void arc_move(double A[], double B[], double r)
     double ACy = dy + p_dy;
 }
 
-bool giveXDirection()
+bool giveXDirection() // gives the direction of the x axis either forward = true or backwards = false, it is not used in code right now.
 {
     return xAxisDirection;
 }
-void changeMachineState(volatile bool newState)
+void changeMachineState(volatile bool newState) // it is used by the limit switch ISR function which either enables or disables movement of the motor.
 {
     machineState = newState;
 }
