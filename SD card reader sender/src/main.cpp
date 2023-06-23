@@ -64,13 +64,13 @@ void setup()
             {
                 // printf("Forward \n");
                 // usart_send_char('f');
-                now_char = 'f';
+                now_char = 'b';
             }
             else if (x > 950 && y < 50)
             {
                 // printf("Backward \n");
                 // usart_send_char('b');
-                now_char = 'b';
+                now_char = 'f';
             }
             else if (x < 50 && y > 480 && y < 550)
             {
