@@ -203,7 +203,7 @@ void ins_exec(char *array, uint8_t size)
 
 void dPadSignalProcessing(char incomingChar)
 {
-  switch (incomingChar)
+  switch (incomingChar) // each movement has a specific number 'letter'
   {
   case 'r':
     make_step_X(1);
