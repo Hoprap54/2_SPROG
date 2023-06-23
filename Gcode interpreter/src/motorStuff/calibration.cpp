@@ -114,7 +114,7 @@ void calibrationY()
     {
         make_step_Y(0);
     }
-    delay_ms(2000);
+    delay_ms(500);
 }
 
 void calibrationZ()
