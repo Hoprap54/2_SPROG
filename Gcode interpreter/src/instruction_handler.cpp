@@ -42,11 +42,11 @@ double extract_number(uint8_t pos, char *array, uint8_t size)
   char temp[10] = "";          // Number extraction temp array
   while (pos < size && k < 10) // While remaining within the bounds of the temp array and the argument array
   {
-    if (*(array + pos) == ' ') // When space occurs, break
+    if (*(array + pos) == ' ') // When space occurs, break loop
     {
       break;
     }
-    // Store number
+    // Store number in temp array
     temp[k] = *(array + pos);
     k++;
     pos++;
@@ -90,14 +90,6 @@ void get_center(char *array, uint8_t size)
       center_target[i] = extract_number(index, array, size); // Get number after letter from instruction
     }
   }
-}
-
-// Swapping function using pointers
-void swap(uint8_t *a, uint8_t *b)
-{
-  uint8_t mem = *a; // Assigns 'mem' to the value at address 'a'
-  *a = *b;          // Assigns the value at address 'a' to the value at address 'b'
-  *b = mem;         // Assigns the value at address 'b' to the value of 'mem'
 }
 
 void m_code_exec(uint8_t code, char *array, uint8_t size)
@@ -169,11 +161,13 @@ void ins_exec(char *array, uint8_t size)
               break;
             }
           }
+          // After if statement check. If move has been found, within the for loop:
           if (move_found == 0)
           {
-            gcodes[n] = temp;
+            gcodes[n] = temp; // then just assign the current gcode to the setup gcodes array
           }
         }
+        // If the move was already found in a previous loop, then just assign the gcode of this loop to setting gcodes array
         else
         {
           gcodes[n] = temp;
@@ -204,17 +198,17 @@ void ins_exec(char *array, uint8_t size)
 void dPadSignalProcessing(char incomingChar)
 {
   switch (incomingChar) // each movement has a specific number 'letter'
-  {
-  case 'r':
+  { // Move:
+  case 'r': // Right
     make_step_X(1);
     break;
-  case 'l':
+  case 'l': // Left
     make_step_X(0);
     break;
-  case 'f':
+  case 'f': // Forward
     make_step_Y(1);
     break;
-  case 'b':
+  case 'b': // Backward
     make_step_Y(0);
     break;
   case 'c':

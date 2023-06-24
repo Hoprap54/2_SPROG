@@ -25,6 +25,7 @@ void setup()
     usart_init(BAUD);
     ADC_init();
 
+    // Turn on controller light for manual mode and make both light pins output
     DDRC |= (1 << PC3) | (1 << PC4);
     PORTC |= 1 << PC3;
     // DDRC = 0xFF;
@@ -34,6 +35,7 @@ void setup()
     char last_char = 's';
 
     while(1){
+        // While loop for manual dpad control
         while (mode)
         {
             x = adc_read(ADC_P1);
@@ -100,20 +102,21 @@ void setup()
                 now_char = 's';
             }
 
-            if(now_char != last_char){ // If command has changed, send change
+            if(now_char != last_char){ // If command has changed, send new command and remember new command
                 usart_send_char(now_char);
                 last_char = now_char;
             }
         }
 
-        usart_send_char(1);
-        usart_receive_char();
+        usart_send_char(1); // Send char to make motor arduino go into gcode mode, where it calibrates first
+        usart_receive_char(); // Wait for confirmation of motor arduino being done
 
-        char target_file[] = "CNC.txt";
+        char target_file[] = "CNC.txt"; // Target file name
 
-        send_file(target_file);
-
-        usart_send_char(0);
+        send_file(target_file); // Execute it by sending to motor arduino with protocol
+        
+        // When done reset
+        usart_send_char(0); // Send reset signal to motor arduino
         mode = 1;
         PORTC &= ~(1 << PC4);
         PORTC |=  (1 << PC3);
@@ -141,9 +144,9 @@ void send_file(char file[])
                 usart_send_string(instruction, ins_size);  // Send instruction
                 usart_receive_char();                      // Wait for confirmation
             }
-            else
+            else // If file read not succesfull, continue to next loop
             {
-                break;
+                continue;
             }
         }
         file_close();

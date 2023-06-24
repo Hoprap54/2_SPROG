@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/include",
-                "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/src",
+                "c:/Users/Christian/Desktop/Github/2_SPROG/Gcode interpreter/include",
+                "c:/Users/Christian/Desktop/Github/2_SPROG/Gcode interpreter/src",
                 "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
                 "C:/Users/Christian/.platformio/packages/framework-arduino-avr/cores/arduino",
                 "C:/Users/Christian/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
@@ -22,8 +22,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/include",
-                    "c:/Users/Christian/Desktop/GitHub/Github files/2_SPROG/Gcode interpreter/src",
+                    "c:/Users/Christian/Desktop/Github/2_SPROG/Gcode interpreter/include",
+                    "c:/Users/Christian/Desktop/Github/2_SPROG/Gcode interpreter/src",
                     "C:/Users/Christian/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
                     "C:/Users/Christian/.platformio/packages/framework-arduino-avr/cores/arduino",
                     "C:/Users/Christian/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",

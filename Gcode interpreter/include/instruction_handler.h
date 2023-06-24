@@ -10,7 +10,6 @@ double extract_number(uint8_t, char *, uint8_t);
 void get_pos_delta(char *, uint8_t);
 void set_current_pos();
 void get_center(char *, uint8_t);
-void swap(uint8_t *, uint8_t *);
 
 void g_code_exec(uint8_t, char *, uint8_t);
 void m_code_exec(uint8_t, char *, uint8_t);
